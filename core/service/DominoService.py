@@ -25,19 +25,28 @@ class DominoService:
         formatted_path = domino_request_descriptor.path_template.format(application, version)
         domino_request = DominoRequest(domino_request_descriptor.method, formatted_path, authenticated=True)
 
-        print("Sending {0} command for application {1} via Domino".format(domino_command, application))
+        print("Sending {0} command for application {1} via Domino".format(domino_command.name, application))
 
         try:
             response: Response = self._domino_client.send_command(domino_request)
 
             if DominoService._is_successful(response):
-                print("Command {0} successfully executed on application {1}".format(domino_command, application))
+                print("Command {0} successfully executed on application {1}".format(domino_command.name, application))
+                DominoService._render_response(response)
             else:
-                print("Failed to execute command {0} on application {1}".format(domino_command, application))
+                print("Failed to execute command {0} on application {1} - Domino responded with {2}"
+                      .format(domino_command.name, application, response.status_code))
 
         except Exception as exc:
-            print("Failed to execute command of {0} - reason {1}".format(domino_request, str(exc)))
+            print("Failed to execute HTTP request {0} - reason {1}".format(domino_request, str(exc)))
 
     @staticmethod
     def _is_successful(response: Response) -> bool:
         return 200 <= response.status_code < 300
+
+    @staticmethod
+    def _render_response(response: Response):
+        response_dict = response.json()
+        print(" --- Response details ---")
+        [print("{:>10}: {}".format(field, response_dict[field])) for field in response_dict]
+        print()

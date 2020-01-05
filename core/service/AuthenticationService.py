@@ -12,8 +12,8 @@ from core.domain.SessionContext import SessionContext
 from core.service.SessionContextHolder import SessionContextHolder
 
 _PASSWORD_ENCODING = "utf8"
-_DOMINO_CLI_PASSWORD = "DOMINO_CLI_USERNAME"
 _DOMINO_CLI_USERNAME = "DOMINO_CLI_USERNAME"
+_DOMINO_CLI_PASSWORD = "DOMINO_CLI_PASSWORD"
 
 
 class AuthenticationService:

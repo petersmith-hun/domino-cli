@@ -1,7 +1,7 @@
 from core.domain.CommandDescriptor import CommandDescriptor
 from core.service.CommandProcessor import CommandProcessor
 
-_PROMPT = "Domino CLI > "
+_PROMPT = "\nDomino CLI > "
 
 
 class CLI:

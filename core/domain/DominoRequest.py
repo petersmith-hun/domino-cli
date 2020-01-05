@@ -12,4 +12,4 @@ class DominoRequest:
         self.authenticated = authenticated
 
     def __repr__(self):
-        return "DominoRequest: {0} {1}".format(self.method.value, self.path)
+        return "[{0} {1}]".format(self.method.value, self.path)
