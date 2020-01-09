@@ -16,6 +16,7 @@ from core.service.ConfigurationWizardService import ConfigurationWizardService
 from core.service.DominoService import DominoService
 from core.service.SessionContextHolder import SessionContextHolder
 from core.service.wizard.RegistrationConfigWizard import RegistrationConfigWizard
+from core.service.wizard.transformer.RegConfigWizardResultTransformer import RegConfigWizardResultTransformer
 
 
 class ApplicationContext:
@@ -31,7 +32,8 @@ class ApplicationContext:
         _domino_base_url = ApplicationContext._assert_config_value("DOMINO_BASE_URL")
 
         # wizards
-        _registration_config_wizard = RegistrationConfigWizard()
+        _reg_config_wizard_result_transformer = RegConfigWizardResultTransformer()
+        _registration_config_wizard = RegistrationConfigWizard(_reg_config_wizard_result_transformer)
 
         # common components
         _session_context_holder = SessionContextHolder()

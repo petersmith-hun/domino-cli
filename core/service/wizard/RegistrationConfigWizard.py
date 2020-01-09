@@ -1,19 +1,20 @@
-import yaml
-
 from core.service.wizard.AbstractWizard import AbstractWizard
 from core.service.wizard.step.BaseWizardStep import BaseWizardStep
 from core.service.wizard.step.MultiAnswerWizardStepDecorator import MultiAnswerWizardStepDecorator
 from core.service.wizard.step.OptionSelectorWizardStep import OptionSelectorWizardStep
+from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
 
 
 class RegistrationConfigWizard(AbstractWizard):
 
-    def __init__(self):
+    def __init__(self, wizard_result_transformer: AbstractWizardResultTransformer):
         super().__init__("registration_config")
+        self._wizard_result_transformer = wizard_result_transformer
 
     def _init_wizard(self) -> None:
 
         # steps
+        ws_registration_name = BaseWizardStep("reg_name", "Specify an identifier for the registration (e.g. abbreviation of app)")
         ws_source_type = OptionSelectorWizardStep("source_type", "Application will be filesystem or Docker based?", ["filesystem", "docker"])
         ws_exec_type = OptionSelectorWizardStep("exec_type", "Specify the execution type", ["executable", "runtime", "service"])
         ws_home = BaseWizardStep("src_home", "What will be the home directory of the application?")
@@ -29,6 +30,7 @@ class RegistrationConfigWizard(AbstractWizard):
         ws_hc_endpoint = BaseWizardStep("hc_endpoint", "Specify the app's health check endpoint")
 
         # transitions
+        ws_registration_name.add_transition(ws_source_type)
         ws_source_type.add_transition(ws_exec_type, lambda context: context["source_type"] == "filesystem")
         ws_exec_type.add_transition(ws_home)
         ws_home.add_transition(ws_binary_name)
@@ -44,11 +46,10 @@ class RegistrationConfigWizard(AbstractWizard):
         ws_hc_timeout.add_transition(ws_hc_max_attempts)
         ws_hc_max_attempts.add_transition(ws_hc_endpoint)
 
-        self.set_entry_point(ws_source_type)
+        self.set_entry_point(ws_registration_name)
 
     def _handle_result(self, result: dict):
 
-        # TODO reformat the dict and return it as yaml dump
-        print(yaml.dump(result))
-
-        # [print("{0}: {1}".format(key, result[key])) for key in result.keys()]
+        print("Copy the YAML document below under domino.registrations section in your Domino instance's registrations configuration file\n\n")
+        print("# -- {0} registration --".format(result["reg_name"]))
+        print(self._wizard_result_transformer.transform(result))
