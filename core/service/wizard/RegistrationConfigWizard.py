@@ -6,18 +6,24 @@ from core.service.wizard.step.OptionSelectorWizardStep import OptionSelectorWiza
 from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
 
 
+_WIZARD_NAME = "regconfig"
+_WIZARD_DESCRIPTION = "Creates a properly configured Domino application registration"
+_AVAILABLE_SOURCE_TYPES = ["filesystem", "docker"]
+_AVAILABLE_EXEC_TYPES = ["executable", "runtime", "service"]
+
+
 class RegistrationConfigWizard(AbstractWizard):
 
     def __init__(self, wizard_result_transformer: AbstractWizardResultTransformer):
-        super().__init__("registration_config")
-        self._wizard_result_transformer = wizard_result_transformer
+        super().__init__(_WIZARD_NAME, _WIZARD_DESCRIPTION)
+        self._wizard_result_transformer: AbstractWizardResultTransformer = wizard_result_transformer
 
     def _init_wizard(self) -> None:
 
         # steps
         ws_registration_name = BaseWizardStep(Mapping.REGISTRATION_NAME, "Specify an identifier for the registration (e.g. abbreviation of app)")
-        ws_source_type = OptionSelectorWizardStep(Mapping.SOURCE_TYPE, "Application will be filesystem or Docker based?", ["filesystem", "docker"])
-        ws_exec_type = OptionSelectorWizardStep(Mapping.EXEC_TYPE, "Specify the execution type", ["executable", "runtime", "service"])
+        ws_source_type = OptionSelectorWizardStep(Mapping.SOURCE_TYPE, "Application will be filesystem or Docker based?", _AVAILABLE_SOURCE_TYPES)
+        ws_exec_type = OptionSelectorWizardStep(Mapping.EXEC_TYPE, "Specify the execution type", _AVAILABLE_EXEC_TYPES)
         ws_home = BaseWizardStep(Mapping.SOURCE_HOME, "What will be the home directory of the application?")
         ws_binary_name = BaseWizardStep(Mapping.BINARY_NAME, "What will be the name of the binary?")
         ws_runtime_name = BaseWizardStep(Mapping.RUNTIME_NAME, "Specify the name of the runtime the app should be executed with")
@@ -36,12 +42,12 @@ class RegistrationConfigWizard(AbstractWizard):
 
         # transitions
         ws_registration_name.add_transition(ws_source_type)
-        ws_source_type.add_transition(ws_exec_type, lambda context: context[source_type_field] == "filesystem")
+        ws_source_type.add_transition(ws_exec_type, lambda context: context[source_type_field] == _AVAILABLE_SOURCE_TYPES[0])
         ws_exec_type.add_transition(ws_home)
         ws_home.add_transition(ws_binary_name)
-        ws_binary_name.add_transition(ws_runtime_name, lambda context: context[exec_type_field] == "runtime")
-        ws_binary_name.add_transition(ws_command_name, lambda context: context[exec_type_field] == "service")
-        ws_binary_name.add_transition(ws_exec_user, lambda context: context[exec_type_field] == "executable")
+        ws_binary_name.add_transition(ws_runtime_name, lambda context: context[exec_type_field] == _AVAILABLE_EXEC_TYPES[1])
+        ws_binary_name.add_transition(ws_command_name, lambda context: context[exec_type_field] == _AVAILABLE_EXEC_TYPES[2])
+        ws_binary_name.add_transition(ws_exec_user, lambda context: context[exec_type_field] == _AVAILABLE_EXEC_TYPES[0])
         ws_runtime_name.add_transition(ws_exec_user)
         ws_exec_user.add_transition(ws_exec_args)
         ws_exec_args.add_transition(ws_health_check)
@@ -53,8 +59,10 @@ class RegistrationConfigWizard(AbstractWizard):
 
         self.set_entry_point(ws_registration_name)
 
-    def _handle_result(self, result: dict):
+    def _handle_result(self, result: dict) -> None:
 
-        print("Copy the YAML document below under domino.registrations section in your Domino instance's registrations configuration file\n\n")
-        print("# -- {0} registration --".format(result["reg_name"]))
+        print("\nCopy the relevant part of the YAML document below under domino.registrations "
+              "section in your Domino instance's registrations configuration file\n")
+        print("# --- Registration config starts here ---\n")
         print(self._wizard_result_transformer.transform(result))
+        print("# --- End of registration config ---")

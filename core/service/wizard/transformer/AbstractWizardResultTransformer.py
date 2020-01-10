@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from collections import Callable
+from typing import List
 
 from core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 
@@ -16,29 +17,30 @@ class AbstractWizardResultTransformer(object, metaclass=ABCMeta):
         key, node = self._node_search(mapping, root_node, target_dict)
         node[key] = self._safe_read(source, mapping.get_wizard_field(), mapper)
 
-    def _read_current_value(self, mapping: WizardDataMappingBaseEnum, root_node: str, target_dict: dict) -> None:
+    def _read_current_value(self, mapping: WizardDataMappingBaseEnum, root_node: str, target_dict: dict) -> any:
 
         key, node = self._node_search(mapping, root_node, target_dict)
 
         return node[key]
 
-    def _node_search(self, mapping: WizardDataMappingBaseEnum, root_node: str, target_dict: dict):
+    def _node_search(self, mapping: WizardDataMappingBaseEnum, root_node: str, target_dict: dict) -> tuple:
 
-        current_dict_node: dict = target_dict
         keys = mapping.get_registration_field_reference(root_node).split(".")
-        index: int = 1  # TODO lil' bit dirty solution, clean it up
-        depth: int = len(keys)
-        key = None
-        for key in keys:
-            if index < depth:
+        max_depth: int = len(keys) - 1
 
-                if key not in current_dict_node:
-                    current_dict_node[key] = {}
+        return self._recursive_search(target_dict, keys, max_depth)
 
-                current_dict_node = current_dict_node[key]
-                index = index + 1
+    def _recursive_search(self, current_dict: dict, keys: List[str], max_depth: int, current_depth: int = 0) -> tuple:
 
-        return key, current_dict_node
+        current_key = keys[current_depth]
+        if current_depth < max_depth:
 
-    def _safe_read(self, source: dict, key: str, mapper: Callable[[str], any]):
+            if current_key not in current_dict:
+                current_dict[current_key] = {}
+
+            return self._recursive_search(current_dict[current_key], keys, max_depth, current_depth + 1)
+        else:
+            return current_key, current_dict
+
+    def _safe_read(self, source: dict, key: str, mapper: Callable[[str], any]) -> any:
         return mapper(source[key]) if key in source else None

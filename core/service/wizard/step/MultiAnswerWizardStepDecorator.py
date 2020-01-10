@@ -6,7 +6,7 @@ from core.service.wizard.step.WizardStep import WizardStep, WizardStepTransition
 class MultiAnswerWizardStepDecorator(WizardStep):
 
     def __init__(self, wrapped_wizard_step: WizardStep):
-        self._wrapped_wizard_step = wrapped_wizard_step
+        self._wrapped_wizard_step: WizardStep = wrapped_wizard_step
 
     def get_step_id(self) -> str:
         return self._wrapped_wizard_step.get_step_id()
