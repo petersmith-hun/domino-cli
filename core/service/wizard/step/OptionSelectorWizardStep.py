@@ -1,3 +1,4 @@
+from core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 from core.service.wizard.step.BaseWizardStep import BaseWizardStep
 
 _DEFAULT_OPTIONS = ["yes", "no"]
@@ -5,7 +6,7 @@ _DEFAULT_OPTIONS = ["yes", "no"]
 
 class OptionSelectorWizardStep(BaseWizardStep):
 
-    def __init__(self, step_id: str, question: str, options: [] = None):
+    def __init__(self, step_id: WizardDataMappingBaseEnum, question: str, options: [] = None):
         super().__init__(step_id, question)
 
         if options is None:

@@ -1,12 +1,13 @@
 from typing import List, Callable
 
+from core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 from core.service.wizard.step.WizardStep import WizardStep, WizardStepTransition
 
 
 class BaseWizardStep(WizardStep):
 
-    def __init__(self, step_id: str, question: str):
-        self._step_id: str = step_id
+    def __init__(self, step_id: WizardDataMappingBaseEnum, question: str):
+        self._step_id: str = step_id.get_wizard_field()
         self._question: str = question
         self._transitions: List[WizardStepTransition] = []
 

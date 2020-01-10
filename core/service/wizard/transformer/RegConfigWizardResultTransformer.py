@@ -1,5 +1,10 @@
+from __future__ import annotations
+from collections import Callable
+
 import yaml
 
+from core.service.wizard.mapping.RegConfigWizardDataMapping import RegConfigWizardDataMapping as Mapping
+from core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
 
 
@@ -8,70 +13,74 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
     def transform(self, source: dict) -> str:
 
         target_dict: dict = self._define_base_dict(source)
-        target_registration: dict = target_dict[source["reg_name"]]
         if source["source_type"] == "filesystem":
-            RegConfigWizardResultTransformer._add_executable_based_registration_parameters(source, target_registration)
-            RegConfigWizardResultTransformer._add_runtime_based_registration_parameters(source, target_registration)
-            RegConfigWizardResultTransformer._add_service_based_registration_parameters(source, target_registration)
-        RegConfigWizardResultTransformer._add_health_check_parameters(source, target_registration)
+            self._add_executable_based_registration_parameters(source, target_dict)
+            self._add_runtime_based_registration_parameters(source, target_dict)
+            self._add_service_based_registration_parameters(source, target_dict)
+        self._add_health_check_parameters(source, target_dict)
 
         return yaml.dump(target_dict)
 
-    @staticmethod
-    def _define_base_dict(source: dict) -> dict:
+    def _define_base_dict(self, source: dict) -> dict:
 
-        return {
-            source["reg_name"]: {
-                "source": {
-                    "type": source["source_type"]
-                },
-                "execution": {
-                    "via": RegConfigWizardResultTransformer._safe_read(source, "exec_type")
-                },
-                "health-check": {
-                    "enabled": RegConfigWizardResultTransformer._safe_read(source, "exec_hc_enable") == "yes"
-                }
-            }
-        }
+        # TODO keep order somehow
+        target_dict: dict = {source["reg_name"]: {}}
+        self._assign(Mapping.SOURCE_TYPE, source, target_dict)
+        self._assign(Mapping.EXEC_TYPE, source, target_dict)
+        self._assign(Mapping.HEALTH_CHECK_ENABLE, source, target_dict, lambda value: value == "yes")
 
-    @staticmethod
-    def _safe_read(source: dict, key: str):
-        return source[key] if key in source else None
+        return target_dict
 
-    @staticmethod
-    def _add_executable_based_registration_parameters(source: dict, target_dict: dict) -> None:
+    def _add_executable_based_registration_parameters(self, source: dict, target_dict: dict) -> None:
 
         if source["exec_type"] == "executable":
-            RegConfigWizardResultTransformer._add_fs_based_registration_common_parameters(source, target_dict)
-            target_dict["execution"]["as-user"] = source["exec_user"]  # TODO assignments map, automatic fill?
-            target_dict["execution"]["args"] = source["exec_args"]
+            self._add_fs_based_registration_common_parameters(source, target_dict)
+            self._assign(Mapping.EXEC_USER, source, target_dict)
+            self._assign(Mapping.EXEC_ARGS, source, target_dict)
 
-    @staticmethod
-    def _add_runtime_based_registration_parameters(source: dict, target_dict: dict) -> None:
+    def _add_runtime_based_registration_parameters(self, source: dict, target_dict: dict) -> None:
 
         if source["exec_type"] == "runtime":
-            RegConfigWizardResultTransformer._add_fs_based_registration_common_parameters(source, target_dict)
-            target_dict["execution"]["as-user"] = source["exec_user"]
-            target_dict["execution"]["args"] = source["exec_args"]
+            self._add_fs_based_registration_common_parameters(source, target_dict)
+            self._assign(Mapping.EXEC_USER, source, target_dict)
+            self._assign(Mapping.EXEC_ARGS, source, target_dict)
+            self._assign(Mapping.RUNTIME_NAME, source, target_dict)
 
-    @staticmethod
-    def _add_service_based_registration_parameters(source: dict, target_dict: dict) -> None:
+    def _add_service_based_registration_parameters(self, source: dict, target_dict: dict) -> None:
 
         if source["exec_type"] == "service":
-            RegConfigWizardResultTransformer._add_fs_based_registration_common_parameters(source, target_dict)
-            target_dict["execution"]["command-name"] = source["exec_cmd_name"]
+            self._add_fs_based_registration_common_parameters(source, target_dict)
+            self._assign(Mapping.EXEC_COMMAND_NAME, source, target_dict)
 
-    @staticmethod
-    def _add_fs_based_registration_common_parameters(source: dict, target_dict: dict) -> None:
+    def _add_fs_based_registration_common_parameters(self, source: dict, target_dict: dict) -> None:
 
-        target_dict["source"]["home"] = source["src_home"]
-        target_dict["source"]["resource"] = source["src_bin_name"]
+        self._assign(Mapping.SOURCE_HOME, source, target_dict)
+        self._assign(Mapping.BINARY_NAME, source, target_dict)
 
-    @staticmethod
-    def _add_health_check_parameters(source: dict, target_dict: dict) -> None:
+    def _add_health_check_parameters(self, source: dict, target_dict: dict) -> None:
 
-        if target_dict["health-check"]["enabled"]:
-            target_dict["health-check"]["delay"] = source["hc_delay"]
-            target_dict["health-check"]["timeout"] = source["hc_timeout"]
-            target_dict["health-check"]["max-attempts"] = source["hc_max_attempts"]
-            target_dict["health-check"]["endpoint"] = source["hc_endpoint"]
+        if target_dict[source["reg_name"]]["health-check"]["enabled"]:
+            self._assign(Mapping.HEALTH_CHECK_DELAY, source, target_dict)
+            self._assign(Mapping.HEALTH_CHECK_TIMEOUT, source, target_dict)
+            self._assign(Mapping.HEALTH_CHECK_MAX_ATTEMPTS, source, target_dict)
+            self._assign(Mapping.HEALTH_CHECK_ENDPOINT, source, target_dict)
+
+    def _assign(self, mapping: WizardDataMappingBaseEnum, source: dict, target_dict: dict, mapper: Callable[[str], any] = lambda value: value) -> None:
+
+        current_dict_node: dict = target_dict
+        keys = mapping.get_registration_field_reference(source["reg_name"]).split(".")
+        index: int = 1  # TODO lil' bit dirty solution, clean it up
+        depth: int = len(keys)
+        for key in keys:
+            if index < depth:
+
+                if key not in current_dict_node:
+                    current_dict_node[key] = {}
+
+                current_dict_node = current_dict_node[key]
+                index = index + 1
+            else:
+                current_dict_node[key] = self._safe_read(source, mapping.get_wizard_field(), mapper)
+
+    def _safe_read(self, source: dict, key: str, mapper: Callable[[str], any]):
+        return mapper(source[key]) if key in source else None
