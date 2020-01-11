@@ -1,14 +1,14 @@
 from abc import ABCMeta, abstractmethod
 from typing import List, Iterator, Optional
 
-from core.service.wizard.step.MultiAnswerWizardStepDecorator import MultiAnswerWizardStepDecorator
-from core.service.wizard.step.OptionSelectorWizardStep import OptionSelectorWizardStep
 from core.service.wizard.step.WizardStep import WizardStep, WizardStepTransition
+from core.service.wizard.util.ResponseParser import ResponseParser
 
 
 class AbstractWizard(object, metaclass=ABCMeta):
 
-    def __init__(self, wizard_name: str, wizard_description: str):
+    def __init__(self, response_parser: ResponseParser, wizard_name: str, wizard_description: str):
+        self._response_parser = response_parser
         self._wizard_name: str = wizard_name
         self._wizard_description = wizard_description
         self._entry_point: Optional[WizardStep] = None
@@ -31,7 +31,7 @@ class AbstractWizard(object, metaclass=ABCMeta):
         while True:
 
             print(current_step)
-            self._read_answer(current_step, result)
+            self._response_parser.read_answer(current_step, result)
             current_step = self._get_next_step(current_step, result)
 
             if current_step is None:
@@ -45,32 +45,6 @@ class AbstractWizard(object, metaclass=ABCMeta):
             raise Exception("Incorrectly configured wizard - entry point is none")
 
         return self._entry_point
-
-    def _read_answer(self, current_step: WizardStep, result: dict) -> None:
-
-        try:
-            if type(current_step) is MultiAnswerWizardStepDecorator:
-                result[current_step.get_step_id()] = []
-                while True:
-                    current_answer = self._read_answer_with_mapping(current_step)
-                    if len(current_answer) > 0:
-                        result[current_step.get_step_id()].append(current_answer)
-                    else:
-                        break
-            else:
-                result[current_step.get_step_id()] = self._read_answer_with_mapping(current_step)
-        except (IndexError, ValueError):
-            print("Your choice is invalid - please try again")
-            self._read_answer(current_step, result)
-
-    def _read_answer_with_mapping(self, current_step: WizardStep) -> str:
-
-        answer: str = input()
-
-        if type(current_step) is OptionSelectorWizardStep:
-            answer = current_step.get_options()[int(answer) - 1]
-
-        return answer
 
     def _get_next_step(self, current_step: WizardStep, result: dict) -> Optional[WizardStep]:
 

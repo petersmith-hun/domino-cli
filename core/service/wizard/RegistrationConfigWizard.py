@@ -1,22 +1,30 @@
 from core.service.wizard.AbstractWizard import AbstractWizard
 from core.service.wizard.mapping.RegConfigWizardDataMapping import RegConfigWizardDataMapping as Mapping
+from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultConsoleRenderer
+from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
 from core.service.wizard.step.BaseWizardStep import BaseWizardStep
 from core.service.wizard.step.MultiAnswerWizardStepDecorator import MultiAnswerWizardStepDecorator
 from core.service.wizard.step.OptionSelectorWizardStep import OptionSelectorWizardStep
 from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
-
+from core.service.wizard.util.ResponseParser import ResponseParser
 
 _WIZARD_NAME = "regconfig"
 _WIZARD_DESCRIPTION = "Creates a properly configured Domino application registration"
 _AVAILABLE_SOURCE_TYPES = ["filesystem", "docker"]
 _AVAILABLE_EXEC_TYPES = ["executable", "runtime", "service"]
+_AVAILABLE_RESULT_RENDERERS = ["console", "file"]
 
 
 class RegistrationConfigWizard(AbstractWizard):
 
-    def __init__(self, wizard_result_transformer: AbstractWizardResultTransformer):
-        super().__init__(_WIZARD_NAME, _WIZARD_DESCRIPTION)
+    def __init__(self, wizard_result_transformer: AbstractWizardResultTransformer,
+                 wizard_result_console_renderer: WizardResultConsoleRenderer,
+                 wizard_result_file_renderer: WizardResultFileRenderer,
+                 response_parser: ResponseParser):
+        super().__init__(response_parser, _WIZARD_NAME, _WIZARD_DESCRIPTION)
         self._wizard_result_transformer: AbstractWizardResultTransformer = wizard_result_transformer
+        self._wizard_result_console_renderer = wizard_result_console_renderer
+        self._wizard_result_file_renderer = wizard_result_file_renderer
 
     def _init_wizard(self) -> None:
 
@@ -35,6 +43,7 @@ class RegistrationConfigWizard(AbstractWizard):
         ws_hc_timeout = BaseWizardStep(Mapping.HEALTH_CHECK_TIMEOUT, "Specify timeout of health check requests (in Node.js 'ms' library format)")
         ws_hc_max_attempts = BaseWizardStep(Mapping.HEALTH_CHECK_MAX_ATTEMPTS, "Specify max number of health check attempts")
         ws_hc_endpoint = BaseWizardStep(Mapping.HEALTH_CHECK_ENDPOINT, "Specify the app's health check endpoint")
+        ws_result_rendering = OptionSelectorWizardStep(Mapping.RESULT_RENDERING, "Write result to", _AVAILABLE_RESULT_RENDERERS)
 
         source_type_field = Mapping.SOURCE_TYPE.get_wizard_field()
         exec_type_field = Mapping.EXEC_TYPE.get_wizard_field()
@@ -53,16 +62,18 @@ class RegistrationConfigWizard(AbstractWizard):
         ws_exec_args.add_transition(ws_health_check)
         ws_command_name.add_transition(ws_health_check)
         ws_health_check.add_transition(ws_hc_delay, lambda context: context[health_check_enable_field] == "yes")
+        ws_health_check.add_transition(ws_result_rendering)
         ws_hc_delay.add_transition(ws_hc_timeout)
         ws_hc_timeout.add_transition(ws_hc_max_attempts)
         ws_hc_max_attempts.add_transition(ws_hc_endpoint)
+        ws_hc_endpoint.add_transition(ws_result_rendering)
 
         self.set_entry_point(ws_registration_name)
 
     def _handle_result(self, result: dict) -> None:
 
-        print("\nCopy the relevant part of the YAML document below under domino.registrations "
-              "section in your Domino instance's registrations configuration file\n")
-        print("# --- Registration config starts here ---\n")
-        print(self._wizard_result_transformer.transform(result))
-        print("# --- End of registration config ---")
+        transformed_result: dict = self._wizard_result_transformer.transform(result)
+        if result[Mapping.RESULT_RENDERING.get_wizard_field()] == _AVAILABLE_RESULT_RENDERERS[0]:
+            self._wizard_result_console_renderer.render(transformed_result)
+        else:
+            self._wizard_result_file_renderer.render(transformed_result, lambda res: res["domino"]["registrations"])

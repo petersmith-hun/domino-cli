@@ -17,5 +17,4 @@ class RegConfigWizardDataMapping(WizardDataMappingBaseEnum):
     HEALTH_CHECK_TIMEOUT = ("hc_timeout", "$root.health-check.timeout")
     HEALTH_CHECK_MAX_ATTEMPTS = ("hc_max_attempts", "$root.health-check.max-attempts")
     HEALTH_CHECK_ENDPOINT = ("hc_endpoint", "$root.health-check.endpoint")
-
-
+    RESULT_RENDERING = ("result_rendering", None)

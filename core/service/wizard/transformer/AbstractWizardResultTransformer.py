@@ -9,7 +9,7 @@ from core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMapp
 class AbstractWizardResultTransformer(object, metaclass=ABCMeta):
 
     @abstractmethod
-    def transform(self, source: dict) -> str:
+    def transform(self, source: dict) -> dict:
         pass
 
     def _assign(self, mapping: WizardDataMappingBaseEnum, root_node: str, source: dict, target_dict: dict, mapper: Callable[[str], any] = lambda value: value) -> None:

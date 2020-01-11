@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-import yaml
-
 from core.service.wizard.mapping.RegConfigWizardDataMapping import RegConfigWizardDataMapping as Mapping
 from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
-
 
 _SOURCE_TYPE_FILESYSTEM = "FILESYSTEM"
 _EXEC_TYPE_EXECUTABLE = "EXECUTABLE"
@@ -25,7 +22,7 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
             _EXEC_TYPE_SERVICE: self._add_service_based_registration_parameters
         }
 
-    def transform(self, source: dict) -> str:
+    def transform(self, source: dict) -> dict:
 
         root_node: str = _REGISTRATION_ROOT.format(source[Mapping.REGISTRATION_NAME.get_wizard_field()])
         target_dict: dict = self._define_base_dict(root_node, source)
@@ -34,7 +31,7 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
             self._exec_type_parameter_filler_mapping.get(exec_type)(root_node, source, target_dict)
         self._add_health_check_parameters(root_node, source, target_dict)
 
-        return yaml.dump(target_dict, sort_keys=False)
+        return target_dict
 
     def _define_base_dict(self, root_node: str, source: dict) -> dict:
 
