@@ -10,7 +10,7 @@ from core.service.wizard.util.ResponseParser import ResponseParser
 
 _WIZARD_NAME = "regconfig"
 _WIZARD_DESCRIPTION = "Creates a properly configured Domino application registration"
-_AVAILABLE_SOURCE_TYPES = ["filesystem", "docker"]
+_AVAILABLE_SOURCE_TYPES = ["filesystem"]
 _AVAILABLE_EXEC_TYPES = ["executable", "runtime", "service"]
 _AVAILABLE_RESULT_RENDERERS = ["console", "file"]
 
@@ -25,8 +25,8 @@ class RegistrationConfigWizard(AbstractWizard):
                  response_parser: ResponseParser):
         super().__init__(response_parser, _WIZARD_NAME, _WIZARD_DESCRIPTION)
         self._wizard_result_transformer: AbstractWizardResultTransformer = wizard_result_transformer
-        self._wizard_result_console_renderer = wizard_result_console_renderer
-        self._wizard_result_file_renderer = wizard_result_file_renderer
+        self._wizard_result_console_renderer: WizardResultConsoleRenderer = wizard_result_console_renderer
+        self._wizard_result_file_renderer: WizardResultFileRenderer = wizard_result_file_renderer
 
     def _init_wizard(self) -> None:
 
