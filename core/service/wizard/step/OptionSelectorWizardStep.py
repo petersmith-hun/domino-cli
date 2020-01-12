@@ -7,7 +7,10 @@ _DEFAULT_OPTIONS = ["yes", "no"]
 
 
 class OptionSelectorWizardStep(BaseWizardStep):
-
+    """
+    BaseWizardStep extension for wizard steps specifying explicit response options.
+    List of options can be emitted, in which case it defaults to yes/no.
+    """
     def __init__(self, step_id: WizardDataMappingBaseEnum, question: str, options: List[str] = None):
         super().__init__(step_id, question)
 
@@ -17,6 +20,11 @@ class OptionSelectorWizardStep(BaseWizardStep):
         self._options: List[str] = options
 
     def get_options(self) -> List[str]:
+        """
+        Returns the list of possible options.
+
+        :return: list of possible options
+        """
         return self._options
 
     def __repr__(self):

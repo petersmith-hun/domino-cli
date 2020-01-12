@@ -16,7 +16,9 @@ _AVAILABLE_RESULT_RENDERERS = ["console", "file"]
 
 
 class RegistrationConfigWizard(AbstractWizard):
-
+    """
+    AbstractWizard implementation for creating Domino application registration configurations.
+    """
     def __init__(self, wizard_result_transformer: AbstractWizardResultTransformer,
                  wizard_result_console_renderer: WizardResultConsoleRenderer,
                  wizard_result_file_renderer: WizardResultFileRenderer,

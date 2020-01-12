@@ -4,7 +4,9 @@ from core.service.wizard.step.WizardStep import WizardStep, WizardStepTransition
 
 
 class MultiAnswerWizardStepDecorator(WizardStep):
-
+    """
+    Decorator for any wizard steps that expects multiple answers.
+    """
     def __init__(self, wrapped_wizard_step: WizardStep):
         self._wrapped_wizard_step: WizardStep = wrapped_wizard_step
 

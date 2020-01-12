@@ -14,7 +14,9 @@ _UPPERCASE_MAPPER = (lambda value: str(value).upper())
 
 
 class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
-
+    """
+    AbstractWizardResultTransformer implementation for registration config wizard.
+    """
     def __init__(self):
         self._exec_type_parameter_filler_mapping = {
             _EXEC_TYPE_EXECUTABLE: self._add_executable_based_registration_parameters,
@@ -23,7 +25,13 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
         }
 
     def transform(self, source: dict) -> dict:
+        """
+        Transforms the raw response data dictionary of the registration config wizard to a Domino registration config
+        compatible dictionary. Can be directly used for transforming into configuration YAML file.
 
+        :param source: source dict object
+        :return: transformed Domino registration configuration
+        """
         root_node: str = _REGISTRATION_ROOT.format(source[Mapping.REGISTRATION_NAME.get_wizard_field()])
         target_dict: dict = self._define_base_dict(root_node, source)
         if self._read_current_value(Mapping.SOURCE_TYPE, root_node, target_dict) == _SOURCE_TYPE_FILESYSTEM:

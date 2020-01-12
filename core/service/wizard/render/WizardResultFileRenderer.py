@@ -6,9 +6,18 @@ import yaml
 
 
 class WizardResultFileRenderer:
-
+    """
+    File based wizard result rendering.
+    """
     def render(self, result: dict, merge_node_selector_function: Callable[[dict], dict] = None) -> None:
+        """
+        Renders a wizards transformed (target) dictionary object as YAML structure and writes it the given file.
+        Target file is asked by this method.
+        Also using a merge function it is able to merge the results with the contents of a currently existing file.
 
+        :param result: target dictionary to be rendered
+        :param merge_node_selector_function: lambda function to select base node from where the merging should happen
+        """
         target_file: str = input("File path > ")
         to_write: dict = self._prepare_dict_to_write(target_file, result, merge_node_selector_function)
         with open(target_file, "w") as target_file:

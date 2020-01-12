@@ -2,7 +2,9 @@ from core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMapp
 
 
 class RegConfigWizardDataMapping(WizardDataMappingBaseEnum):
-
+    """
+    Field mappings between raw wizard response data and target data dictionaries.
+    """
     REGISTRATION_NAME = ("reg_name", "$root")
     SOURCE_TYPE = ("source_type", "$root.source.type")
     EXEC_TYPE = ("exec_type", "$root.execution.via")
