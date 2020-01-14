@@ -11,7 +11,7 @@ class WizardResultFileRenderer:
     """
     def render(self, result: dict, merge_node_selector_function: Callable[[dict], dict] = None) -> None:
         """
-        Renders a wizards transformed (target) dictionary object as YAML structure and writes it the given file.
+        Renders a wizard's transformed (target) dictionary object as YAML structure and writes it in the given file.
         Target file is asked by this method.
         Also using a merge function it is able to merge the results with the contents of a currently existing file.
 

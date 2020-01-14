@@ -15,7 +15,7 @@ class WizardCommand(AbstractCommand):
 
     def execute_command(self, command_descriptor: CommandDescriptor) -> None:
         """
-        Instructs ConfigurationWizardService to start execution the specified wizard.
+        Instructs ConfigurationWizardService to start execution of the specified wizard.
         Shows available wizards in case of missing wizard name parameter.
 
         :param command_descriptor: CommandDescriptor object containing the command arguments

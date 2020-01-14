@@ -66,6 +66,6 @@ class WizardStepTransition:
         Executes the stored applicability predicate on the given response context (raw response dictionary).
 
         :param context: raw response dictionary
-        :return: boolean True is the step is applicable (can be transitioned to), False otherwise
+        :return: boolean True if the step is applicable (can be transitioned to), False otherwise
         """
         return self._applicability_predicate(context)

@@ -11,9 +11,9 @@ class AbstractWizard(object, metaclass=ABCMeta):
     Concrete wizards must implement this base implementation.
     """
     def __init__(self, response_parser: ResponseParser, wizard_name: str, wizard_description: str):
-        self._response_parser = response_parser
+        self._response_parser: ResponseParser = response_parser
         self._wizard_name: str = wizard_name
-        self._wizard_description = wizard_description
+        self._wizard_description: str = wizard_description
         self._entry_point: Optional[WizardStep] = None
         self._init_wizard()
 

@@ -7,7 +7,7 @@ class WizardResultConsoleRenderer:
     """
     def render(self, result: dict) -> None:
         """
-        Renders a wizards transformed (target) dictionary object as YAML structure and prints it to console.
+        Renders a wizard's transformed (target) dictionary object as YAML structure and prints it to console.
 
         :param result: target dictionary to be rendered
         """
