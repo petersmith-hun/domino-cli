@@ -1,0 +1,7 @@
+# production dependencies
+bcrypt
+pyyaml
+requests
+
+# dev dependencies
+coverage
