@@ -32,10 +32,11 @@ class DominoService:
 
             if DominoService._is_successful(response):
                 print("Command {0} successfully executed on application {1}".format(domino_command.name, application))
-                DominoService._render_response(response)
             else:
                 print("Failed to execute command {0} on application {1} - Domino responded with {2}"
                       .format(domino_command.name, application, response.status_code))
+
+            DominoService._render_response(response)
 
         except Exception as exc:
             print("Failed to execute HTTP request {0} - reason {1}".format(domino_request, str(exc)))
