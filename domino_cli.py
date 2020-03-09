@@ -3,7 +3,7 @@
 domino_cli.py :: Main entry point for Domino CLI application.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 import os
 
