@@ -83,6 +83,7 @@ _SERVICE_TYPE_RAW_RESPONSES = [
     "/home",
     "app3-exec.jar",
     "app3-svc",
+    "app_svc_user",
     "no",
     "file"
 ]
@@ -93,6 +94,7 @@ _SERVICE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "src_home": "/home",
     "src_bin_name": "app3-exec.jar",
     "exec_cmd_name": "app3-svc",
+    "exec_user": "app_svc_user",
     "hc_enable": "no",
     "result_rendering": "file"
 }

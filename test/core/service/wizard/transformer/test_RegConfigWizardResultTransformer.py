@@ -93,6 +93,7 @@ _REG_CONFIG_SERVICE_RAW: dict = {
     "src_home": "/home",
     "src_bin_name": "app3-exec.jar",
     "exec_cmd_name": "app3-svc",
+    "exec_user": "app3-user",
     "hc_enable": "no",
 }
 _REG_CONFIG_SERVICE_TRANSFORMED: dict = {
@@ -106,6 +107,7 @@ _REG_CONFIG_SERVICE_TRANSFORMED: dict = {
                 },
                 "execution": {
                     "via": "SERVICE",
+                    "as-user": "app3-user",
                     "command-name": "app3-svc"
                 },
                 "health-check": {
