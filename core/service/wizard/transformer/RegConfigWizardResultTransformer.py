@@ -53,13 +53,11 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
     def _add_executable_based_registration_parameters(self, root_node: str, source: dict, target_dict: dict) -> None:
 
         self._add_fs_based_registration_common_parameters(root_node, source, target_dict)
-        self._assign(Mapping.EXEC_USER, root_node, source, target_dict)
         self._assign(Mapping.EXEC_ARGS, root_node, source, target_dict)
 
     def _add_runtime_based_registration_parameters(self, root_node: str, source: dict, target_dict: dict) -> None:
 
         self._add_fs_based_registration_common_parameters(root_node, source, target_dict)
-        self._assign(Mapping.EXEC_USER, root_node, source, target_dict)
         self._assign(Mapping.EXEC_ARGS, root_node, source, target_dict)
         self._assign(Mapping.RUNTIME_NAME, root_node, source, target_dict)
 
@@ -72,6 +70,7 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
 
         self._assign(Mapping.SOURCE_HOME, root_node, source, target_dict)
         self._assign(Mapping.BINARY_NAME, root_node, source, target_dict)
+        self._assign(Mapping.EXEC_USER, root_node, source, target_dict)
 
     def _add_health_check_parameters(self, root_node: str, source: dict, target_dict: dict) -> None:
 
