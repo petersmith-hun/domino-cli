@@ -1,5 +1,6 @@
 from typing import cast
 
+from core.service.wizard.step.KeyValuePairAnswerWizardStep import KeyValuePairAnswerWizardStep
 from core.service.wizard.step.MultiAnswerWizardStepDecorator import MultiAnswerWizardStepDecorator
 from core.service.wizard.step.OptionSelectorWizardStep import OptionSelectorWizardStep
 from core.service.wizard.step.WizardStep import WizardStep
@@ -31,13 +32,24 @@ class ResponseParser:
         """
         try:
             if type(current_step) is MultiAnswerWizardStepDecorator:
-                result[current_step.get_step_id()] = []
-                while True:
-                    current_answer = self._read_answer_with_mapping(current_step)
-                    if len(current_answer) > 0:
-                        result[current_step.get_step_id()].append(current_answer)
-                    else:
-                        break
+
+                if type(current_step._wrapped_wizard_step) is KeyValuePairAnswerWizardStep:
+                    result[current_step.get_step_id()] = dict()
+                    while True:
+                        current_answer = self._read_answer_with_mapping(current_step)
+                        if len(current_answer) > 0:
+                            split_answer = current_answer.split(sep=":", maxsplit=1)
+                            result[current_step.get_step_id()][split_answer[0]] = split_answer[1]
+                        else:
+                            break
+                else:
+                    result[current_step.get_step_id()] = []
+                    while True:
+                        current_answer = self._read_answer_with_mapping(current_step)
+                        if len(current_answer) > 0:
+                            result[current_step.get_step_id()].append(current_answer)
+                        else:
+                            break
             else:
                 result[current_step.get_step_id()] = self._read_answer_with_mapping(current_step)
         except (IndexError, ValueError):
