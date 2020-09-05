@@ -31,5 +31,11 @@ class BaseWizardStep(WizardStep):
         """
         self._transitions.append(WizardStepTransition(wizard_step, applicability_predicate))
 
+    def read_answer(self, result: dict) -> None:
+        """
+        See documentation of WizardStep.
+        """
+        result[self.get_step_id()] = input()
+
     def __repr__(self):
         return self._question
