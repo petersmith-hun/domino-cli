@@ -4,29 +4,26 @@ from unittest import mock
 from core.service.wizard.RegistrationConfigWizard import RegistrationConfigWizard
 from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultConsoleRenderer
 from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
-from core.service.wizard.step.WizardStep import WizardStep
 from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
-from core.service.wizard.util.ResponseParser import ResponseParser
 
 _TRANSFORMED_VALUE = {"transformed": {}}
 
 _EXECUTABLE_TYPE_RAW_RESPONSES = [
     "app1",
-    "filesystem",
-    "executable",
+    "1",
+    "1",
     "/home",
     "app1-exec.jar",
     "app_user",
-    [
-        "--arg1",
-        "--arg2"
-    ],
-    "yes",
+    "--arg1",
+    "--arg2",
+    "",
+    "1",
     "3 seconds",
     "2 seconds",
     2,
     "http://localhost:8099/health",
-    "console"
+    "1"
 ]
 _EXECUTABLE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "reg_name": "app1",
@@ -49,17 +46,16 @@ _EXECUTABLE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
 
 _RUNTIME_TYPE_RAW_RESPONSES = [
     "app2",
-    "filesystem",
-    "runtime",
+    "1",
+    "2",
     "/home",
     "app2-exec.jar",
     "java",
     "app_user",
-    [
-        "--arg1"
-    ],
-    "no",
-    "console"
+    "--arg1",
+    "",
+    "2",
+    "1"
 ]
 _RUNTIME_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "reg_name": "app2",
@@ -78,14 +74,14 @@ _RUNTIME_TYPE_FORMATTED_RESPONSE_DICT: dict = {
 
 _SERVICE_TYPE_RAW_RESPONSES = [
     "app3",
-    "filesystem",
-    "service",
+    "1",
+    "3",
     "/home",
     "app3-exec.jar",
     "app3-svc",
     "app_svc_user",
-    "no",
-    "file"
+    "2",
+    "2"
 ]
 _SERVICE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "reg_name": "app3",
@@ -99,28 +95,80 @@ _SERVICE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "result_rendering": "file"
 }
 
+_DOCKER_STANDARD_TYPE_RAW_RESPONSES = [
+    "app4",
+    "2",
+    "1",
+    "http://localhost:5000/apps",
+    "img_app4",
+    "container_app4",
+    "9000:9000/tcp",
+    "8080:8080",
+    "",
+    "ENV_VAR1:value1",
+    "ENV_VAR2:value2",
+    "ENV_VAR3:value3",
+    "",
+    "/tmp1:/tmp1",
+    "/tmp2/something:/app/tmp:rw",
+    "/tmp3/tmp:/app/something:ro",
+    "",
+    "host",
+    "4",
+    "--param1",
+    "--param2",
+    "",
+    "2",
+    "1"
+]
+_DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT: dict = {
+    "reg_name": "app4",
+    "source_type": "docker",
+    "exec_type": "standard",
+    "src_home": "http://localhost:5000/apps",
+    "src_bin_name": "img_app4",
+    "exec_cmd_name": "container_app4",
+    "exec_args_docker_ports": {
+        "9000": "9000/tcp",
+        "8080": "8080"
+    },
+    "exec_args_docker_env": {
+        "ENV_VAR1": "value1",
+        "ENV_VAR2": "value2",
+        "ENV_VAR3": "value3"
+    },
+    "exec_args_docker_volumes": {
+        "/tmp1": "/tmp1",
+        "/tmp2/something": "/app/tmp:rw",
+        "/tmp3/tmp": "/app/something:ro"
+    },
+    "exec_args_docker_network": "host",
+    "exec_args_docker_restart": "unless-stopped",
+    "exec_args_docker_cmd": [
+        "--param1",
+        "--param2"
+    ],
+    "hc_enable": "no",
+    "result_rendering": "console"
+}
+
 
 class RegistrationConfigWizardTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.response_parser_mock: ResponseParser = mock.create_autospec(ResponseParser)
         self.wizard_result_transformer_mock: AbstractWizardResultTransformer = mock.create_autospec(AbstractWizardResultTransformer)
         self.wizard_result_console_renderer_mock: WizardResultConsoleRenderer = mock.create_autospec(WizardResultConsoleRenderer)
         self.wizard_result_file_renderer_mock: WizardResultFileRenderer = mock.create_autospec(WizardResultFileRenderer)
 
-        self.response_index = 0
         self.wizard_result_transformer_mock.transform.return_value = _TRANSFORMED_VALUE
 
         self.registration_config_wizard: RegistrationConfigWizard = RegistrationConfigWizard(
             self.wizard_result_transformer_mock,
             self.wizard_result_console_renderer_mock,
-            self.wizard_result_file_renderer_mock,
-            self.response_parser_mock)
+            self.wizard_result_file_renderer_mock)
 
-    def test_should_run_wizard_for_executable_type_and_console_rendering(self):
-
-        # given
-        self.response_parser_mock.read_answer.side_effect = self._response_parser_executable_side_effect
+    @mock.patch("builtins.input", side_effect=_EXECUTABLE_TYPE_RAW_RESPONSES)
+    def test_should_run_wizard_for_executable_type_and_console_rendering(self, input_mock):
 
         # when
         self.registration_config_wizard.run()
@@ -129,10 +177,8 @@ class RegistrationConfigWizardTest(unittest.TestCase):
         self.wizard_result_transformer_mock.transform.assert_called_once_with(_EXECUTABLE_TYPE_FORMATTED_RESPONSE_DICT)
         self.wizard_result_console_renderer_mock.render.assert_called_once_with(_TRANSFORMED_VALUE)
 
-    def test_should_run_wizard_for_runtime_type_and_console_rendering(self):
-
-        # given
-        self.response_parser_mock.read_answer.side_effect = self._response_parser_runtime_side_effect
+    @mock.patch("builtins.input", side_effect=_RUNTIME_TYPE_RAW_RESPONSES)
+    def test_should_run_wizard_for_runtime_type_and_console_rendering(self, input_mock):
 
         # when
         self.registration_config_wizard.run()
@@ -141,10 +187,8 @@ class RegistrationConfigWizardTest(unittest.TestCase):
         self.wizard_result_transformer_mock.transform.assert_called_once_with(_RUNTIME_TYPE_FORMATTED_RESPONSE_DICT)
         self.wizard_result_console_renderer_mock.render.assert_called_once_with(_TRANSFORMED_VALUE)
 
-    def test_should_run_wizard_for_service_type_and_file_rendering(self):
-
-        # given
-        self.response_parser_mock.read_answer.side_effect = self._response_parser_service_side_effect
+    @mock.patch("builtins.input", side_effect=_SERVICE_TYPE_RAW_RESPONSES)
+    def test_should_run_wizard_for_service_type_and_file_rendering(self, input_mock):
 
         # when
         self.registration_config_wizard.run()
@@ -157,18 +201,15 @@ class RegistrationConfigWizardTest(unittest.TestCase):
         self.assertEqual(file_renderer_call_args[0], _TRANSFORMED_VALUE)
         self.assertEqual(merge_lambda_result, {"key": "value"})
 
-    def _response_parser_executable_side_effect(self, current_step: WizardStep, result: dict) -> None:
-        self._response_parser_side_effect(_EXECUTABLE_TYPE_RAW_RESPONSES, current_step, result)
+    @mock.patch("builtins.input", side_effect=_DOCKER_STANDARD_TYPE_RAW_RESPONSES)
+    def test_should_run_wizard_for_docker_standard_type_and_console_rendering(self, input_mock):
 
-    def _response_parser_runtime_side_effect(self, current_step: WizardStep, result: dict) -> None:
-        self._response_parser_side_effect(_RUNTIME_TYPE_RAW_RESPONSES, current_step, result)
+        # when
+        self.registration_config_wizard.run()
 
-    def _response_parser_service_side_effect(self, current_step: WizardStep, result: dict) -> None:
-        self._response_parser_side_effect(_SERVICE_TYPE_RAW_RESPONSES, current_step, result)
-
-    def _response_parser_side_effect(self, response_source: [], current_step: WizardStep, result: dict) -> None:
-        result[current_step.get_step_id()] = response_source[self.response_index]
-        self.response_index = self.response_index + 1
+        # then
+        self.wizard_result_transformer_mock.transform.assert_called_once_with(_DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT)
+        self.wizard_result_console_renderer_mock.render.assert_called_once_with(_TRANSFORMED_VALUE)
 
 
 if __name__ == "__main__":

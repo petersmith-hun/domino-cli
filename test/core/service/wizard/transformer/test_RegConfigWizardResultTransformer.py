@@ -118,6 +118,78 @@ _REG_CONFIG_SERVICE_TRANSFORMED: dict = {
     }
 }
 
+_REG_CONFIG_DOCKER_STANDARD_RAW: dict = {
+    "reg_name": "app4",
+    "source_type": "docker",
+    "exec_type": "standard",
+    "src_home": "http://localhost:5000/apps",
+    "src_bin_name": "img_app4",
+    "exec_cmd_name": "container_app4",
+    "exec_args_docker_ports": {
+        "9000": "9000/tcp",
+        "8080": "8080"
+    },
+    "exec_args_docker_env": {
+        "ENV_VAR1": "value1",
+        "ENV_VAR2": "value2",
+        "ENV_VAR3": "value3"
+    },
+    "exec_args_docker_volumes": {
+        "/tmp1": "/tmp1",
+        "/tmp2/something": "/app/tmp:rw",
+        "/tmp3/tmp": "/app/something:ro"
+    },
+    "exec_args_docker_network": "host",
+    "exec_args_docker_restart": "unless-stopped",
+    "exec_args_docker_cmd": [
+        "--param1",
+        "--param2"
+    ],
+    "hc_enable": "no",
+}
+_REG_CONFIG_DOCKER_STANDARD_TRANSFORMED: dict = {
+    "domino": {
+        "registrations": {
+            "app4": {
+                "source": {
+                    "type": "DOCKER",
+                    "home": "http://localhost:5000/apps",
+                    "resource": "img_app4"
+                },
+                "execution": {
+                    "via": "STANDARD",
+                    "command-name": "container_app4",
+                    "args": {
+                        "ports": {
+                            "9000": "9000/tcp",
+                            "8080": "8080"
+                        },
+                        "environment": {
+                            "ENV_VAR1": "value1",
+                            "ENV_VAR2": "value2",
+                            "ENV_VAR3": "value3"
+                        },
+                        "volumes": {
+                            "/tmp1": "/tmp1",
+                            "/tmp2/something": "/app/tmp:rw",
+                            "/tmp3/tmp": "/app/something:ro"
+                        },
+                        "network-mode": "host",
+                        "restart-policy": "unless-stopped",
+                        "command-args": [
+                            "--param1",
+                            "--param2"
+                        ]
+                    }
+                },
+                "health-check": {
+                    "enabled": False
+                }
+            }
+        }
+    }
+}
+
 
 class RegConfigWizardResultTransformerTest(unittest.TestCase):
 
@@ -140,7 +212,8 @@ class RegConfigWizardResultTransformerTest(unittest.TestCase):
         return [
             (_REG_CONFIG_EXECUTABLE_RAW, _REG_CONFIG_EXECUTABLE_TRANSFORMED),
             (_REG_CONFIG_RUNTIME_RAW, _REG_CONFIG_RUNTIME_TRANSFORMED),
-            (_REG_CONFIG_SERVICE_RAW, _REG_CONFIG_SERVICE_TRANSFORMED)
+            (_REG_CONFIG_SERVICE_RAW, _REG_CONFIG_SERVICE_TRANSFORMED),
+            (_REG_CONFIG_DOCKER_STANDARD_RAW, _REG_CONFIG_DOCKER_STANDARD_TRANSFORMED)
         ]
 
 

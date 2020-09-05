@@ -7,6 +7,8 @@ from core.service.wizard.step.WizardStep import WizardStepTransition, WizardStep
 from test.core.service.wizard.step.TestWizardDataMapping import TestWizardDataMapping
 
 _TEST_QUESTION = "test_question"
+_TEST_SINGLE_RESPONSE = "test_single_response"
+_WIZARD_STEP_FIELD = TestWizardDataMapping.TEST_MAPPING.get_wizard_field()
 
 
 class BaseWizardStepTest(unittest.TestCase):
@@ -42,6 +44,18 @@ class BaseWizardStepTest(unittest.TestCase):
         self.assertTrue(result[0].is_applicable(context_non_transitionable))  # defaults transition is unconditional
         self.assertTrue(result[1].is_applicable(context_transitionable))
         self.assertFalse(result[1].is_applicable(context_non_transitionable))
+
+    @mock.patch("builtins.input", return_value=_TEST_SINGLE_RESPONSE)
+    def test_should_read_answer(self, input_mock):
+
+        # given
+        response_dict = {}
+
+        # when
+        self.base_wizard_step.read_answer(response_dict)
+
+        # then
+        self.assertEqual(response_dict[_WIZARD_STEP_FIELD], _TEST_SINGLE_RESPONSE)
 
     def test_should_repr_return_assigned_question(self):
 

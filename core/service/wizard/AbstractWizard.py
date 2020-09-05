@@ -2,7 +2,6 @@ from abc import ABCMeta, abstractmethod
 from typing import List, Iterator, Optional
 
 from core.service.wizard.step.WizardStep import WizardStep, WizardStepTransition
-from core.service.wizard.util.ResponseParser import ResponseParser
 
 
 class AbstractWizard(object, metaclass=ABCMeta):
@@ -10,8 +9,7 @@ class AbstractWizard(object, metaclass=ABCMeta):
     Wizard controller engine base implementation.
     Concrete wizards must implement this base implementation.
     """
-    def __init__(self, response_parser: ResponseParser, wizard_name: str, wizard_description: str):
-        self._response_parser: ResponseParser = response_parser
+    def __init__(self, wizard_name: str, wizard_description: str):
         self._wizard_name: str = wizard_name
         self._wizard_description: str = wizard_description
         self._entry_point: Optional[WizardStep] = None
@@ -60,7 +58,7 @@ class AbstractWizard(object, metaclass=ABCMeta):
         while True:
 
             print(current_step)
-            self._response_parser.read_answer(current_step, result)
+            current_step.read_answer(result)
             current_step = self._get_next_step(current_step, result)
 
             if current_step is None:

@@ -4,10 +4,9 @@ from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultC
 from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
 from core.service.wizard.step.BaseWizardStep import BaseWizardStep
 from core.service.wizard.step.KeyValuePairAnswerWizardStep import KeyValuePairAnswerWizardStep
-from core.service.wizard.step.MultiAnswerWizardStepDecorator import MultiAnswerWizardStepDecorator
+from core.service.wizard.step.MultiAnswerWizardStep import MultiAnswerWizardStep
 from core.service.wizard.step.OptionSelectorWizardStep import OptionSelectorWizardStep
 from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
-from core.service.wizard.util.ResponseParser import ResponseParser
 
 _WIZARD_NAME = "regconfig"
 _WIZARD_DESCRIPTION = "Creates a properly configured Domino application registration"
@@ -24,9 +23,8 @@ class RegistrationConfigWizard(AbstractWizard):
     """
     def __init__(self, wizard_result_transformer: AbstractWizardResultTransformer,
                  wizard_result_console_renderer: WizardResultConsoleRenderer,
-                 wizard_result_file_renderer: WizardResultFileRenderer,
-                 response_parser: ResponseParser):
-        super().__init__(response_parser, _WIZARD_NAME, _WIZARD_DESCRIPTION)
+                 wizard_result_file_renderer: WizardResultFileRenderer):
+        super().__init__(_WIZARD_NAME, _WIZARD_DESCRIPTION)
         self._wizard_result_transformer: AbstractWizardResultTransformer = wizard_result_transformer
         self._wizard_result_console_renderer: WizardResultConsoleRenderer = wizard_result_console_renderer
         self._wizard_result_file_renderer: WizardResultFileRenderer = wizard_result_file_renderer
@@ -46,13 +44,13 @@ class RegistrationConfigWizard(AbstractWizard):
         ws_command_name = BaseWizardStep(Mapping.EXEC_COMMAND_NAME, "What will be the (service) command to execute app with?")
         ws_container_name = BaseWizardStep(Mapping.EXEC_COMMAND_NAME, "What will be the name of the container?")
         ws_exec_user = BaseWizardStep(Mapping.EXEC_USER, "What system user will execute the app?")
-        ws_exec_args = MultiAnswerWizardStepDecorator(BaseWizardStep(Mapping.EXEC_ARGS, "Specify execution arguments (one at a line, empty line to stop)"))
-        ws_exec_args_docker_ports = MultiAnswerWizardStepDecorator(KeyValuePairAnswerWizardStep(Mapping.EXEC_ARGS_DOCKER_PORTS, "Specify the ports to be exposed (one at a line, empty line to stop)"))
-        ws_exec_args_docker_env = MultiAnswerWizardStepDecorator(KeyValuePairAnswerWizardStep(Mapping.EXEC_ARGS_DOCKER_ENV, "Specify environment variables and their values (one at a line, empty line to stop)"))
-        ws_exec_args_docker_volumes = MultiAnswerWizardStepDecorator(KeyValuePairAnswerWizardStep(Mapping.EXEC_ARGS_DOCKER_VOLUMES, "Specify volume mappings (one at a line, empty line to stop)"))
+        ws_exec_args = MultiAnswerWizardStep(Mapping.EXEC_ARGS, "Specify execution arguments")
+        ws_exec_args_docker_ports = KeyValuePairAnswerWizardStep(Mapping.EXEC_ARGS_DOCKER_PORTS, "Specify the ports to be exposed")
+        ws_exec_args_docker_env = KeyValuePairAnswerWizardStep(Mapping.EXEC_ARGS_DOCKER_ENV, "Specify environment variables and their values")
+        ws_exec_args_docker_volumes = KeyValuePairAnswerWizardStep(Mapping.EXEC_ARGS_DOCKER_VOLUMES, "Specify volume mappings")
         ws_exec_args_docker_network = BaseWizardStep(Mapping.EXEC_ARGS_DOCKER_NETWORK, "Specify network mode")
         ws_exec_args_docker_restart = OptionSelectorWizardStep(Mapping.EXEC_ARGS_DOCKER_RESTART, "Select restart policy", _AVAILABLE_RESTART_POLICIES)
-        ws_exec_args_docker_cmd = MultiAnswerWizardStepDecorator(KeyValuePairAnswerWizardStep(Mapping.EXEC_ARGS_DOCKER_CMD, "Specify command line arguments  (one at a line, empty line to stop)"))
+        ws_exec_args_docker_cmd = MultiAnswerWizardStep(Mapping.EXEC_ARGS_DOCKER_CMD, "Specify command line arguments")
         ws_health_check = OptionSelectorWizardStep(Mapping.HEALTH_CHECK_ENABLE, "Do you want to execute health check after starting the app up?")
         ws_hc_delay = BaseWizardStep(Mapping.HEALTH_CHECK_DELAY, "Specify delay between first and subsequent health checks (in Node.js 'ms' library format)")
         ws_hc_timeout = BaseWizardStep(Mapping.HEALTH_CHECK_TIMEOUT, "Specify timeout of health check requests (in Node.js 'ms' library format)")

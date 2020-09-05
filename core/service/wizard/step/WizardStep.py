@@ -40,6 +40,15 @@ class WizardStep(object, metaclass=ABCMeta):
         """
         pass
 
+    @abstractmethod
+    def read_answer(self, result: dict) -> None:
+        """
+        Reads an answer from stdin.
+
+        :param result: dictionary to be used to collect answers
+        """
+        pass
+
 
 class WizardStepTransition:
     """

@@ -27,6 +27,27 @@ class OptionSelectorWizardStep(BaseWizardStep):
         """
         return self._options
 
+    def read_answer(self, result: dict) -> None:
+        """
+        Reads an answer from stdin. Answer must be an integer (n > 0 and n < number of possible choices). Answer is
+        validated, providing incorrect value restarts step.
+
+        :param result:
+        :return:
+        """
+        try:
+            super().read_answer(result)
+            index: int = int(result[self.get_step_id()]) - 1
+
+            if index < 0:
+                raise ValueError()
+
+            result[self.get_step_id()] = self.get_options()[index]
+
+        except (IndexError, ValueError):
+            print("Your choice is invalid - please try again")
+            self.read_answer(result)
+
     def __repr__(self):
         return "{0} {1}".format(self._question, self._format_options())
 
