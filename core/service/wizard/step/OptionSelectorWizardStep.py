@@ -29,11 +29,10 @@ class OptionSelectorWizardStep(BaseWizardStep):
 
     def read_answer(self, result: dict) -> None:
         """
-        Reads an answer from stdin. Answer must be an integer (n > 0 and n < number of possible choices). Answer is
+        Reads an answer from stdin. Answer must be an integer (n > 0 and n <= number of possible choices). Answer is
         validated, providing incorrect value restarts step.
 
-        :param result:
-        :return:
+        :param result: dictionary to be used to collect answers
         """
         try:
             super().read_answer(result)

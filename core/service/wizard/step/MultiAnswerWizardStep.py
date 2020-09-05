@@ -4,7 +4,7 @@ from core.service.wizard.step.BaseWizardStep import BaseWizardStep
 
 class MultiAnswerWizardStep(BaseWizardStep):
     """
-    Decorator for any wizard step that expects multiple answers.
+    BaseWizardStep implementation to create wizard steps generating the response model as list.
     """
     def __init__(self, step_id: WizardDataMappingBaseEnum, question: str):
         super().__init__(step_id, "{0} (one at a line, empty line to stop)".format(question))
