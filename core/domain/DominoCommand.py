@@ -23,3 +23,4 @@ class DominoCommand(Enum):
     RESTART = DominoRequestDescriptor(HTTPMethod.PUT, "/lifecycle/{0}/restart")
     DEPLOY_LATEST = DominoRequestDescriptor(HTTPMethod.PUT, "/lifecycle/{0}/deploy")
     DEPLOY_VERSION = DominoRequestDescriptor(HTTPMethod.PUT, "/lifecycle/{0}/deploy/{1}")
+    INFO = DominoRequestDescriptor(HTTPMethod.GET, "/lifecycle/{0}/info")

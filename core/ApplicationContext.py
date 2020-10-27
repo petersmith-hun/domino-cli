@@ -6,6 +6,7 @@ from core.command.AuthCommand import AuthCommand
 from core.command.DeployApplicationCommand import DeployApplicationCommand
 from core.command.ExitCommand import ExitCommand
 from core.command.HelpCommand import HelpCommand
+from core.command.InfoCommand import InfoCommand
 from core.command.RestartApplicationCommand import RestartApplicationCommand
 from core.command.StartApplicationCommand import StartApplicationCommand
 from core.command.StopApplicationCommand import StopApplicationCommand
@@ -59,6 +60,7 @@ class ApplicationContext:
         _command_deploy_app = DeployApplicationCommand(_domino_service)
         _command_auth = AuthCommand(_auth_service)
         _command_wizard = WizardCommand(_config_wizard_service)
+        _command_info = InfoCommand(_domino_service)
 
         # command processor
         _command_processor = CommandProcessor(_command_help, [
@@ -69,7 +71,8 @@ class ApplicationContext:
             _command_restart_app,
             _command_start_app,
             _command_stop_app,
-            _command_wizard
+            _command_wizard,
+            _command_info
         ])
 
         _cli = CLI(_command_processor)

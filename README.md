@@ -108,6 +108,11 @@ restart <app>
 ```
 Instructs Domino to restart the currently running instance of the application.
 
+```
+info <app>
+```
+Instructs Domino to query the application's info endpoint and returns the results.
+
 ### Configuration wizards
 
 Domino CLI also provides configuration wizards which help to properly create Domino configuration files.
