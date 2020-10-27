@@ -12,7 +12,7 @@ class HelpCommandTest(CommandBaseTest):
         self.help_command: HelpCommand = HelpCommand()
 
     @mock.patch("builtins.print", side_effect=print)
-    def test_should_execute_command_say_goodbye(self, print_mock):
+    def test_should_execute_command_show_help_text(self, print_mock):
 
         # given
         command_descriptor: CommandDescriptor = CommandDescriptor("help")

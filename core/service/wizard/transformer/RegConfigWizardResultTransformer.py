@@ -40,6 +40,7 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
         exec_type: str = self._read_current_value(Mapping.EXEC_TYPE, root_node, target_dict)
         self._exec_type_parameter_filler_mapping.get(exec_type)(root_node, source, target_dict)
         self._add_health_check_parameters(root_node, source, target_dict)
+        self._add_info_parameters(root_node, source, target_dict)
 
         return target_dict
 
@@ -49,6 +50,7 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
         self._assign(Mapping.SOURCE_TYPE, root_node, source, target_dict, _UPPERCASE_MAPPER)
         self._assign(Mapping.EXEC_TYPE, root_node, source, target_dict, _UPPERCASE_MAPPER)
         self._assign(Mapping.HEALTH_CHECK_ENABLE, root_node, source, target_dict, _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER)
+        self._assign(Mapping.INFO_ENABLE, root_node, source, target_dict, _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER)
 
         return target_dict
 
@@ -93,3 +95,9 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
             self._assign(Mapping.HEALTH_CHECK_TIMEOUT, root_node, source, target_dict)
             self._assign(Mapping.HEALTH_CHECK_MAX_ATTEMPTS, root_node, source, target_dict)
             self._assign(Mapping.HEALTH_CHECK_ENDPOINT, root_node, source, target_dict)
+
+    def _add_info_parameters(self, root_node: str, source: dict, target_dict: dict) -> None:
+
+        if self._read_current_value(Mapping.INFO_ENABLE, root_node, target_dict):
+            self._assign(Mapping.INFO_ENDPOINT, root_node, source, target_dict)
+            self._assign(Mapping.INFO_FIELD_MAPPING, root_node, source, target_dict)
