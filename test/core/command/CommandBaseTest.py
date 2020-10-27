@@ -4,7 +4,7 @@ from core.command.AbstractCommand import AbstractCommand
 from core.domain.CommandDescriptor import CommandDescriptor
 
 
-_COMMAND_LIST = ["start", "stop", "restart", "deploy", "help", "exit", "auth", "wizard"]
+_COMMAND_LIST = ["start", "stop", "restart", "deploy", "help", "exit", "auth", "wizard", "info"]
 
 
 class CommandBaseTest(unittest.TestCase):
