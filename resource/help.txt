@@ -10,3 +10,4 @@ Known commands:
  - stop <app>: commands Domino to stop the given app
  - restart <app>: commands Domino to restart the given app
  - deploy <app> <latest|version>: commands Domino to deploy either the latest or the specified version of the given app
+ - wizard <wizard name>: starts the specified configuration wizard

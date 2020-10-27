@@ -17,7 +17,8 @@ _REG_CONFIG_EXECUTABLE_RAW: dict = {
     "hc_delay": "3 seconds",
     "hc_timeout": "2 seconds",
     "hc_max_attempts": 2,
-    "hc_endpoint": "http://localhost:8099/health"
+    "hc_endpoint": "http://localhost:8099/health",
+    "info_enable": "no"
 }
 _REG_CONFIG_EXECUTABLE_TRANSFORMED: dict = {
     "domino": {
@@ -42,6 +43,9 @@ _REG_CONFIG_EXECUTABLE_TRANSFORMED: dict = {
                     "timeout": "2 seconds",
                     "max-attempts": 2,
                     "endpoint": "http://localhost:8099/health"
+                },
+                "info": {
+                    "enabled": False
                 }
             }
         }
@@ -60,6 +64,12 @@ _REG_CONFIG_RUNTIME_RAW: dict = {
         "--arg1"
     ],
     "hc_enable": "no",
+    "info_enable": "yes",
+    "info_endpoint": "http://localhost:9000/actuator/info",
+    "info_field_mapping": {
+        "name": "$.app.name",
+        "version": "$.build.version"
+    }
 }
 _REG_CONFIG_RUNTIME_TRANSFORMED: dict = {
     "domino": {
@@ -80,6 +90,14 @@ _REG_CONFIG_RUNTIME_TRANSFORMED: dict = {
                 "runtime": "java",
                 "health-check": {
                     "enabled": False
+                },
+                "info": {
+                    "enabled": True,
+                    "endpoint": "http://localhost:9000/actuator/info",
+                    "field-mapping": {
+                        "name": "$.app.name",
+                        "version": "$.build.version"
+                    }
                 }
             }
         }
@@ -95,6 +113,7 @@ _REG_CONFIG_SERVICE_RAW: dict = {
     "exec_cmd_name": "app3-svc",
     "exec_user": "app3-user",
     "hc_enable": "no",
+    "info_enable": "no"
 }
 _REG_CONFIG_SERVICE_TRANSFORMED: dict = {
     "domino": {
@@ -111,6 +130,9 @@ _REG_CONFIG_SERVICE_TRANSFORMED: dict = {
                     "command-name": "app3-svc"
                 },
                 "health-check": {
+                    "enabled": False
+                },
+                "info": {
                     "enabled": False
                 }
             }
@@ -146,6 +168,7 @@ _REG_CONFIG_DOCKER_STANDARD_RAW: dict = {
         "--param2"
     ],
     "hc_enable": "no",
+    "info_enable": "no"
 }
 _REG_CONFIG_DOCKER_STANDARD_TRANSFORMED: dict = {
     "domino": {
@@ -183,6 +206,9 @@ _REG_CONFIG_DOCKER_STANDARD_TRANSFORMED: dict = {
                     }
                 },
                 "health-check": {
+                    "enabled": False
+                },
+                "info": {
                     "enabled": False
                 }
             }

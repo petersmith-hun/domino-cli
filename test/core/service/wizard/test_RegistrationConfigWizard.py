@@ -23,6 +23,7 @@ _EXECUTABLE_TYPE_RAW_RESPONSES = [
     "2 seconds",
     2,
     "http://localhost:8099/health",
+    "2",
     "1"
 ]
 _EXECUTABLE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
@@ -41,6 +42,7 @@ _EXECUTABLE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "hc_timeout": "2 seconds",
     "hc_max_attempts": 2,
     "hc_endpoint": "http://localhost:8099/health",
+    "info_enable": "no",
     "result_rendering": "console"
 }
 
@@ -54,6 +56,7 @@ _RUNTIME_TYPE_RAW_RESPONSES = [
     "app_user",
     "--arg1",
     "",
+    "2",
     "2",
     "1"
 ]
@@ -69,6 +72,7 @@ _RUNTIME_TYPE_FORMATTED_RESPONSE_DICT: dict = {
         "--arg1"
     ],
     "hc_enable": "no",
+    "info_enable": "no",
     "result_rendering": "console"
 }
 
@@ -81,6 +85,7 @@ _SERVICE_TYPE_RAW_RESPONSES = [
     "app3-svc",
     "app_svc_user",
     "2",
+    "2",
     "2"
 ]
 _SERVICE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
@@ -92,6 +97,7 @@ _SERVICE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "exec_cmd_name": "app3-svc",
     "exec_user": "app_svc_user",
     "hc_enable": "no",
+    "info_enable": "no",
     "result_rendering": "file"
 }
 
@@ -119,6 +125,11 @@ _DOCKER_STANDARD_TYPE_RAW_RESPONSES = [
     "--param2",
     "",
     "2",
+    "1",
+    "http://localhost:9000/actuator/info",
+    "name:$.app.name",
+    "version:$.build.version",
+    "",
     "1"
 ]
 _DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT: dict = {
@@ -149,6 +160,12 @@ _DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT: dict = {
         "--param2"
     ],
     "hc_enable": "no",
+    "info_enable": "yes",
+    "info_endpoint": "http://localhost:9000/actuator/info",
+    "info_field_mapping": {
+        "name": "$.app.name",
+        "version": "$.build.version"
+    },
     "result_rendering": "console"
 }
 

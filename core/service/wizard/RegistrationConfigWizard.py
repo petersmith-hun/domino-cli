@@ -56,11 +56,15 @@ class RegistrationConfigWizard(AbstractWizard):
         ws_hc_timeout = BaseWizardStep(Mapping.HEALTH_CHECK_TIMEOUT, "Specify timeout of health check requests (in Node.js 'ms' library format)")
         ws_hc_max_attempts = BaseWizardStep(Mapping.HEALTH_CHECK_MAX_ATTEMPTS, "Specify max number of health check attempts")
         ws_hc_endpoint = BaseWizardStep(Mapping.HEALTH_CHECK_ENDPOINT, "Specify the app's health check endpoint")
+        ws_info_enable = OptionSelectorWizardStep(Mapping.INFO_ENABLE, "Do you want to specify the application's info endpoint?")
+        ws_info_endpoint = BaseWizardStep(Mapping.INFO_ENDPOINT, "Specify the app's info endpoint")
+        ws_info_field_mapping = KeyValuePairAnswerWizardStep(Mapping.INFO_FIELD_MAPPING, "Specify the response mapping as target-source pairs (see Domino's documentation for more information)")
         ws_result_rendering = OptionSelectorWizardStep(Mapping.RESULT_RENDERING, "Write result to", _AVAILABLE_RESULT_RENDERERS)
 
         source_type_field = Mapping.SOURCE_TYPE.get_wizard_field()
         exec_type_field = Mapping.EXEC_TYPE.get_wizard_field()
         health_check_enable_field = Mapping.HEALTH_CHECK_ENABLE.get_wizard_field()
+        info_enable_field = Mapping.INFO_ENABLE.get_wizard_field()
 
         # transitions
         ws_registration_name.add_transition(ws_source_type)
@@ -89,11 +93,16 @@ class RegistrationConfigWizard(AbstractWizard):
         ws_exec_args_docker_cmd.add_transition(ws_health_check)
 
         ws_health_check.add_transition(ws_hc_delay, lambda context: context[health_check_enable_field] == "yes")
-        ws_health_check.add_transition(ws_result_rendering)
+        ws_health_check.add_transition(ws_info_enable)
         ws_hc_delay.add_transition(ws_hc_timeout)
         ws_hc_timeout.add_transition(ws_hc_max_attempts)
         ws_hc_max_attempts.add_transition(ws_hc_endpoint)
-        ws_hc_endpoint.add_transition(ws_result_rendering)
+        ws_hc_endpoint.add_transition(ws_info_enable)
+
+        ws_info_enable.add_transition(ws_info_endpoint, lambda context: context[info_enable_field] == "yes")
+        ws_info_enable.add_transition(ws_result_rendering)
+        ws_info_endpoint.add_transition(ws_info_field_mapping)
+        ws_info_field_mapping.add_transition(ws_result_rendering)
 
         self.set_entry_point(ws_registration_name)
 
