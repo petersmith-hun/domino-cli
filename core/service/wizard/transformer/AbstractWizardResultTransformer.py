@@ -1,7 +1,6 @@
 from __future__ import annotations
 from abc import ABCMeta, abstractmethod
-from collections import Callable
-from typing import List
+from typing import List, Callable
 
 from core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 

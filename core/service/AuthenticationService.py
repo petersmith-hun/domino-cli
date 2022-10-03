@@ -1,35 +1,34 @@
-import os
-from getpass import getpass
+from typing import List, Dict
 
 import bcrypt
-from requests import Response
 
-from core.client.DominoClient import DominoClient
-from core.domain.AuthRequest import AuthRequest
-from core.domain.DominoRequest import DominoRequest
-from core.domain.HTTPMethod import HTTPMethod
+from core.domain.AuthMode import AuthMode
 from core.domain.SessionContext import SessionContext
 from core.service.SessionContextHolder import SessionContextHolder
+from core.service.auth.AbstractAuthHandler import AbstractAuthHandler
+from core.service.auth.AuthUtils import AuthUtils
 
 _PASSWORD_ENCODING = "utf8"
-_DOMINO_CLI_USERNAME = "DOMINO_CLI_USERNAME"
-_DOMINO_CLI_PASSWORD = "DOMINO_CLI_PASSWORD"
 
 
 class AuthenticationService:
     """
     Service implementation for handling authentication related operations.
     """
-    def __init__(self, domino_client: DominoClient, session_context_holder: SessionContextHolder):
-        self._domino_client = domino_client
-        self._session_context_holder = session_context_holder
+    def __init__(self, default_auth_mode: AuthMode, session_context_holder: SessionContextHolder,
+                 auth_handlers: List[AbstractAuthHandler]):
+        self._auth_mode: AuthMode = default_auth_mode
+        self._session_context_holder: SessionContextHolder = session_context_holder
+        self._auth_handler_dict: Dict[AuthMode, AbstractAuthHandler] = self._init_handler_map(auth_handlers)
+
+        print(f"Domino authentication mode is set to {self._auth_mode.name}. Use 'auth --set-mode' command to change")
 
     def encrypt_password(self) -> None:
         """
         Utility to encrypt a password with BCrypt for usage in Domino (as service user password).
         """
-        plain_password: bytes = self._input_password().encode(_PASSWORD_ENCODING)
-        encrypted_password_as_byte_array: bytearray = bcrypt.hashpw(plain_password, bcrypt.gensalt())
+        plain_password: bytes = AuthUtils.input_password().encode(_PASSWORD_ENCODING)
+        encrypted_password_as_byte_array: bytes = bcrypt.hashpw(plain_password, bcrypt.gensalt())
         encrypted_password: str = encrypted_password_as_byte_array.decode(_PASSWORD_ENCODING)
 
         print("Encrypted password: {0}".format(encrypted_password))
@@ -58,41 +57,24 @@ class AuthenticationService:
         except Exception as exc:
             print("Failed to open session - reason: {0}".format(str(exc)))
 
+    def set_mode(self, new_mode: str) -> None:
+        """
+        Changes the currently set authentication mode to the specified one.
+        The accepted values are the ones defined in the AuthMode enum (currently 'direct' and 'oauth').
+
+        :param new_mode: authentication mode to change to
+        """
+        try:
+            self._auth_mode = AuthMode.by_value(new_mode)
+        except KeyError:
+            print(f"Failed to change authentication mode, invalid mode defined: {new_mode}")
+
     def _request_token(self) -> SessionContext:
 
-        auth_request = self._generate_auth_request()
+        return self._auth_handler_dict[self._auth_mode] \
+            .create_session_context()
 
-        return self._authenticate_with_domino(auth_request)
+    @staticmethod
+    def _init_handler_map(auth_handlers):
+        return {handler.for_auth_mode(): handler for handler in auth_handlers}
 
-    def _generate_auth_request(self) -> AuthRequest:
-
-        username: str = self._input_username()
-        password: str = self._input_password()
-
-        return AuthRequest(username, password)
-
-    def _authenticate_with_domino(self, auth_request: AuthRequest) -> SessionContext:
-
-        domino_request: DominoRequest = DominoRequest(HTTPMethod.POST, "/claim-token", body=auth_request.get_as_dict())
-        response: Response = self._domino_client.send_command(domino_request)
-
-        if not response.status_code == 201:
-            raise Exception("Failed to authenticate - Domino responded with {0}".format(response.status_code))
-
-        return SessionContext(auth_request.username, response.json()["jwt"])
-
-    def _input_username(self) -> str:
-
-        username = os.getenv(_DOMINO_CLI_USERNAME)
-        if username is None:
-            username = input(" ** specify username: ")
-
-        return username
-
-    def _input_password(self) -> str:
-
-        password = os.getenv(_DOMINO_CLI_PASSWORD)
-        if password is None:
-            password = getpass(" ** specify password: ")
-
-        return password

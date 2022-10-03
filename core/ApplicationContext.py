@@ -2,6 +2,7 @@ import os
 
 from core.cli.CLI import CLI
 from core.client.DominoClient import DominoClient
+from core.client.OAuthAuthorizationClient import OAuthAuthorizationClient
 from core.command.AuthCommand import AuthCommand
 from core.command.DeployApplicationCommand import DeployApplicationCommand
 from core.command.ExitCommand import ExitCommand
@@ -11,11 +12,15 @@ from core.command.RestartApplicationCommand import RestartApplicationCommand
 from core.command.StartApplicationCommand import StartApplicationCommand
 from core.command.StopApplicationCommand import StopApplicationCommand
 from core.command.WizardCommand import WizardCommand
+from core.domain.AuthMode import AuthMode
+from core.domain.OAuthConfig import OAuthConfig
 from core.service.AuthenticationService import AuthenticationService
 from core.service.CommandProcessor import CommandProcessor
 from core.service.ConfigurationWizardService import ConfigurationWizardService
 from core.service.DominoService import DominoService
 from core.service.SessionContextHolder import SessionContextHolder
+from core.service.auth.DirectAuthHandler import DirectAuthHandler
+from core.service.auth.OAuthAuthHandler import OAuthAuthHandler
 from core.service.wizard.RegistrationConfigWizard import RegistrationConfigWizard
 from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultConsoleRenderer
 from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
@@ -27,12 +32,14 @@ class ApplicationContext:
     Simple IoC container for Domino CLI.
     """
     @staticmethod
-    def init_cli() -> CLI:
+    def init_cli(version: str) -> CLI:
 
         print("Initializing Domino CLI...")
 
         # configuration properties
         _domino_base_url = ApplicationContext._assert_config_value("DOMINO_BASE_URL")
+        _default_auth_mode = AuthMode.by_value(os.getenv("DOMINO_DEFAULT_AUTH_MODE", AuthMode.DIRECT.value))
+        _oauth_config = OAuthConfig()
 
         # wizards
         _wizard_result_console_renderer = WizardResultConsoleRenderer()
@@ -45,8 +52,14 @@ class ApplicationContext:
         # common components
         _session_context_holder = SessionContextHolder()
         _domino_client = DominoClient(_domino_base_url, _session_context_holder)
+        _oauth_authorization_client = OAuthAuthorizationClient(_oauth_config)
         _domino_service = DominoService(_domino_client)
-        _auth_service = AuthenticationService(_domino_client, _session_context_holder)
+        _direct_auth_handler = DirectAuthHandler(_domino_client)
+        _oauth_auth_handler = OAuthAuthHandler(_oauth_config, _oauth_authorization_client)
+        _auth_service = AuthenticationService(_default_auth_mode, _session_context_holder, [
+            _direct_auth_handler,
+            _oauth_auth_handler
+        ])
         _config_wizard_service = ConfigurationWizardService([
             _registration_config_wizard
         ])
@@ -77,7 +90,7 @@ class ApplicationContext:
 
         _cli = CLI(_command_processor)
 
-        print("Domino CLI initialized.")
+        print(f"Domino CLI v{version} initialized.")
         print("-" * 30)
 
         return _cli

@@ -2,32 +2,37 @@ import unittest
 from unittest import mock
 
 import bcrypt
-from requests import Response
 
-from core.client.DominoClient import DominoClient
-from core.domain.DominoRequest import DominoRequest
-from core.domain.HTTPMethod import HTTPMethod
+from core.domain.AuthMode import AuthMode
 from core.domain.SessionContext import SessionContext
 from core.service.AuthenticationService import AuthenticationService
 from core.service.SessionContextHolder import SessionContextHolder
+from core.service.auth.AbstractAuthHandler import AbstractAuthHandler
 
 _JWT_TOKEN = "jwt_token"
 _TEST_USERNAME = "test_user"
 _TEST_PASSWORD = "test_pw"
 _DOMINO_CLI_PASSWORD = "DOMINO_CLI_USERNAME"
 _DOMINO_CLI_USERNAME = "DOMINO_CLI_USERNAME"
+_MOCK_SESSION_CONTEXT = SessionContext(_TEST_USERNAME, _JWT_TOKEN)
 
 
 class AuthenticationServiceTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.domino_client_mock: DominoClient = mock.create_autospec(DominoClient)
+        self.direct_auth_handler_mock: AbstractAuthHandler = mock.create_autospec(AbstractAuthHandler)
+        self.oauth_auth_handler_mock: AbstractAuthHandler = mock.create_autospec(AbstractAuthHandler)
         self.session_context_holder_mock: SessionContextHolder = mock.create_autospec(SessionContextHolder)
 
-        self.authentication_service: AuthenticationService = AuthenticationService(self.domino_client_mock, self.session_context_holder_mock)
+        self.direct_auth_handler_mock.for_auth_mode.return_value = AuthMode.DIRECT
+        self.oauth_auth_handler_mock.for_auth_mode.return_value = AuthMode.OAUTH
+
+        self.authentication_service: AuthenticationService = \
+            AuthenticationService(AuthMode.DIRECT, self.session_context_holder_mock,
+                                  [self.direct_auth_handler_mock, self.oauth_auth_handler_mock])
 
     @mock.patch("builtins.print", side_effect=print)
-    @mock.patch("core.service.AuthenticationService.getpass", return_value=_TEST_PASSWORD)
+    @mock.patch("core.service.auth.AuthUtils.getpass", return_value=_TEST_PASSWORD)
     def test_should_encrypt_password_from_terminal(self, getpass_mock, print_mock):
 
         # given
@@ -53,59 +58,41 @@ class AuthenticationServiceTest(unittest.TestCase):
     def test_should_generate_token_with_success_from_env_variable(self, getenv_mock, print_mock):
 
         # given
-        self.domino_client_mock.send_command.return_value = AuthenticationServiceTest._prepare_client_response(True)
+        self.direct_auth_handler_mock.create_session_context.return_value = _MOCK_SESSION_CONTEXT
 
         # when
         self.authentication_service.generate_token()
 
         # then
         self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Generated auth token: jwt_token")
-        self._assert_domino_request()
 
     @mock.patch("builtins.print", side_effect=print)
     @mock.patch("builtins.input", return_value=_TEST_USERNAME)
-    @mock.patch("core.service.AuthenticationService.getpass", return_value=_TEST_PASSWORD)
-    def test_should_generate_token_with_success_from_terminal(self, getpass_mock, input_mock, print_mock):
-
-        # given
-        self.domino_client_mock.send_command.return_value = AuthenticationServiceTest._prepare_client_response(True)
-
-        # when
-        self.authentication_service.generate_token()
-
-        # then
-        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Generated auth token: jwt_token")
-        self._assert_domino_request()
-
-    @mock.patch("builtins.print", side_effect=print)
-    @mock.patch("builtins.input", return_value=_TEST_USERNAME)
-    @mock.patch("core.service.AuthenticationService.getpass", return_value=_TEST_PASSWORD)
+    @mock.patch("core.service.auth.AuthUtils.getpass", return_value=_TEST_PASSWORD)
     def test_should_generate_token_with_failure_from_terminal(self, getpass_mock, input_mock, print_mock):
 
         # given
-        self.domino_client_mock.send_command.return_value = AuthenticationServiceTest._prepare_client_response(False)
+        self.direct_auth_handler_mock.create_session_context.side_effect = Exception("Failed to authenticate")
 
         # when
         self.authentication_service.generate_token()
 
         # then
-        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Failed to generate token - reason: Failed to authenticate - Domino responded with 403")
-        self._assert_domino_request()
+        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Failed to generate token - reason: Failed to authenticate")
 
     @mock.patch("builtins.print", side_effect=print)
     @mock.patch("builtins.input", return_value=_TEST_USERNAME)
-    @mock.patch("core.service.AuthenticationService.getpass", return_value=_TEST_PASSWORD)
+    @mock.patch("core.service.auth.AuthUtils.getpass", return_value=_TEST_PASSWORD)
     def test_should_open_session_with_success(self, getpass_mock, input_mock, print_mock):
 
         # given
-        self.domino_client_mock.send_command.return_value = AuthenticationServiceTest._prepare_client_response(True)
+        self.direct_auth_handler_mock.create_session_context.return_value = _MOCK_SESSION_CONTEXT
 
         # when
         self.authentication_service.open_session()
 
         # then
         self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Session is open")
-        self._assert_domino_request()
         self.assertEqual(self.session_context_holder_mock.update.call_count, 1)
         session_context: SessionContext = self._extract_session_context()
         self.assertEqual(session_context.username, _TEST_USERNAME)
@@ -113,19 +100,44 @@ class AuthenticationServiceTest(unittest.TestCase):
 
     @mock.patch("builtins.print", side_effect=print)
     @mock.patch("builtins.input", return_value=_TEST_USERNAME)
-    @mock.patch("core.service.AuthenticationService.getpass", return_value=_TEST_PASSWORD)
+    @mock.patch("core.service.auth.AuthUtils.getpass", return_value=_TEST_PASSWORD)
     def test_should_open_session_with_failure(self, getpass_mock, input_mock, print_mock):
 
         # given
-        self.domino_client_mock.send_command.return_value = AuthenticationServiceTest._prepare_client_response(False)
+        self.direct_auth_handler_mock.create_session_context.side_effect = Exception("Failed to authenticate")
 
         # when
         self.authentication_service.open_session()
 
         # then
-        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Failed to open session - reason: Failed to authenticate - Domino responded with 403")
-        self._assert_domino_request()
+        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Failed to open session - reason: Failed to authenticate")
         self.assertEqual(self.session_context_holder_mock.call_count, 0)
+
+    def test_should_set_mode_to_direct(self):
+
+        # when
+        self.authentication_service.set_mode("direct")
+
+        # then
+        self.assertEqual(self.authentication_service._auth_mode, AuthMode.DIRECT)
+
+    def test_should_set_mode_to_oauth(self):
+
+        # when
+        self.authentication_service.set_mode("oauth")
+
+        # then
+        self.assertEqual(self.authentication_service._auth_mode, AuthMode.OAUTH)
+
+    @mock.patch("builtins.print", side_effect=print)
+    def test_should_set_mode_fail_on_invalid_value(self, print_mock):
+
+        # when
+        self.authentication_service.set_mode("invalid")
+
+        # then
+        self.assertEqual(self.authentication_service._auth_mode, AuthMode.DIRECT)
+        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Failed to change authentication mode, invalid mode defined: invalid")
 
     def _extract_session_context(self):
         return self.session_context_holder_mock.mock_calls[0][1][0]
@@ -136,7 +148,7 @@ class AuthenticationServiceTest(unittest.TestCase):
 
     @staticmethod
     def _extract_print_value(print_mock):
-        return print_mock.mock_calls[0][1][0]
+        return print_mock.call_args.args[0]
 
     @staticmethod
     def _extract_encrypted_password(print_mock):
@@ -144,25 +156,6 @@ class AuthenticationServiceTest(unittest.TestCase):
                 .split(":")[1] \
                 .strip() \
                 .encode("utf8")
-
-    @staticmethod
-    def _prepare_client_response(successful: bool):
-
-        response: Response = mock.create_autospec(Response)
-        if successful:
-            response.status_code = 201
-            response.json.return_value = {"jwt": _JWT_TOKEN}
-        else:
-            response.status_code = 403
-
-        return response
-
-    def _assert_domino_request(self):
-        domino_request: DominoRequest = self.domino_client_mock.send_command.mock_calls[0][1][0]
-        self.assertEqual(domino_request.method, HTTPMethod.POST)
-        self.assertEqual(domino_request.path, "/claim-token")
-        self.assertEqual(domino_request.body, {"username": _TEST_USERNAME, "password": _TEST_PASSWORD})
-        self.assertFalse(domino_request.authenticated)
 
 
 if __name__ == "__main__":
