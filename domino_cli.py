@@ -3,7 +3,7 @@
 domino_cli.py :: Main entry point for Domino CLI application.
 """
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 import os
 
@@ -18,4 +18,4 @@ def _set_work_dir() -> None:
 
 if __name__ == "__main__":
     _set_work_dir()
-    ApplicationContext.init_cli().run_loop()
+    ApplicationContext.init_cli(__version__).run_loop()

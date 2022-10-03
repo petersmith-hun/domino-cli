@@ -19,12 +19,15 @@ class AuthCommand(AbstractCommand):
 
         :param command_descriptor: CommandDescriptor object containing the command arguments
         """
-        if not len(command_descriptor.arguments) == 1:
+        if not 0 < len(command_descriptor.arguments) < 3:
             AuthCommand._show_help()
         else:
-            self._route_auth_request(command_descriptor.arguments[0])
+            additional_parameter: str = command_descriptor.arguments[1] \
+                if len(command_descriptor.arguments) == 2 \
+                else None
+            self._route_auth_request(command_descriptor.arguments[0], additional_parameter)
 
-    def _route_auth_request(self, operation_flag: str):
+    def _route_auth_request(self, operation_flag: str, additional_parameter: str):
 
         if operation_flag == "--encrypt-password":
             self._authentication_service.encrypt_password()
@@ -32,9 +35,12 @@ class AuthCommand(AbstractCommand):
             self._authentication_service.generate_token()
         elif operation_flag == "--open-session":
             self._authentication_service.open_session()
+        elif operation_flag == "--set-mode":
+            self._authentication_service.set_mode(additional_parameter)
         else:
             AuthCommand._show_help()
 
     @staticmethod
     def _show_help():
-        print("Auth command requires operation flag of: --encrypt-password | --generate-token | --open-session")
+        print("Auth command requires operation flag of: --encrypt-password | --generate-token | --open-session "
+              "| --set-mode direct|oauth")

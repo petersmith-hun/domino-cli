@@ -6,19 +6,25 @@ Its purpose is to provide a convenient way of controlling Domino via its REST in
 
 ## Requirements
 
-* Domino CLI requires Python 3.x for execution (tested on Python 3.7 and 3.8).
+* Domino CLI requires Python 3.x for execution (tested on Python 3.7, 3.8 and 3.10).
 * It is executable both on Windows and Linux systems.
 
 ## Configuration
 
 The tool can be configured via the following environment variables:
 
-| Environment variable  | Mandatory? | Description                                                                    |
-|-----------------------|------------|--------------------------------------------------------------------------------|
-| DOMINO_BASE_URL       | Yes        | URL of Domino instance to be controlled, e.g. http://localhost:8080/domino     |
-| DOMINO_CLI_USERNAME   | No         | Optional predefined username for accessing Domino                              |
-| DOMINO_CLI_PASSWORD   | No         | Optional predefined password for accessing Domino                              |
-| DOMINO_CLI_DEBUG_MODE | No         | Optional debug switch. Currently its only effect is echoing the parsed command |
+| Environment variable       | Mandatory?    | Description                                                                                   |
+|----------------------------|---------------|-----------------------------------------------------------------------------------------------|
+| DOMINO_BASE_URL            | Yes           | URL of Domino instance to be controlled, e.g. http://localhost:8080/domino                    |
+| DOMINO_CLI_USERNAME        | No            | Optional predefined username for accessing Domino                                             |
+| DOMINO_CLI_PASSWORD        | No            | Optional predefined password for accessing Domino                                             |
+| DOMINO_CLI_DEBUG_MODE      | No            | Optional debug switch. Currently its only effect is echoing the parsed command                |
+| DOMINO_DEFAULT_AUTH_MODE   | No            | Changes how Domino CLI acquires the access token for Domino. Defaults to direct mode (legacy) |
+| DOMINO_OAUTH_TOKEN_URL     | In OAuth mode | OAuth 2.0 compliant authorization server address, including the token request endpoint path   |
+| DOMINO_OAUTH_CLIENT_ID     | In OAuth mode | OAuth 2.0 Client ID of Domino CLI                                                             |
+| DOMINO_OAUTH_CLIENT_SECRET | In OAuth mode | OAuth 2.0 Client Secret of Domino CLI                                                         |
+| DOMINO_OAUTH_SCOPE         | In OAuth mode | OAuth 2.0 access token scope                                                                  |                                                                                         
+| DOMINO_OAUTH_AUDIENCE      | No            | OAuth 2.0 audience of Domino                                                                  |
 
 ## Execution
 
@@ -63,7 +69,7 @@ exit
 This command doesn't really need any explanation, it makes the tool quit.
 
 ```
-auth <--encrypt-password|--generate-token|--open-session>
+auth <--encrypt-password|--generate-token|--open-session|--set-mode <direct|oauth>>
 ```
 Authentication command serves three different purposes based on the provided flag.
 * `--encrypt-password`: Provides a utility to hash the provided password with BCrypt.
@@ -74,12 +80,18 @@ Authentication command serves three different purposes based on the provided fla
     stores it in the tool's security context. Opening a session is always needed to access lifecycle commands.
     Opening a session is only needed once every time you start the tool, but the token is stored only in memory,
     so you always need to open a session after starting the tool.
+* `--set-mode <direct|oauth>`: Changes the active authentication mode. Since CLI v1.3.0, it's possible to use an
+    external OAuth 2.0 Authorization Server to acquire access token for Domino. Please note, that both Domino and
+    Domino CLI must be registered clients on the specified authorization server; as well as Domino must be configured
+    to accept the token issued by the configured authorization server. The default auth mode is the legacy one,
+    called "direct". Please make sure to specify the required OAuth parameters before changing the auth mode to "oauth".
+    Also, this feature is only supported in Domino v1.5.0 and above.
     
 Opening a session and generating a token require full authentication, therefore the tool asks for your configured 
-(on Domino side) management account username and password. You can speed up the process by predefining the credentials
-as environment variables (see [Configuration](#configuration) section). Please be warned that by setting the password 
-as an environment variable you cause a potential security vulnerability to your system. Keeping this in mind please
-handle this option with caution!
+(on Domino side) management account username and password (only in direct auth mode). You can speed up the process by 
+predefining the credentials as environment variables (see [Configuration](#configuration) section). Please be warned 
+that by setting the password as an environment variable you cause a potential security vulnerability to your system. 
+Keeping this in mind please handle this option with caution!
 
 ### Lifecycle-management commands
 

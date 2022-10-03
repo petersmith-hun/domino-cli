@@ -50,6 +50,45 @@ class AuthCommandTest(CommandBaseTest):
         self.assertEqual(len(self.authentication_service_mock.mock_calls), 1)
         self.assertEqual(self.authentication_service_mock.open_session.call_count, 1)
 
+    def test_should_execute_command_for_setting_mode_to_direct(self):
+
+        # given
+        command_descriptor: CommandDescriptor = CommandDescriptor("auth --set-mode direct")
+
+        # when
+        self.auth_command.execute_command(command_descriptor)
+
+        # then
+        self.assertEqual(len(self.authentication_service_mock.mock_calls), 1)
+        self.assertEqual(self.authentication_service_mock.set_mode.call_count, 1)
+        self.authentication_service_mock.set_mode.assert_called_with("direct")
+
+    def test_should_execute_command_for_setting_mode_to_oauth(self):
+
+        # given
+        command_descriptor: CommandDescriptor = CommandDescriptor("auth --set-mode oauth")
+
+        # when
+        self.auth_command.execute_command(command_descriptor)
+
+        # then
+        self.assertEqual(len(self.authentication_service_mock.mock_calls), 1)
+        self.assertEqual(self.authentication_service_mock.set_mode.call_count, 1)
+        self.authentication_service_mock.set_mode.assert_called_with("oauth")
+
+    def test_should_execute_command_for_setting_mode_without_mode_value(self):
+
+        # given
+        command_descriptor: CommandDescriptor = CommandDescriptor("auth --set-mode")
+
+        # when
+        self.auth_command.execute_command(command_descriptor)
+
+        # then
+        self.assertEqual(len(self.authentication_service_mock.mock_calls), 1)
+        self.assertEqual(self.authentication_service_mock.set_mode.call_count, 1)
+        self.authentication_service_mock.set_mode.assert_called_with(None)
+
     def test_should_execute_command_show_help_for_invalid_flag(self):
 
         # given

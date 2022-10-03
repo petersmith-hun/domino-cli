@@ -1,6 +1,7 @@
 from __future__ import annotations
-from collections import Callable
+
 from os import path
+from typing import Callable
 
 import yaml
 
