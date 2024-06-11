@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from core.service.wizard.mapping.RegConfigWizardDataMapping import RegConfigWizardDataMapping as Mapping
+from core.service.wizard.mapping.DeploymentConfigWizardDataMapping import DeploymentConfigWizardDataMapping as Mapping
 from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
 
 _SOURCE_TYPE_FILESYSTEM = "FILESYSTEM"
@@ -10,12 +10,12 @@ _EXEC_TYPE_RUNTIME = "RUNTIME"
 _EXEC_TYPE_SERVICE = "SERVICE"
 _EXEC_TYPE_DOCKER_STANDARD = "STANDARD"
 
-_REGISTRATION_ROOT = "domino.registrations.{0}"
+_DEPLOYMENT_ROOT = "domino.deployments.{0}"
 _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER = (lambda value: value == "yes")
 _UPPERCASE_MAPPER = (lambda value: str(value).upper())
 
 
-class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
+class DeploymentConfigWizardResultTransformer(AbstractWizardResultTransformer):
     """
     AbstractWizardResultTransformer implementation for registration config wizard.
     """
@@ -35,7 +35,7 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
         :param source: source dict object
         :return: transformed Domino registration configuration
         """
-        root_node: str = _REGISTRATION_ROOT.format(source[Mapping.REGISTRATION_NAME.get_wizard_field()])
+        root_node: str = _DEPLOYMENT_ROOT.format(source[Mapping.DEPLOYMENT_NAME.get_wizard_field()])
         target_dict: dict = self._define_base_dict(root_node, source)
         exec_type: str = self._read_current_value(Mapping.EXEC_TYPE, root_node, target_dict)
         self._exec_type_parameter_filler_mapping.get(exec_type)(root_node, source, target_dict)
@@ -48,6 +48,7 @@ class RegConfigWizardResultTransformer(AbstractWizardResultTransformer):
 
         target_dict: dict = {}
         self._assign(Mapping.SOURCE_TYPE, root_node, source, target_dict, _UPPERCASE_MAPPER)
+        self._assign(Mapping.TARGET_HOSTS, root_node, source, target_dict)
         self._assign(Mapping.EXEC_TYPE, root_node, source, target_dict, _UPPERCASE_MAPPER)
         self._assign(Mapping.HEALTH_CHECK_ENABLE, root_node, source, target_dict, _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER)
         self._assign(Mapping.INFO_ENABLE, root_node, source, target_dict, _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER)

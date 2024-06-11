@@ -21,10 +21,10 @@ from core.service.DominoService import DominoService
 from core.service.SessionContextHolder import SessionContextHolder
 from core.service.auth.DirectAuthHandler import DirectAuthHandler
 from core.service.auth.OAuthAuthHandler import OAuthAuthHandler
-from core.service.wizard.RegistrationConfigWizard import RegistrationConfigWizard
+from core.service.wizard.DeploymentConfigWizard import DeploymentConfigWizard
 from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultConsoleRenderer
 from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
-from core.service.wizard.transformer.RegConfigWizardResultTransformer import RegConfigWizardResultTransformer
+from core.service.wizard.transformer.DeploymentConfigWizardResultTransformer import DeploymentConfigWizardResultTransformer
 
 
 class ApplicationContext:
@@ -44,10 +44,10 @@ class ApplicationContext:
         # wizards
         _wizard_result_console_renderer = WizardResultConsoleRenderer()
         _wizard_result_file_renderer = WizardResultFileRenderer()
-        _reg_config_wizard_result_transformer = RegConfigWizardResultTransformer()
-        _registration_config_wizard = RegistrationConfigWizard(_reg_config_wizard_result_transformer,
-                                                               _wizard_result_console_renderer,
-                                                               _wizard_result_file_renderer)
+        _reg_config_wizard_result_transformer = DeploymentConfigWizardResultTransformer()
+        _deployment_config_wizard = DeploymentConfigWizard(_reg_config_wizard_result_transformer,
+                                                           _wizard_result_console_renderer,
+                                                           _wizard_result_file_renderer)
 
         # common components
         _session_context_holder = SessionContextHolder()
@@ -61,7 +61,7 @@ class ApplicationContext:
             _oauth_auth_handler
         ])
         _config_wizard_service = ConfigurationWizardService([
-            _registration_config_wizard
+            _deployment_config_wizard
         ])
 
         # commands

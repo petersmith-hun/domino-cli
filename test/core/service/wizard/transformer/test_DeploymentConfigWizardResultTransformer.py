@@ -1,9 +1,13 @@
 import unittest
 
-from core.service.wizard.transformer.RegConfigWizardResultTransformer import RegConfigWizardResultTransformer
+from core.service.wizard.transformer.DeploymentConfigWizardResultTransformer import DeploymentConfigWizardResultTransformer
 
-_REG_CONFIG_EXECUTABLE_RAW: dict = {
-    "reg_name": "app1",
+_DEPLOYMENT_CONFIG_EXECUTABLE_RAW: dict = {
+    "deployment_name": "app1",
+    "target_hosts": [
+        "devlocal",
+        "localhost"
+    ],
     "source_type": "filesystem",
     "exec_type": "executable",
     "src_home": "/home",
@@ -20,14 +24,20 @@ _REG_CONFIG_EXECUTABLE_RAW: dict = {
     "hc_endpoint": "http://localhost:8099/health",
     "info_enable": "no"
 }
-_REG_CONFIG_EXECUTABLE_TRANSFORMED: dict = {
+_DEPLOYMENT_CONFIG_EXECUTABLE_TRANSFORMED: dict = {
     "domino": {
-        "registrations": {
+        "deployments": {
             "app1": {
                 "source": {
                     "type": "FILESYSTEM",
                     "home": "/home",
                     "resource": "app1-exec.jar"
+                },
+                "target": {
+                    "hosts": [
+                        "devlocal",
+                        "localhost"
+                    ]
                 },
                 "execution": {
                     "via": "EXECUTABLE",
@@ -52,8 +62,11 @@ _REG_CONFIG_EXECUTABLE_TRANSFORMED: dict = {
     }
 }
 
-_REG_CONFIG_RUNTIME_RAW: dict = {
-    "reg_name": "app2",
+_DEPLOYMENT_CONFIG_RUNTIME_RAW: dict = {
+    "deployment_name": "app2",
+    "target_hosts": [
+        "localhost"
+    ],
     "source_type": "filesystem",
     "exec_type": "runtime",
     "src_home": "/home",
@@ -71,14 +84,19 @@ _REG_CONFIG_RUNTIME_RAW: dict = {
         "version": "$.build.version"
     }
 }
-_REG_CONFIG_RUNTIME_TRANSFORMED: dict = {
+_DEPLOYMENT_CONFIG_RUNTIME_TRANSFORMED: dict = {
     "domino": {
-        "registrations": {
+        "deployments": {
             "app2": {
                 "source": {
                     "type": "FILESYSTEM",
                     "home": "/home",
                     "resource": "app2-exec.jar"
+                },
+                "target": {
+                    "hosts": [
+                        "localhost"
+                    ]
                 },
                 "execution": {
                     "via": "RUNTIME",
@@ -104,8 +122,11 @@ _REG_CONFIG_RUNTIME_TRANSFORMED: dict = {
     }
 }
 
-_REG_CONFIG_SERVICE_RAW: dict = {
-    "reg_name": "app3",
+_DEPLOYMENT_CONFIG_SERVICE_RAW: dict = {
+    "deployment_name": "app3",
+    "target_hosts": [
+        "localhost"
+    ],
     "source_type": "filesystem",
     "exec_type": "service",
     "src_home": "/home",
@@ -115,14 +136,19 @@ _REG_CONFIG_SERVICE_RAW: dict = {
     "hc_enable": "no",
     "info_enable": "no"
 }
-_REG_CONFIG_SERVICE_TRANSFORMED: dict = {
+_DEPLOYMENT_CONFIG_SERVICE_TRANSFORMED: dict = {
     "domino": {
-        "registrations": {
+        "deployments": {
             "app3": {
                 "source": {
                     "type": "FILESYSTEM",
                     "home": "/home",
                     "resource": "app3-exec.jar"
+                },
+                "target": {
+                    "hosts": [
+                        "localhost"
+                    ]
                 },
                 "execution": {
                     "via": "SERVICE",
@@ -140,8 +166,11 @@ _REG_CONFIG_SERVICE_TRANSFORMED: dict = {
     }
 }
 
-_REG_CONFIG_DOCKER_STANDARD_RAW: dict = {
-    "reg_name": "app4",
+_DEPLOYMENT_CONFIG_DOCKER_STANDARD_RAW: dict = {
+    "deployment_name": "app4",
+    "target_hosts": [
+        "localhost"
+    ],
     "source_type": "docker",
     "exec_type": "standard",
     "src_home": "http://localhost:5000/apps",
@@ -170,14 +199,19 @@ _REG_CONFIG_DOCKER_STANDARD_RAW: dict = {
     "hc_enable": "no",
     "info_enable": "no"
 }
-_REG_CONFIG_DOCKER_STANDARD_TRANSFORMED: dict = {
+_DEPLOYMENT_CONFIG_DOCKER_STANDARD_TRANSFORMED: dict = {
     "domino": {
-        "registrations": {
+        "deployments": {
             "app4": {
                 "source": {
                     "type": "DOCKER",
                     "home": "http://localhost:5000/apps",
                     "resource": "img_app4"
+                },
+                "target": {
+                    "hosts": [
+                        "localhost"
+                    ]
                 },
                 "execution": {
                     "via": "STANDARD",
@@ -217,18 +251,18 @@ _REG_CONFIG_DOCKER_STANDARD_TRANSFORMED: dict = {
 }
 
 
-class RegConfigWizardResultTransformerTest(unittest.TestCase):
+class DeploymentConfigWizardResultTransformerTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.reg_config_wizard_result_transformer: RegConfigWizardResultTransformer = RegConfigWizardResultTransformer()
+        self.deployment_config_wizard_result_transformer: DeploymentConfigWizardResultTransformer = DeploymentConfigWizardResultTransformer()
 
     def test_should_transform(self):
 
-        for (source, expected_target) in RegConfigWizardResultTransformerTest._prepare_parameters():
+        for (source, expected_target) in DeploymentConfigWizardResultTransformerTest._prepare_parameters():
             with self.subTest("answer dictionary transformation", source=source, expected_target=expected_target):
 
                 # when
-                result: dict = self.reg_config_wizard_result_transformer.transform(source)
+                result: dict = self.deployment_config_wizard_result_transformer.transform(source)
 
                 # then
                 self.assertEqual(result, expected_target)
@@ -236,10 +270,10 @@ class RegConfigWizardResultTransformerTest(unittest.TestCase):
     @staticmethod
     def _prepare_parameters():
         return [
-            (_REG_CONFIG_EXECUTABLE_RAW, _REG_CONFIG_EXECUTABLE_TRANSFORMED),
-            (_REG_CONFIG_RUNTIME_RAW, _REG_CONFIG_RUNTIME_TRANSFORMED),
-            (_REG_CONFIG_SERVICE_RAW, _REG_CONFIG_SERVICE_TRANSFORMED),
-            (_REG_CONFIG_DOCKER_STANDARD_RAW, _REG_CONFIG_DOCKER_STANDARD_TRANSFORMED)
+            (_DEPLOYMENT_CONFIG_EXECUTABLE_RAW, _DEPLOYMENT_CONFIG_EXECUTABLE_TRANSFORMED),
+            (_DEPLOYMENT_CONFIG_RUNTIME_RAW, _DEPLOYMENT_CONFIG_RUNTIME_TRANSFORMED),
+            (_DEPLOYMENT_CONFIG_SERVICE_RAW, _DEPLOYMENT_CONFIG_SERVICE_TRANSFORMED),
+            (_DEPLOYMENT_CONFIG_DOCKER_STANDARD_RAW, _DEPLOYMENT_CONFIG_DOCKER_STANDARD_TRANSFORMED)
         ]
 
 
