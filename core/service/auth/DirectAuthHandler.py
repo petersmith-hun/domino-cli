@@ -13,7 +13,7 @@ from core.service.auth.AuthUtils import AuthUtils
 class DirectAuthHandler(AbstractAuthHandler):
     """
     AbstractAuthHandler implementation using the legacy authentication flow of Domino. Request is sent directly to
-    Domino, calling the /claim-token endpoint, therefore. This mode requires Domino to be properly configured
+    Domino, calling the /claim-token endpoint. Therefore, this mode requires Domino to be properly configured
     regarding authentication (having the administrative user set up in Domino's config).
     """
     def __init__(self, domino_client: DominoClient):

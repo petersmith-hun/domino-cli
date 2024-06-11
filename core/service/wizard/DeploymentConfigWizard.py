@@ -1,5 +1,5 @@
 from core.service.wizard.AbstractWizard import AbstractWizard
-from core.service.wizard.mapping.RegConfigWizardDataMapping import RegConfigWizardDataMapping as Mapping
+from core.service.wizard.mapping.DeploymentConfigWizardDataMapping import DeploymentConfigWizardDataMapping as Mapping
 from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultConsoleRenderer
 from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
 from core.service.wizard.step.BaseWizardStep import BaseWizardStep
@@ -8,8 +8,8 @@ from core.service.wizard.step.MultiAnswerWizardStep import MultiAnswerWizardStep
 from core.service.wizard.step.OptionSelectorWizardStep import OptionSelectorWizardStep
 from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
 
-_WIZARD_NAME = "regconfig"
-_WIZARD_DESCRIPTION = "Creates a properly configured Domino application registration"
+_WIZARD_NAME = "deployment"
+_WIZARD_DESCRIPTION = "Creates a properly configured Domino application deployment"
 _AVAILABLE_SOURCE_TYPES = ["filesystem", "docker"]
 _AVAILABLE_EXEC_TYPES = ["executable", "runtime", "service"]
 _AVAILABLE_DOCKER_EXEC_TYPES = ["standard"]
@@ -17,7 +17,7 @@ _AVAILABLE_RESULT_RENDERERS = ["console", "file"]
 _AVAILABLE_RESTART_POLICIES = ["no", "on-failure", "always", "unless-stopped"]
 
 
-class RegistrationConfigWizard(AbstractWizard):
+class DeploymentConfigWizard(AbstractWizard):
     """
     AbstractWizard implementation for creating Domino application registration configurations.
     """
@@ -32,8 +32,9 @@ class RegistrationConfigWizard(AbstractWizard):
     def _init_wizard(self) -> None:
 
         # steps
-        ws_registration_name = BaseWizardStep(Mapping.REGISTRATION_NAME, "Specify an identifier for the registration (e.g. abbreviation of app)")
+        ws_deployment_name = BaseWizardStep(Mapping.DEPLOYMENT_NAME, "Specify an identifier for the deployment (e.g. abbreviation of app)")
         ws_source_type = OptionSelectorWizardStep(Mapping.SOURCE_TYPE, "Application will be filesystem or Docker based?", _AVAILABLE_SOURCE_TYPES)
+        ws_target_hosts = MultiAnswerWizardStep(Mapping.TARGET_HOSTS, "Hosts to deploy application to (host IDs)")
         ws_exec_type = OptionSelectorWizardStep(Mapping.EXEC_TYPE, "Specify the execution type", _AVAILABLE_EXEC_TYPES)
         ws_exec_type_docker = OptionSelectorWizardStep(Mapping.EXEC_TYPE, "Specify the Docker execution type", _AVAILABLE_DOCKER_EXEC_TYPES)
         ws_home = BaseWizardStep(Mapping.SOURCE_HOME, "What will be the home directory of the application?")
@@ -67,7 +68,8 @@ class RegistrationConfigWizard(AbstractWizard):
         info_enable_field = Mapping.INFO_ENABLE.get_wizard_field()
 
         # transitions
-        ws_registration_name.add_transition(ws_source_type)
+        ws_deployment_name.add_transition(ws_target_hosts)
+        ws_target_hosts.add_transition(ws_source_type)
         ws_source_type.add_transition(ws_exec_type, lambda context: context[source_type_field] == _AVAILABLE_SOURCE_TYPES[0])
         ws_source_type.add_transition(ws_exec_type_docker, lambda context: context[source_type_field] == _AVAILABLE_SOURCE_TYPES[1])
         ws_exec_type.add_transition(ws_home)
@@ -104,7 +106,7 @@ class RegistrationConfigWizard(AbstractWizard):
         ws_info_endpoint.add_transition(ws_info_field_mapping)
         ws_info_field_mapping.add_transition(ws_result_rendering)
 
-        self.set_entry_point(ws_registration_name)
+        self.set_entry_point(ws_deployment_name)
 
     def _handle_result(self, result: dict) -> None:
 
@@ -112,4 +114,4 @@ class RegistrationConfigWizard(AbstractWizard):
         if result[Mapping.RESULT_RENDERING.get_wizard_field()] == _AVAILABLE_RESULT_RENDERERS[0]:
             self._wizard_result_console_renderer.render(transformed_result)
         else:
-            self._wizard_result_file_renderer.render(transformed_result, lambda res: res["domino"]["registrations"])
+            self._wizard_result_file_renderer.render(transformed_result, lambda res: res["domino"]["deployments"])

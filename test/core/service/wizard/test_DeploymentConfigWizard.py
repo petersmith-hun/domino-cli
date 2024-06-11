@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from core.service.wizard.RegistrationConfigWizard import RegistrationConfigWizard
+from core.service.wizard.DeploymentConfigWizard import DeploymentConfigWizard
 from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultConsoleRenderer
 from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
 from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
@@ -10,6 +10,9 @@ _TRANSFORMED_VALUE = {"transformed": {}}
 
 _EXECUTABLE_TYPE_RAW_RESPONSES = [
     "app1",
+    "devlocal",
+    "localhost",
+    "",
     "1",
     "1",
     "/home",
@@ -27,7 +30,11 @@ _EXECUTABLE_TYPE_RAW_RESPONSES = [
     "1"
 ]
 _EXECUTABLE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
-    "reg_name": "app1",
+    "deployment_name": "app1",
+    "target_hosts": [
+        "devlocal",
+        "localhost"
+    ],
     "source_type": "filesystem",
     "exec_type": "executable",
     "src_home": "/home",
@@ -48,6 +55,8 @@ _EXECUTABLE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
 
 _RUNTIME_TYPE_RAW_RESPONSES = [
     "app2",
+    "localhost",
+    "",
     "1",
     "2",
     "/home",
@@ -61,8 +70,11 @@ _RUNTIME_TYPE_RAW_RESPONSES = [
     "1"
 ]
 _RUNTIME_TYPE_FORMATTED_RESPONSE_DICT: dict = {
-    "reg_name": "app2",
+    "deployment_name": "app2",
     "source_type": "filesystem",
+    "target_hosts": [
+        "localhost"
+    ],
     "exec_type": "runtime",
     "src_home": "/home",
     "src_bin_name": "app2-exec.jar",
@@ -78,6 +90,8 @@ _RUNTIME_TYPE_FORMATTED_RESPONSE_DICT: dict = {
 
 _SERVICE_TYPE_RAW_RESPONSES = [
     "app3",
+    "localhost",
+    "",
     "1",
     "3",
     "/home",
@@ -89,8 +103,11 @@ _SERVICE_TYPE_RAW_RESPONSES = [
     "2"
 ]
 _SERVICE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
-    "reg_name": "app3",
+    "deployment_name": "app3",
     "source_type": "filesystem",
+    "target_hosts": [
+        "localhost"
+    ],
     "exec_type": "service",
     "src_home": "/home",
     "src_bin_name": "app3-exec.jar",
@@ -103,6 +120,8 @@ _SERVICE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
 
 _DOCKER_STANDARD_TYPE_RAW_RESPONSES = [
     "app4",
+    "localhost",
+    "",
     "2",
     "1",
     "http://localhost:5000/apps",
@@ -133,8 +152,11 @@ _DOCKER_STANDARD_TYPE_RAW_RESPONSES = [
     "1"
 ]
 _DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT: dict = {
-    "reg_name": "app4",
+    "deployment_name": "app4",
     "source_type": "docker",
+    "target_hosts": [
+        "localhost"
+    ],
     "exec_type": "standard",
     "src_home": "http://localhost:5000/apps",
     "src_bin_name": "img_app4",
@@ -170,7 +192,7 @@ _DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT: dict = {
 }
 
 
-class RegistrationConfigWizardTest(unittest.TestCase):
+class DeploymentConfigWizardTest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.wizard_result_transformer_mock: AbstractWizardResultTransformer = mock.create_autospec(AbstractWizardResultTransformer)
@@ -179,7 +201,7 @@ class RegistrationConfigWizardTest(unittest.TestCase):
 
         self.wizard_result_transformer_mock.transform.return_value = _TRANSFORMED_VALUE
 
-        self.registration_config_wizard: RegistrationConfigWizard = RegistrationConfigWizard(
+        self.registration_config_wizard: DeploymentConfigWizard = DeploymentConfigWizard(
             self.wizard_result_transformer_mock,
             self.wizard_result_console_renderer_mock,
             self.wizard_result_file_renderer_mock)
@@ -212,7 +234,7 @@ class RegistrationConfigWizardTest(unittest.TestCase):
 
         # then
         file_renderer_call_args = self.wizard_result_file_renderer_mock.render.call_args.args
-        merge_lambda_result = file_renderer_call_args[1]({"domino": {"registrations": {"key": "value"}}})
+        merge_lambda_result = file_renderer_call_args[1]({"domino": {"deployments": {"key": "value"}}})
 
         self.wizard_result_transformer_mock.transform.assert_called_once_with(_SERVICE_TYPE_FORMATTED_RESPONSE_DICT)
         self.assertEqual(file_renderer_call_args[0], _TRANSFORMED_VALUE)

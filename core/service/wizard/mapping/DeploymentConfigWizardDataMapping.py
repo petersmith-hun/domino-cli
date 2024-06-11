@@ -1,12 +1,13 @@
 from core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 
 
-class RegConfigWizardDataMapping(WizardDataMappingBaseEnum):
+class DeploymentConfigWizardDataMapping(WizardDataMappingBaseEnum):
     """
     Field mappings between raw wizard response data and target data dictionaries.
     """
-    REGISTRATION_NAME = ("reg_name", "$root")
+    DEPLOYMENT_NAME = ("deployment_name", "$root")
     SOURCE_TYPE = ("source_type", "$root.source.type")
+    TARGET_HOSTS = ("target_hosts", "$root.target.hosts")
     EXEC_TYPE = ("exec_type", "$root.execution.via")
     SOURCE_HOME = ("src_home", "$root.source.home")
     BINARY_NAME = ("src_bin_name", "$root.source.resource")

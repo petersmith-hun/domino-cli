@@ -131,14 +131,14 @@ Domino CLI also provides configuration wizards which help to properly create Dom
 Currently one configuration wizard is supported by the tool, but the list of wizards will be extended soon.
 
 ```
-wizard regconfig
+wizard deployment
 ```
-Starts wizard that helps creating a Domino application registration. Usage notes:
+Starts wizard that helps to create a Domino application deployment configuration. Usage notes:
 * Fixed choice steps are indicated by displaying the choices with a number in square brackets at the beginning
 of the line. Type the desired number and hit enter to select your choice.
 * Some steps may expect multiple responses. Hit enter after each of your answers. To finalize the step hit enter
 on an empty line.
 * Resulted configuration can be either displayed on console or written to file. If you chose to show the result
-on console, simply copy the displayed config into your existing Domino registration config file. If you want to 
-write the results to file, you need to define the file path when prompted. Having an already existing registration
+on console, simply copy the displayed config into your existing Domino deployment config file. If you want to 
+write the results to file, you need to define the file path when prompted. Having an already existing deployment
 configuration file will cause the tool to merge the newly created config with the existing file.
