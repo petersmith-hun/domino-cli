@@ -6,6 +6,7 @@ Known commands:
     --encrypt-password: encrypts the given password for usage in Domino
     --generate-token: authenticates with Domino and prints the generated token
     --open-session: authenticates with Domino and stores the token in the session context for further usage
+    --set-mode <oauth|direct>: switches authentication mode (oauth or direct)
  - start <app>: commands Domino to start the given app
  - stop <app>: commands Domino to stop the given app
  - restart <app>: commands Domino to restart the given app
