@@ -34,7 +34,7 @@ class OptionSelectorWizardStepTest(unittest.TestCase):
         # then
         self.assertEqual(result, options)
 
-    @mock.patch("builtins.input", return_value=2)
+    @mock.patch("builtins.input", return_value="2")
     def test_should_read_answer_with_proper_value(self, input_mock):
 
         # given
@@ -47,7 +47,7 @@ class OptionSelectorWizardStepTest(unittest.TestCase):
         # then
         self.assertEqual(response_dict[_WIZARD_STEP_FIELD], "no")
 
-    @mock.patch("builtins.input", side_effect=[5, -1, 0, "test", 1])
+    @mock.patch("builtins.input", side_effect=["5", "-1", "0", "test", "1"])
     def test_should_read_answer_with_multiple_consequent_mistakes(self, input_mock):
 
         # given

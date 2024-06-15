@@ -1,5 +1,5 @@
 from core.service.wizard.AbstractWizard import AbstractWizard
-from core.service.wizard.mapping.DeploymentConfigWizardDataMapping import DeploymentConfigWizardDataMapping as Mapping
+from core.service.wizard.mapping.DeploymentConfigWizardDataMapping import Mapping
 from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultConsoleRenderer
 from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
 from core.service.wizard.step.BaseWizardStep import BaseWizardStep
@@ -19,7 +19,7 @@ _AVAILABLE_RESTART_POLICIES = ["no", "on-failure", "always", "unless-stopped"]
 
 class DeploymentConfigWizard(AbstractWizard):
     """
-    AbstractWizard implementation for creating Domino application registration configurations.
+    AbstractWizard implementation for creating Domino application deployment configurations.
     """
     def __init__(self, wizard_result_transformer: AbstractWizardResultTransformer,
                  wizard_result_console_renderer: WizardResultConsoleRenderer,
