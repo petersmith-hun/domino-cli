@@ -23,11 +23,14 @@ from core.service.auth.DirectAuthHandler import DirectAuthHandler
 from core.service.auth.OAuthAuthHandler import OAuthAuthHandler
 from core.service.wizard.CoordinatorConfigWizard import CoordinatorConfigWizard
 from core.service.wizard.DeploymentConfigWizard import DeploymentConfigWizard
+from core.service.wizard.DockerAgentConfigWizard import DockerAgentConfigWizard
 from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultConsoleRenderer
 from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
 from core.service.wizard.transformer.CoordinatorConfigWizardResultTransformer import \
     CoordinatorConfigWizardResultTransformer
 from core.service.wizard.transformer.DeploymentConfigWizardResultTransformer import DeploymentConfigWizardResultTransformer
+from core.service.wizard.transformer.DockerAgentConfigWizardResultTransformer import \
+    DockerAgentConfigWizardResultTransformer
 
 
 class ApplicationContext:
@@ -49,12 +52,16 @@ class ApplicationContext:
         _wizard_result_file_renderer = WizardResultFileRenderer()
         _deployment_config_wizard_result_transformer = DeploymentConfigWizardResultTransformer()
         _coordinator_config_wizard_result_transformer = CoordinatorConfigWizardResultTransformer()
+        _docker_agent_config_wizard_result_transformer = DockerAgentConfigWizardResultTransformer()
         _deployment_config_wizard = DeploymentConfigWizard(_deployment_config_wizard_result_transformer,
                                                            _wizard_result_console_renderer,
                                                            _wizard_result_file_renderer)
         _coordinator_config_wizard = CoordinatorConfigWizard(_coordinator_config_wizard_result_transformer,
                                                              _wizard_result_console_renderer,
                                                              _wizard_result_file_renderer)
+        _docker_agent_config_wizard = DockerAgentConfigWizard(_docker_agent_config_wizard_result_transformer,
+                                                              _wizard_result_console_renderer,
+                                                              _wizard_result_file_renderer)
 
         # common components
         _session_context_holder = SessionContextHolder()
@@ -69,7 +76,8 @@ class ApplicationContext:
         ])
         _config_wizard_service = ConfigurationWizardService([
             _deployment_config_wizard,
-            _coordinator_config_wizard
+            _coordinator_config_wizard,
+            _docker_agent_config_wizard
         ])
 
         # commands

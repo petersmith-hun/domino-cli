@@ -142,3 +142,12 @@ on an empty line.
 on console, simply copy the displayed config into your existing Domino deployment config file. If you want to 
 write the results to file, you need to define the file path when prompted. Having an already existing deployment
 configuration file will cause the tool to merge the newly created config with the existing file.
+
+```
+wizard coordinator
+```
+Starts wizard that helps to create a Domino Platform Coordinator configuration.
+```
+wizard docker-agent
+```
+Starts wizard that helps to create a Domino Platform Docker Agent configuration.
