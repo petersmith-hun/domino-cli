@@ -24,7 +24,7 @@ _EXECUTABLE_TYPE_RAW_RESPONSES = [
     "1",
     "3 seconds",
     "2 seconds",
-    2,
+    "2",
     "http://localhost:8099/health",
     "2",
     "1"
@@ -47,7 +47,7 @@ _EXECUTABLE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "hc_enable": "yes",
     "hc_delay": "3 seconds",
     "hc_timeout": "2 seconds",
-    "hc_max_attempts": 2,
+    "hc_max_attempts": "2",
     "hc_endpoint": "http://localhost:8099/health",
     "info_enable": "no",
     "result_rendering": "console"
@@ -201,7 +201,7 @@ class DeploymentConfigWizardTest(unittest.TestCase):
 
         self.wizard_result_transformer_mock.transform.return_value = _TRANSFORMED_VALUE
 
-        self.registration_config_wizard: DeploymentConfigWizard = DeploymentConfigWizard(
+        self.deployment_config_wizard: DeploymentConfigWizard = DeploymentConfigWizard(
             self.wizard_result_transformer_mock,
             self.wizard_result_console_renderer_mock,
             self.wizard_result_file_renderer_mock)
@@ -210,7 +210,7 @@ class DeploymentConfigWizardTest(unittest.TestCase):
     def test_should_run_wizard_for_executable_type_and_console_rendering(self, input_mock):
 
         # when
-        self.registration_config_wizard.run()
+        self.deployment_config_wizard.run()
 
         # then
         self.wizard_result_transformer_mock.transform.assert_called_once_with(_EXECUTABLE_TYPE_FORMATTED_RESPONSE_DICT)
@@ -220,7 +220,7 @@ class DeploymentConfigWizardTest(unittest.TestCase):
     def test_should_run_wizard_for_runtime_type_and_console_rendering(self, input_mock):
 
         # when
-        self.registration_config_wizard.run()
+        self.deployment_config_wizard.run()
 
         # then
         self.wizard_result_transformer_mock.transform.assert_called_once_with(_RUNTIME_TYPE_FORMATTED_RESPONSE_DICT)
@@ -230,7 +230,7 @@ class DeploymentConfigWizardTest(unittest.TestCase):
     def test_should_run_wizard_for_service_type_and_file_rendering(self, input_mock):
 
         # when
-        self.registration_config_wizard.run()
+        self.deployment_config_wizard.run()
 
         # then
         file_renderer_call_args = self.wizard_result_file_renderer_mock.render.call_args.args
@@ -244,7 +244,7 @@ class DeploymentConfigWizardTest(unittest.TestCase):
     def test_should_run_wizard_for_docker_standard_type_and_console_rendering(self, input_mock):
 
         # when
-        self.registration_config_wizard.run()
+        self.deployment_config_wizard.run()
 
         # then
         self.wizard_result_transformer_mock.transform.assert_called_once_with(_DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT)

@@ -8,10 +8,13 @@ class BaseWizardStep(WizardStep):
     """
     Base WizardStep implementation providing common functionality of wizard steps.
     """
-    def __init__(self, step_id: WizardDataMappingBaseEnum, question: str):
+    def __init__(self, step_id: WizardDataMappingBaseEnum, question: str, default_answer: str = None):
         self._step_id: str = step_id.get_wizard_field()
-        self._question: str = question
         self._transitions: List[WizardStepTransition] = []
+        self._default_answer: str = default_answer
+        self._question: str = "{0} [default: {1}]".format(question, default_answer) \
+            if default_answer is not None \
+            else question
 
     def get_step_id(self) -> str:
         """
@@ -35,7 +38,10 @@ class BaseWizardStep(WizardStep):
         """
         See documentation of WizardStep.
         """
-        result[self.get_step_id()] = input()
+        answer: str = input()
+        result[self.get_step_id()] = self._default_answer \
+            if len(answer) == 0 \
+            else answer
 
     def __repr__(self):
         return self._question

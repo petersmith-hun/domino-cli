@@ -20,7 +20,7 @@ _DEPLOYMENT_CONFIG_EXECUTABLE_RAW: dict = {
     "hc_enable": "yes",
     "hc_delay": "3 seconds",
     "hc_timeout": "2 seconds",
-    "hc_max_attempts": 2,
+    "hc_max_attempts": "2",
     "hc_endpoint": "http://localhost:8099/health",
     "info_enable": "no"
 }

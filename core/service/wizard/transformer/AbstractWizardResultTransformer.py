@@ -22,7 +22,7 @@ class AbstractWizardResultTransformer(object, metaclass=ABCMeta):
         """
         pass
 
-    def _assign(self, mapping: WizardDataMappingBaseEnum, root_node: str, source: dict, target_dict: dict, mapper: Callable[[str], any] = lambda value: value) -> None:
+    def _assign(self, mapping: WizardDataMappingBaseEnum, root_node: str, source: dict, target_dict: dict) -> None:
         """
         Transforms a single value by doing the following steps:
          - Reads up the raw value from the source dict object using the specified field mapping.
@@ -33,10 +33,9 @@ class AbstractWizardResultTransformer(object, metaclass=ABCMeta):
         :param root_node: target dict object root node name (search starts from this node)
         :param source: source dict object
         :param target_dict: target dict object
-        :param mapper: value mapper function
         """
         key, node = self._node_search(mapping, root_node, target_dict)
-        node[key] = self._safe_read(source, mapping.get_wizard_field(), mapper)
+        node[key] = self._safe_read(source, mapping.get_wizard_field(), mapping.get_mapper())
 
     def _read_current_value(self, mapping: WizardDataMappingBaseEnum, root_node: str, target_dict: dict) -> any:
         """
@@ -62,7 +61,7 @@ class AbstractWizardResultTransformer(object, metaclass=ABCMeta):
         :param mapping: WizardDataMappingBaseEnum object holding the field mapping information
         :param root_node: target dict object root node name (search starts from this node)
         :param target_dict: target dict object
-        :return: extracted leaf key and it's parent node as tuple
+        :return: extracted leaf key, and it's parent node as tuple
         """
         keys = mapping.get_registration_field_reference(root_node).split(".")
         max_depth: int = len(keys) - 1
@@ -76,7 +75,7 @@ class AbstractWizardResultTransformer(object, metaclass=ABCMeta):
          - Extracts the key for the current level.
          - If the max depth is already reached based on the specified mapping, returns with the current node and key.
            With the returned key and node, data can also be read and written on this level.
-           Otherwise searching needs to go deeper:
+           Otherwise, searching needs to go deeper:
          - First, it checks whether the currently extracted key exists on the current level of the dictionary.
            If not, initializes am empty node (dict object) on this level.
          - Then the logic enters this node and increments the depth level, and calls itself.

@@ -7,8 +7,7 @@ from core.domain.SessionContext import SessionContext
 from core.service.SessionContextHolder import SessionContextHolder
 from core.service.auth.AbstractAuthHandler import AbstractAuthHandler
 from core.service.auth.AuthUtils import AuthUtils
-
-_PASSWORD_ENCODING = "utf8"
+from core.service.utility.BCryptUtil import encrypt
 
 
 class AuthenticationService:
@@ -27,9 +26,7 @@ class AuthenticationService:
         """
         Utility to encrypt a password with BCrypt for usage in Domino (as service user password).
         """
-        plain_password: bytes = AuthUtils.input_password().encode(_PASSWORD_ENCODING)
-        encrypted_password_as_byte_array: bytes = bcrypt.hashpw(plain_password, bcrypt.gensalt())
-        encrypted_password: str = encrypted_password_as_byte_array.decode(_PASSWORD_ENCODING)
+        encrypted_password: str = encrypt(AuthUtils.input_password())
 
         print("Encrypted password: {0}".format(encrypted_password))
 
