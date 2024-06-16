@@ -151,3 +151,7 @@ Starts wizard that helps to create a Domino Platform Coordinator configuration.
 wizard docker-agent
 ```
 Starts wizard that helps to create a Domino Platform Docker Agent configuration.
+```
+wizard bin-exec-agent
+```
+Starts wizard that helps to create a Domino Platform Binary Executable Agent configuration.

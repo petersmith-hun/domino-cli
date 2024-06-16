@@ -21,11 +21,14 @@ from core.service.DominoService import DominoService
 from core.service.SessionContextHolder import SessionContextHolder
 from core.service.auth.DirectAuthHandler import DirectAuthHandler
 from core.service.auth.OAuthAuthHandler import OAuthAuthHandler
+from core.service.wizard.BinaryExecutableAgentConfigWizard import BinaryExecutableAgentConfigWizard
 from core.service.wizard.CoordinatorConfigWizard import CoordinatorConfigWizard
 from core.service.wizard.DeploymentConfigWizard import DeploymentConfigWizard
 from core.service.wizard.DockerAgentConfigWizard import DockerAgentConfigWizard
 from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultConsoleRenderer
 from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
+from core.service.wizard.transformer.BinaryExecutableAgentConfigWizardResultTransformer import \
+    BinaryExecutableAgentConfigWizardResultTransformer
 from core.service.wizard.transformer.CoordinatorConfigWizardResultTransformer import \
     CoordinatorConfigWizardResultTransformer
 from core.service.wizard.transformer.DeploymentConfigWizardResultTransformer import DeploymentConfigWizardResultTransformer
@@ -53,6 +56,7 @@ class ApplicationContext:
         _deployment_config_wizard_result_transformer = DeploymentConfigWizardResultTransformer()
         _coordinator_config_wizard_result_transformer = CoordinatorConfigWizardResultTransformer()
         _docker_agent_config_wizard_result_transformer = DockerAgentConfigWizardResultTransformer()
+        _bin_exec_agent_config_wizard_result_transformer = BinaryExecutableAgentConfigWizardResultTransformer()
         _deployment_config_wizard = DeploymentConfigWizard(_deployment_config_wizard_result_transformer,
                                                            _wizard_result_console_renderer,
                                                            _wizard_result_file_renderer)
@@ -62,6 +66,9 @@ class ApplicationContext:
         _docker_agent_config_wizard = DockerAgentConfigWizard(_docker_agent_config_wizard_result_transformer,
                                                               _wizard_result_console_renderer,
                                                               _wizard_result_file_renderer)
+        _bin_exec_agent_config_wizard = BinaryExecutableAgentConfigWizard(_bin_exec_agent_config_wizard_result_transformer,
+                                                                          _wizard_result_console_renderer,
+                                                                          _wizard_result_file_renderer)
 
         # common components
         _session_context_holder = SessionContextHolder()
@@ -77,7 +84,8 @@ class ApplicationContext:
         _config_wizard_service = ConfigurationWizardService([
             _deployment_config_wizard,
             _coordinator_config_wizard,
-            _docker_agent_config_wizard
+            _docker_agent_config_wizard,
+            _bin_exec_agent_config_wizard
         ])
 
         # commands

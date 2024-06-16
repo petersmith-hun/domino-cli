@@ -1,5 +1,5 @@
+from core.service.wizard.mapping.CommonAgentConfigWizardDataMapping import CommonMappingGroups, CommonMapping
 from core.service.wizard.mapping.DockerAgentConfigWizardDataMapping import Mapping, MappingGroups
-
 from core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
 
 _ROOT = "domino"
@@ -24,6 +24,7 @@ class DockerAgentConfigWizardResultTransformer(AbstractWizardResultTransformer):
         return target_dict
 
     def _define_base_dict(self, source: dict, target_dict: dict) -> None:
+        [self._assign(mapping, _ROOT, source, target_dict) for mapping in CommonMapping.get_mappings_by_group(CommonMappingGroups.BASE)]
         [self._assign(mapping, _ROOT, source, target_dict) for mapping in Mapping.get_mappings_by_group(MappingGroups.BASE)]
 
     def _add_conditional_server_configuration(self, source: dict, target_dict: dict) -> None:

@@ -13,7 +13,7 @@ class MappingGroups(Enum):
 
 class Mapping(WizardDataMappingBaseEnum):
     """
-    Field mappings between raw wizard response data and target data dictionaries.
+    Field mappings between raw wizard response data and target data dictionaries for Coordinator configuration.
     """
     SERVER_CONTEXT_PATH = (MappingGroups.BASE, "server_context_path", "$root.server.context-path")
     SERVER_HOST = (MappingGroups.BASE, "server_host", "$root.server.host")
