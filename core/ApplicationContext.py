@@ -25,13 +25,20 @@ from core.service.wizard.BinaryExecutableAgentConfigWizard import BinaryExecutab
 from core.service.wizard.CoordinatorConfigWizard import CoordinatorConfigWizard
 from core.service.wizard.DeploymentConfigWizard import DeploymentConfigWizard
 from core.service.wizard.DockerAgentConfigWizard import DockerAgentConfigWizard
+from core.service.wizard.InstallerWizard import InstallerWizard
+from core.service.wizard.installer.BinaryExecutablePlatformComponentInstaller import \
+    BinaryExecutablePlatformComponentInstaller
+from core.service.wizard.installer.DockerPlatformComponentInstaller import DockerPlatformComponentInstaller
+from core.service.wizard.installer.DockerVersionResolver import DockerVersionResolver
+from core.service.wizard.installer.GitHubReleaseVersionResolver import GitHubReleaseVersionResolver
 from core.service.wizard.render.WizardResultConsoleRenderer import WizardResultConsoleRenderer
 from core.service.wizard.render.WizardResultFileRenderer import WizardResultFileRenderer
 from core.service.wizard.transformer.BinaryExecutableAgentConfigWizardResultTransformer import \
     BinaryExecutableAgentConfigWizardResultTransformer
 from core.service.wizard.transformer.CoordinatorConfigWizardResultTransformer import \
     CoordinatorConfigWizardResultTransformer
-from core.service.wizard.transformer.DeploymentConfigWizardResultTransformer import DeploymentConfigWizardResultTransformer
+from core.service.wizard.transformer.DeploymentConfigWizardResultTransformer import \
+    DeploymentConfigWizardResultTransformer
 from core.service.wizard.transformer.DockerAgentConfigWizardResultTransformer import \
     DockerAgentConfigWizardResultTransformer
 
@@ -70,6 +77,13 @@ class ApplicationContext:
                                                                           _wizard_result_console_renderer,
                                                                           _wizard_result_file_renderer)
 
+        # installer
+        _docker_version_resolver = DockerVersionResolver()
+        _github_release_version_resolver = GitHubReleaseVersionResolver()
+        _docker_platform_component_installer = DockerPlatformComponentInstaller(_docker_version_resolver)
+        _bin_exec_platform_component_installer = BinaryExecutablePlatformComponentInstaller(_github_release_version_resolver)
+        _installer_wizard = InstallerWizard(_docker_platform_component_installer, _bin_exec_platform_component_installer)
+
         # common components
         _session_context_holder = SessionContextHolder()
         _domino_client = DominoClient(_domino_base_url, _session_context_holder)
@@ -85,7 +99,8 @@ class ApplicationContext:
             _deployment_config_wizard,
             _coordinator_config_wizard,
             _docker_agent_config_wizard,
-            _bin_exec_agent_config_wizard
+            _bin_exec_agent_config_wizard,
+            _installer_wizard
         ])
 
         # commands

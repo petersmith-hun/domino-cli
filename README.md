@@ -155,3 +155,10 @@ Starts wizard that helps to create a Domino Platform Docker Agent configuration.
 wizard bin-exec-agent
 ```
 Starts wizard that helps to create a Domino Platform Binary Executable Agent configuration.
+```
+wizard installer
+```
+Starts wizard that helps to install the currently available Domino Platform components (Domino Coordinator, Domino 
+Docker Agent, and Domino Binary Executable Agent). The first two are installed as Docker containers, while the last
+one is installed as a Systemd service. Please note, that because of this, Domino Binary Executable Agent installer 
+supports Linux OS only (tested on Ubuntu).
