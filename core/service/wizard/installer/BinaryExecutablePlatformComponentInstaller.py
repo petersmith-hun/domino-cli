@@ -7,8 +7,7 @@ from core.service.wizard.mapping.InstallerWizardDataMapping import Mapping
 from installer_config import DominoComponent
 
 
-_systemd_descriptor_template: str = """
-[Unit]
+_systemd_descriptor_template: str = """[Unit]
 Description=Domino Platform Binary Executable Agent
 
 [Service]

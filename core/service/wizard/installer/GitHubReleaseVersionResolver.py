@@ -16,10 +16,21 @@ class GitHubReleaseVersionResolver(VersionResolver):
 
         available_releases = requests.get(installer_config.github_release_version_source)
 
-        release_name = ArrayStream(available_releases.json()) \
+        latest_release_name = ArrayStream(available_releases.json()) \
             .filter(lambda release: str(release["tag_name"]).startswith(component.value)) \
             .filter(lambda release: str(release["tag_name"]).endswith(".release")) \
             .sort(lambda release: release["created_at"]) \
-            .last()["tag_name"]
+            .last()
 
-        return re.search("^.*-v([0-9]+\.[0-9]+\.[0-9]+-[0-9]+)\.release$", release_name).group(1)
+        return "" \
+            if latest_release_name is None \
+            else self._extract_version(latest_release_name)
+
+    @staticmethod
+    def _extract_version(release: dict) -> str:
+
+        match = re.search("^.*-v([0-9]+\.[0-9]+\.[0-9]+-[0-9]+)\.release$", release["tag_name"])
+
+        return "" \
+            if match is None \
+            else match.group(1)

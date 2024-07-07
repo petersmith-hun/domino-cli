@@ -33,6 +33,8 @@ class ArrayStream:
     def last(self) -> any:
         """
         Closes the wrapper and returns the last item of the wrapped array.
-        :return: last item of the wrapped array
+        :return: last item of the wrapped array or None is array is empty
         """
-        return self._array.pop()
+        return None \
+            if len(self._array) == 0 \
+            else self._array.pop()

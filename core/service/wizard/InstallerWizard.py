@@ -28,7 +28,7 @@ class InstallerWizard(AbstractWizard):
         ws_container_name_docker_agent = BaseWizardStep(Mapping.DOCKER_CONTAINER_NAME, "Specify name of the container", "domino_docker_agent")
         ws_config_filename_coordinator = BaseWizardStep(Mapping.CONFIGURATION_FILENAME, "Specify configuration filename without path and extension", "coordinator_production")
         ws_config_filename_docker_agent = BaseWizardStep(Mapping.CONFIGURATION_FILENAME, "Specify configuration filename without path and extension", "docker_agent_production")
-        ws_config_filename_bin_exec_agent = BaseWizardStep(Mapping.CONFIGURATION_FILENAME, "Specify configuration filename without path and extension", "docker_agent_production")
+        ws_config_filename_bin_exec_agent = BaseWizardStep(Mapping.CONFIGURATION_FILENAME, "Specify configuration filename without path and extension", "binary_executable_agent_production")
         ws_deployments_filename = BaseWizardStep(Mapping.DEPLOYMENTS_FILENAME, "Specify deployments configuration filename without path and extension", "deployments_production")
         ws_target_binary_location = BaseWizardStep(Mapping.TARGET_BINARY_LOCATION, "Specify binary target location on host (as absolute path)")
         ws_config_location = BaseWizardStep(Mapping.CONFIGURATION_FILE_LOCATION, "Specify configuration location on host (as absolute path)")

@@ -14,7 +14,11 @@ class DockerVersionResolver(VersionResolver):
         component_tags_path = installer_config.docker_version_source.replace("{component}", component.value)
         available_tags = requests.get(component_tags_path)
 
-        return ArrayStream(available_tags.json()["results"]) \
+        latest_exact_tag = ArrayStream(available_tags.json()["results"]) \
             .filter(lambda tag: tag["name"] != "latest") \
             .sort(lambda tag: tag["last_updated"]) \
-            .last()["name"]
+            .last()
+
+        return "" \
+            if latest_exact_tag is None \
+            else latest_exact_tag["name"]
