@@ -1,12 +1,14 @@
 # Domino CLI
 
 Domino CLI is a command line interface tool written in Python for 
-[Domino deployment orchestration application](https://github.com/petersmith-hun/domino-deployment-orchestration).
-Its purpose is to provide a convenient way of controlling Domino via its REST interface.
+[Domino Platform deployment orchestration system](https://github.com/petersmith-hun/domino-platform).
+Its purpose is to provide a convenient way of controlling the Domino Platform Coordinator via its REST interface. It can 
+also generate configuration files for each Domino Platform components, as well as install those.
 
 ## Requirements
 
-* Domino CLI requires Python 3.x for execution (tested on Python 3.7, 3.8 and 3.10).
+* Domino CLI requires Python 3.x for execution (tested on Python 3.7, 3.8, 3.10 and 3.12).
+* Pip (Python package installer) is required for installation.
 * It is executable both on Windows and Linux systems.
 
 ## Configuration
@@ -26,17 +28,33 @@ The tool can be configured via the following environment variables:
 | DOMINO_OAUTH_SCOPE         | In OAuth mode | OAuth 2.0 access token scope                                                                  |                                                                                         
 | DOMINO_OAUTH_AUDIENCE      | No            | OAuth 2.0 audience of Domino                                                                  |
 
+## Installation
+
+Domino CLI can be installed via `pip` and then it can be executed as a standalone CLI tool. In order to install,
+execute the following command in the terminal:
+
+* On Windows:
+    ```shell
+    py -m pip install domino-cli
+    # or
+    pip install domino-cli
+    ```
+* On Linux:
+    ```shell
+    python3 -m pip install domino-cli
+    ```
+
 ## Execution
 
 Domino CLI can be executed from any terminal with Python. First the `DOMINO_BASE_URL` parameter must be defined.
 To do this, execute the following command in the terminal:
 
 * On Windows:
-    ```
+    ```shell
     set DOMINO_BASE_URL=<your_domino_instance_url>
     ```
 * On Linux:
-    ```
+    ```shell
     export DOMINO_BASE_URL=<your_domino_instance_url>
     ```
 
@@ -44,11 +62,9 @@ Notes:
 * With the same approach you can set the other supported environment variables as well.
 * You may consider setting the environment variables permanently in the supported way of your platform. 
 
-After this step, you can start Domino CLI (assuming you are standing in the tool's root directory):
-```
-python domino_cli.py
-# or
-py -3 domino_cli.py
+After this step, you can start Domino CLI:
+```shell
+domino-cli
 ```
 
 ## Usage

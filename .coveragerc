@@ -1,6 +1,6 @@
 [run]
 source =
-    core
+    domino_cli.core
 omit =
     test/*
     */__init__.py
