@@ -103,7 +103,7 @@ jobs:
             python -m pip install build twine
             repository=$([[ "<< parameters.target-index >>" = "live" ]] && echo pypi || echo testpypi)
             password=$([[ "<< parameters.target-index >>" = "live" ]] && echo ${TWINE_PASSWORD_LIVE} || echo ${TWINE_PASSWORD_TEST})
-            twine upload -u ${TWINE_USERNAME} -p $password -r $repository --skip-existing << pipeline.parameters.workspace_dir >>/dist/*
+            python -m twine upload -u ${TWINE_USERNAME} -p $password -r $repository --skip-existing << pipeline.parameters.workspace_dir >>/dist/*
 
   # Domino CLI - Publish tag (and release) on GitHub for RELEASE versions
   publish-github-release:
