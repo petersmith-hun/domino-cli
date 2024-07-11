@@ -4,7 +4,7 @@ from unittest import mock
 from requests import Response
 
 from domino_cli.core.service.wizard.installer.GitHubReleaseVersionResolver import GitHubReleaseVersionResolver
-from installer_config import DominoComponent
+from domino_cli.installer_config import DominoComponent
 
 
 class GitHubReleaseVersionResolverTest(unittest.TestCase):

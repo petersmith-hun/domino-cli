@@ -6,4 +6,6 @@ pyyaml
 requests
 
 # dev dependencies
+build
 coverage
+twine

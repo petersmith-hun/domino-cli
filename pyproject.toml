@@ -13,9 +13,21 @@ dependencies = [
     "pyyaml",
     "requests",
 ]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Natural Language :: English",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux"
+]
 
 [project.scripts]
 domino-cli = "domino_cli:main"
+
+[project.urls]
+"Maintainer's website" = "https://psprog.hu"
 
 [tool.hatch.version]
 path = "domino_cli/__init__.py"
