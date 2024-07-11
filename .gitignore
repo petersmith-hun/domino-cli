@@ -2,5 +2,6 @@
 *.iml
 .coverage
 *.in
+dist/
 htmlcov/
 out/

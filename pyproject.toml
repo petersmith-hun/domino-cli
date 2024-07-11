@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "domino-cli"
+dynamic = ["version"]
+description = "Domino Platform CLI tool, providing utilities to install, configure and control your Domino Platform insfrastructure"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "bcrypt==4.0.0", # current latest (4.1.3) does not work
+    "pyyaml",
+    "requests",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Natural Language :: English",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux"
+]
+
+[project.scripts]
+domino-cli = "domino_cli:main"
+
+[project.urls]
+"Maintainer's website" = "https://psprog.hu"
+
+[tool.hatch.version]
+path = "domino_cli/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/domino_cli",
+]

@@ -1,0 +1,168 @@
+version: 2.1
+
+orbs:
+  jira: circleci/jira@2.1.0
+  jq: circleci/jq@3.0.0
+  gh: circleci/github-cli@2.3.0
+
+# Common parameters for CircleCI build config
+parameters:
+  distribution_source_dir:
+    type: string
+    default: dist/
+  distribution_archive_prefix:
+    type: string
+    default: domino-cli-
+  distribution_archive_extension:
+    type: string
+    default: .tar.gz
+  workspace_dir:
+    type: string
+    default: /tmp/ws_store
+  version_file:
+    type: string
+    default: version
+
+# Reusable commands
+commands:
+
+  # Command definition for publishing GitHub releases/tags
+  github_release:
+    steps:
+      - checkout
+      - attach_workspace:
+          at: << pipeline.parameters.workspace_dir >>
+      - gh/setup
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            VERSION=v$(cat << pipeline.parameters.workspace_dir >>/<< pipeline.parameters.version_file >>) 
+            gh release create ${VERSION} --target ${CIRCLE_SHA1} --title ${VERSION} << pipeline.parameters.workspace_dir >>/dist/<< pipeline.parameters.distribution_archive_prefix >>${VERSION}<< pipeline.parameters.distribution_archive_extension >>
+
+executors:
+  python:
+    docker:
+      - image: cimg/python:3.12
+  base:
+    docker:
+      - image: img/base:stable
+
+jobs:
+
+  # Domino CLI - Build and test application
+  build:
+    parameters:
+      release-type:
+        type: enum
+        default: "rc"
+        enum: ["rc", "release"]
+    executor: python
+    steps:
+      - checkout
+      - run:
+          name: Extract version number
+          command: |
+            VERSION=$(cat domino_cli/__init__.py | grep __version__ | head -n 1 | sed -E "s/__version__ = \"([0-9]+\.[0-9]+\.[0-9]+)\"/\1/")
+            echo "Extracted version $VERSION"
+            echo "export VERSION='$VERSION'" >> $BASH_ENV
+            mkdir << pipeline.parameters.workspace_dir >>
+            echo $VERSION >> << pipeline.parameters.workspace_dir >>/<< pipeline.parameters.version_file >>
+      - run:
+          name: Install pip dependencies
+          command: |
+            python -m pip install -r requirements.txt
+      - run:
+          name: Execute Domino CLI unit tests and coverage check
+          command: |
+            python -m coverage run -m unittest discover
+      - run:
+          name: Build wheel package
+          command: |
+            python -m build
+            mkdir << pipeline.parameters.workspace_dir >>/dist
+            cp dist/* << pipeline.parameters.workspace_dir >>/dist/
+      - persist_to_workspace:
+          root: << pipeline.parameters.workspace_dir >>
+          paths:
+            - dist/*
+            - << pipeline.parameters.version_file >>
+
+  publish-to-pypi:
+    executor: python
+    parameters:
+      target-index:
+        type: enum
+        enum: ["test", "live"]
+    steps:
+      - checkout
+      - attach_workspace:
+          at: << pipeline.parameters.workspace_dir >>
+      - run:
+          name: Publish package to PyPI << parameters.target-index >> index
+          command: |
+            python -m pip install build twine
+            repository=$([[ "<< parameters.target-index >>" = "live" ]] && echo pypi || echo testpypi)
+            password=$([[ "<< parameters.target-index >>" = "live" ]] && echo ${TWINE_PASSWORD_LIVE} || echo ${TWINE_PASSWORD_TEST})
+            twine upload -u ${TWINE_USERNAME} -p $password -r $repository --skip-existing << pipeline.parameters.workspace_dir >>/dist/*
+
+  # Domino CLI - Publish tag (and release) on GitHub for RELEASE versions
+  publish-github-release:
+    executor: base
+    steps:
+      - github_release
+
+workflows:
+
+  # Domino CLI - Build pipeline for Domino CLI
+  domino-cli-release:
+    jobs:
+
+      - build:
+          release-type: release
+          context: leaflet_ci
+          filters:
+            branches:
+              only:
+                - master
+          post-steps:
+            - jira/notify:
+                pipeline_id: << pipeline.id >>
+                pipeline_number: << pipeline.number >>
+
+      - rc-approval:
+          type: approval
+          requires:
+            - build
+
+      - publish-to-pypi:
+          name: publish-to-pypi-test
+          context: leaflet_ci
+          target-index: test
+          requires:
+            - rc-approval
+
+      - release-approval:
+          type: approval
+          requires:
+            - publish-to-pypi-test
+
+      - publish-to-pypi:
+          name: publish-to-pypi-live
+          context: leaflet_ci
+          target-index: live
+          requires:
+            - release-approval
+          post-steps:
+            - jira/notify:
+                environment: production
+                environment_type: production
+                job_type: deployment
+                pipeline_id: << pipeline.id >>
+                pipeline_number: << pipeline.number >>
+
+      - publish-github-release:
+          context: leaflet_ci
+          requires:
+            - publish-to-pypi-live
+
+  version: 2

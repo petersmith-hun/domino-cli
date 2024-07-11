@@ -1,7 +1,11 @@
+# FOR LOCAL USAGE
+
 # production dependencies
-bcrypt
+bcrypt==4.0.0
 pyyaml
 requests
 
 # dev dependencies
+build
 coverage
+twine
