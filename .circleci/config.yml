@@ -45,7 +45,7 @@ executors:
       - image: cimg/python:3.12
   base:
     docker:
-      - image: img/base:stable
+      - image: cimg/base:stable
 
 jobs:
 
