@@ -12,7 +12,7 @@ parameters:
     default: dist/
   distribution_archive_prefix:
     type: string
-    default: domino-cli-
+    default: domino_cli-
   distribution_archive_extension:
     type: string
     default: .tar.gz
