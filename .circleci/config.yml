@@ -36,8 +36,9 @@ commands:
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=v$(cat << pipeline.parameters.workspace_dir >>/<< pipeline.parameters.version_file >>) 
-            gh release create ${VERSION} --target ${CIRCLE_SHA1} --title ${VERSION} << pipeline.parameters.workspace_dir >>/dist/<< pipeline.parameters.distribution_archive_prefix >>${VERSION}<< pipeline.parameters.distribution_archive_extension >>
+            VERSION=$(cat << pipeline.parameters.workspace_dir >>/<< pipeline.parameters.version_file >>)
+            distribution_archive=<< pipeline.parameters.workspace_dir >>/dist/<< pipeline.parameters.distribution_archive_prefix >>${VERSION}<< pipeline.parameters.distribution_archive_extension >>
+            gh release create ${VERSION} --target ${CIRCLE_SHA1} --title ${VERSION} $distribution_archive
 
 executors:
   python:
