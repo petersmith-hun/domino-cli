@@ -9,7 +9,7 @@ _DEFAULTS_NO_RUNTIME_RAW: dict = {
     "coordinator_ping": "5 minutes",
     "coordinator_pong": "2 seconds",
     "identification_host_id": "devlocal",
-    "identification_type": "docker",
+    "identification_type": "filesystem",
     "identification_agent_key": "agent-key-1",
     "logging_min_level": "warn",
     "logging_json": "yes",
@@ -35,7 +35,7 @@ _DEFAULTS_NO_RUNTIME_TRANSFORMED: dict = {
             },
             "identification": {
                 "host-id": "devlocal",
-                "type": "docker",
+                "type": "FILESYSTEM",
                 "agent-key": "agent-key-1"
             }
         },
@@ -93,7 +93,7 @@ _CUSTOM_AND_RUNTIME_CONFIG_TRANSFORMED: dict = {
             },
             "identification": {
                 "host-id": "remote1",
-                "type": "filesystem",
+                "type": "FILESYSTEM",
                 "agent-key": "agent-key-2"
             }
         },

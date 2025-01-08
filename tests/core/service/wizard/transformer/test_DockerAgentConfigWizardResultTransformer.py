@@ -29,7 +29,7 @@ _DEFAULTS_NO_SERVER_TRANSFORMED: dict = {
             },
             "identification": {
                 "host-id": "devlocal",
-                "type": "docker",
+                "type": "DOCKER",
                 "agent-key": "agent-key-1"
             }
         },
@@ -41,7 +41,8 @@ _DEFAULTS_NO_SERVER_TRANSFORMED: dict = {
             "connection": {
                 "type": "socket",
                 "uri": "/var/run/docker.sock"
-            }
+            },
+            "servers": []
         }
     }
 }
@@ -52,7 +53,7 @@ _CUSTOM_AND_SERVER_CONFIG_RAW: dict = {
     "coordinator_ping": "10 minutes",
     "coordinator_pong": "3 seconds",
     "identification_host_id": "remote1",
-    "identification_type": "filesystem",
+    "identification_type": "docker",
     "identification_agent_key": "agent-key-2",
     "logging_min_level": "info",
     "logging_json": "no",
@@ -75,7 +76,7 @@ _CUSTOM_AND_SERVER_CONFIG_TRANSFORMED: dict = {
             },
             "identification": {
                 "host-id": "remote1",
-                "type": "filesystem",
+                "type": "DOCKER",
                 "agent-key": "agent-key-2"
             }
         },

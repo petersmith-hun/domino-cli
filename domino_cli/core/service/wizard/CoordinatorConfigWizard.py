@@ -33,6 +33,9 @@ class CoordinatorConfigWizard(AbstractWizard):
         ws_server_host = BaseWizardStep(Mapping.SERVER_HOST, "Specify server host address", "0.0.0.0")
         ws_server_port = BaseWizardStep(Mapping.SERVER_PORT, "Specify server port", "9987")
 
+        ws_datasource_sqlite_path = BaseWizardStep(Mapping.DATASOURCE_SQLITE_PATH, "Specify SQLite datafile path (use default for auto-installer!)", "./data/database.sqlite")
+        ws_datasource_auto_import = OptionSelectorWizardStep(Mapping.DATASOURCE_AUTO_IMPORT, "Do you want to enable auto-import of static deployment configurations?")
+
         ws_logging_min_level = OptionSelectorWizardStep(Mapping.LOGGING_MIN_LEVEL, "Select minimum logging level", _AVAILABLE_LOGGING_LEVELS)
         ws_logging_enable_json = OptionSelectorWizardStep(Mapping.LOGGING_JSON, "Enable JSON logging?")
 
@@ -62,7 +65,9 @@ class CoordinatorConfigWizard(AbstractWizard):
         # transitions
         ws_server_context_path.add_transition(ws_server_host)
         ws_server_host.add_transition(ws_server_port)
-        ws_server_port.add_transition(ws_logging_min_level)
+        ws_server_port.add_transition(ws_datasource_sqlite_path)
+        ws_datasource_sqlite_path.add_transition(ws_datasource_auto_import)
+        ws_datasource_auto_import.add_transition(ws_logging_min_level)
         ws_logging_min_level.add_transition(ws_logging_enable_json)
         ws_logging_enable_json.add_transition(ws_auth_mode)
 

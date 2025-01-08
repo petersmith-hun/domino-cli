@@ -9,6 +9,8 @@ _DIRECT_AUTH_NO_FIRST_AGENT_RAW: dict = {
     "server_context_path": "/api",
     "server_host": "127.0.0.1",
     "server_port": "9876",
+    "datasource_sqlite_datafile_path": "/opt/dpc/data/database.sqlite",
+    "datasource_enable_auto_import": "yes",
     "logging_min_level": "warn",
     "logging_json": "yes",
     "auth_mode": "direct",
@@ -23,12 +25,16 @@ _DIRECT_AUTH_NO_FIRST_AGENT_RAW: dict = {
     "info_abbreviation": "DPC-TEST",
     "result_rendering": "console"
 }
-_DIRECT_AUTH_NO_FIRST_AGEN_TRANSFORMED: dict = {
+_DIRECT_AUTH_NO_FIRST_AGENT_TRANSFORMED: dict = {
     "domino": {
         "server": {
             "context-path": "/api",
             "host": "127.0.0.1",
             "port": 9876
+        },
+        "datasource": {
+            "sqlite-datafile-path": "/opt/dpc/data/database.sqlite",
+            "enable-auto-import": True,
         },
         "logging": {
             "min-level": "warn",
@@ -43,7 +49,8 @@ _DIRECT_AUTH_NO_FIRST_AGEN_TRANSFORMED: dict = {
         },
         "agent": {
             "operation-timeout": "2 minutes",
-            "api-key": ""
+            "api-key": "",
+            "known-agents": []
         },
         "info": {
             "app-name": "Coordinator Test",
@@ -56,6 +63,8 @@ _OAUTH_AUTH_FIRST_AGENT_DEFAULTS_RAW: dict = {
     "server_context_path": "/",
     "server_host": "0.0.0.0",
     "server_port": "9987",
+    "datasource_sqlite_datafile_path": "./data/database.sqlite",
+    "datasource_enable_auto_import": "no",
     "logging_min_level": "info",
     "logging_json": "no",
     "auth_mode": "oauth",
@@ -78,6 +87,10 @@ _OAUTH_AUTH_FIRST_AGENT_DEFAULTS_TRANSFORMED: dict = {
             "host": "0.0.0.0",
             "port": 9987
         },
+        "datasource": {
+            "sqlite-datafile-path": "./data/database.sqlite",
+            "enable-auto-import": False,
+        },
         "logging": {
             "min-level": "info",
             "enable-json-logging": False
@@ -93,7 +106,7 @@ _OAUTH_AUTH_FIRST_AGENT_DEFAULTS_TRANSFORMED: dict = {
             "known-agents": [
                 {
                     "host-id": "devlocal",
-                    "type": "docker",
+                    "type": "DOCKER",
                     "agent-key": "agent-key-docker1"
                 }
             ]
@@ -131,7 +144,7 @@ class CoordinatorConfigWizardResultTransformerTest(unittest.TestCase):
     @staticmethod
     def _prepare_parameters():
         return [
-            (_DIRECT_AUTH_NO_FIRST_AGENT_RAW, _DIRECT_AUTH_NO_FIRST_AGEN_TRANSFORMED),
+            (_DIRECT_AUTH_NO_FIRST_AGENT_RAW, _DIRECT_AUTH_NO_FIRST_AGENT_TRANSFORMED),
             (_OAUTH_AUTH_FIRST_AGENT_DEFAULTS_RAW, _OAUTH_AUTH_FIRST_AGENT_DEFAULTS_TRANSFORMED)
         ]
 

@@ -1,6 +1,7 @@
 from enum import Enum
 
-from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
+from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum, \
+    _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER
 from domino_cli.installer_config import DominoComponent
 
 
@@ -22,6 +23,8 @@ class Mapping(WizardDataMappingBaseEnum):
     DOCKER_HOST_PORT = (MappingGroups.COORDINATOR_ONLY, "host_port", "", lambda value: "-p {0}:9987".format(value))
 
     CONFIGURATION_FILENAME = (MappingGroups.CONFIGURATION, "configuration_filename", "")
+    ENABLE_DEPLOYMENTS_FILE = (MappingGroups.CONFIGURATION, "enable_deployments_file", "", _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER)
     DEPLOYMENTS_FILENAME = (MappingGroups.CONFIGURATION, "deployments_filename", "")
     CONFIGURATION_FILE_LOCATION = (MappingGroups.CONFIGURATION, "config_location", "")
+    SQLITE_DATAFILE_LOCATION = (MappingGroups.CONFIGURATION, "sqlite_location", "")
     TARGET_BINARY_LOCATION = (MappingGroups.CONFIGURATION, "target_binary_location", "")

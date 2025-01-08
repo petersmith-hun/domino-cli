@@ -58,7 +58,7 @@ class DockerPlatformComponentInstaller(PlatformComponentInstaller):
     def _create_profile_directive(self, component: DominoComponent, wizard_data: dict) -> str:
 
         environment = self._extract_value(wizard_data, Mapping.CONFIGURATION_FILENAME)
-        if self._is_coordinator(component):
+        if self._is_coordinator(component) and self._extract_value(wizard_data, Mapping.ENABLE_DEPLOYMENTS_FILE):
             deployment_environment = self._extract_value(wizard_data, Mapping.DEPLOYMENTS_FILENAME)
             environment = "{0},{1}".format(environment, deployment_environment)
 
@@ -69,7 +69,11 @@ class DockerPlatformComponentInstaller(PlatformComponentInstaller):
         config_volume = self._extract_value(wizard_data, Mapping.CONFIGURATION_FILE_LOCATION)
         volumes: List[str] = ["-v", "{0}:/opt/{1}/config:ro".format(config_volume, component.value)]
 
-        if not self._is_coordinator(component):
+        if self._is_coordinator(component):
+            sqlite_datafile_volume = self._extract_value(wizard_data, Mapping.SQLITE_DATAFILE_LOCATION)
+            volumes = volumes + ["-v", "{0}:/opt/{1}/data".format(sqlite_datafile_volume, component.value)]
+
+        else:
             volumes = volumes + ["-v", "/var/run/docker.sock:/var/run/docker.sock"]
 
         return volumes

@@ -44,4 +44,8 @@ class CoordinatorConfigWizardResultTransformer(AbstractWizardResultTransformer):
             [self._assign(mapping, _ROOT, source, agent_dict) for mapping in Mapping.get_mappings_by_group(MappingGroups.FIRST_AGENT)]
 
             source[configure_first_agent_field] = [agent_dict]
-            self._assign(Mapping.AGENT_CONFIGURE_FIRST, _ROOT, source, target_dict)
+
+        else:
+            source[configure_first_agent_field] = []
+
+        self._assign(Mapping.AGENT_CONFIGURE_FIRST, _ROOT, source, target_dict)
