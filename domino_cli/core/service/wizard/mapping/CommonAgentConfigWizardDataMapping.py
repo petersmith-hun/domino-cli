@@ -1,7 +1,7 @@
 from enum import Enum
 
 from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum, \
-    _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER
+    _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER, _UPPERCASE_MAPPER
 
 
 class CommonMappingGroups(Enum):
@@ -18,7 +18,7 @@ class CommonMapping(WizardDataMappingBaseEnum):
     COORDINATOR_PONG = (CommonMappingGroups.BASE, "coordinator_pong", "$root.agent.coordinator.pong-timeout")
 
     IDENTIFICATION_HOST_ID = (CommonMappingGroups.BASE, "identification_host_id", "$root.agent.identification.host-id")
-    IDENTIFICATION_TYPE = (CommonMappingGroups.BASE, "identification_type", "$root.agent.identification.type")
+    IDENTIFICATION_TYPE = (CommonMappingGroups.BASE, "identification_type", "$root.agent.identification.type", _UPPERCASE_MAPPER)
     IDENTIFICATION_AGENT_KEY = (CommonMappingGroups.BASE, "identification_agent_key", "$root.agent.identification.agent-key")
 
     LOGGING_MIN_LEVEL = (CommonMappingGroups.BASE, "logging_min_level", "$root.logging.min-level")

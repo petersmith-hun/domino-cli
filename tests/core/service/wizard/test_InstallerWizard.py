@@ -8,8 +8,10 @@ _INSTALL_COORDINATOR_DEFAULTS_RAW_RESPONSES = [
     "1",
     "",
     "",
+    "1",
     "",
     "/opt/config",
+    "/opt/data",
     "",
     ""
 ]
@@ -17,26 +19,30 @@ _INSTALL_COORDINATOR_DEFAULTS_RESPONSE_DICT: dict = {
     "component": "coordinator",
     "container_name": "domino_coordinator",
     "configuration_filename": "coordinator_production",
+    "enable_deployments_file": "yes",
     "deployments_filename": "deployments_production",
     "config_location": "/opt/config",
+    "sqlite_location": "/opt/data",
     "host_port": "9987",
     "network_mode": "host"
 }
-_INSTALL_COORDINATOR_OVERRIDES_RAW_RESPONSES = [
+_INSTALL_COORDINATOR_OVERRIDES_RAW_RESPONSES_NO_DEPLOYMENTS_FILE = [
     "1",
     "test-coordinator",
     "coordinator_test",
-    "deployments_test",
+    "2",
     "/opt/config/test",
+    "/opt/dpc/data",
     "1234",
     "bridge"
 ]
-_INSTALL_COORDINATOR_OVERRIDES_RESPONSE_DICT: dict = {
+_INSTALL_COORDINATOR_OVERRIDES_RESPONSE_DICT_NO_DEPLOYMENTS_FILE: dict = {
     "component": "coordinator",
     "container_name": "test-coordinator",
     "configuration_filename": "coordinator_test",
-    "deployments_filename": "deployments_test",
+    "enable_deployments_file": "no",
     "config_location": "/opt/config/test",
+    "sqlite_location": "/opt/dpc/data",
     "host_port": "1234",
     "network_mode": "bridge"
 }
@@ -115,14 +121,14 @@ class InstallerWizardTest(unittest.TestCase):
         # then
         self.docker_platform_component_installer_mock.install.assert_called_once_with(_INSTALL_COORDINATOR_DEFAULTS_RESPONSE_DICT)
 
-    @mock.patch("builtins.input", side_effect=_INSTALL_COORDINATOR_OVERRIDES_RAW_RESPONSES)
-    def test_should_run_wizard_install_coordinator_with_overrides(self, _):
+    @mock.patch("builtins.input", side_effect=_INSTALL_COORDINATOR_OVERRIDES_RAW_RESPONSES_NO_DEPLOYMENTS_FILE)
+    def test_should_run_wizard_install_coordinator_with_overrides_no_deployments_file(self, _):
 
         # when
         self.installer_wizard.run()
 
         # then
-        self.docker_platform_component_installer_mock.install.assert_called_once_with(_INSTALL_COORDINATOR_OVERRIDES_RESPONSE_DICT)
+        self.docker_platform_component_installer_mock.install.assert_called_once_with(_INSTALL_COORDINATOR_OVERRIDES_RESPONSE_DICT_NO_DEPLOYMENTS_FILE)
 
     @mock.patch("builtins.input", side_effect=_INSTALL_DOCKER_AGENT_DEFAULTS_RAW_RESPONSES)
     def test_should_run_wizard_install_docker_agent_with_defaults(self, _):

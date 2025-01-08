@@ -101,7 +101,7 @@ jobs:
       - run:
           name: Publish package to PyPI << parameters.target-index >> index
           command: |
-            python -m pip install build twine
+            python -m pip install --upgrade build twine pkginfo
             repository=$([[ "<< parameters.target-index >>" = "live" ]] && echo pypi || echo testpypi)
             password=$([[ "<< parameters.target-index >>" = "live" ]] && echo ${TWINE_PASSWORD_LIVE} || echo ${TWINE_PASSWORD_TEST})
             python -m twine upload -u ${TWINE_USERNAME} -p $password -r $repository --skip-existing << pipeline.parameters.workspace_dir >>/dist/*

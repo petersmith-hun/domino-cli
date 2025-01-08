@@ -12,7 +12,19 @@ _INSTALL_COORDINATOR_RESPONSE_DICT: dict = {
     "deployments_filename": "deployments_production",
     "config_location": "/opt/config",
     "host_port": "9987",
-    "network_mode": "host"
+    "network_mode": "host",
+    "enable_deployments_file": "yes",
+    "sqlite_location": "/opt/data"
+}
+_INSTALL_COORDINATOR_RESPONSE_DICT_WITHOUT_DEPLOYMENTS_FILE: dict = {
+    "component": "coordinator",
+    "container_name": "domino_coordinator",
+    "configuration_filename": "coordinator_production",
+    "config_location": "/opt/config",
+    "host_port": "9987",
+    "network_mode": "host",
+    "enable_deployments_file": "no",
+    "sqlite_location": "/opt/data"
 }
 _INSTALL_DOCKER_AGENT_RESPONSE_DICT: dict = {
     "component": "docker-agent",
@@ -52,6 +64,37 @@ class DockerPlatformComponentInstallerTest(unittest.TestCase):
                        '-e', 'NODE_CONF_DIR=/opt/coordinator/config',
                        '-e', 'NODE_OPTIONS=--max_old_space_size=128',
                        '-v', '/opt/config:/opt/coordinator/config:ro',
+                       '-v', '/opt/data:/opt/coordinator/data',
+                       '-p', '9987:9987',
+                       '--name', 'domino_coordinator',
+                       '--network', 'host',
+                       'docker.io/psproghu/domino-coordinator:2.0.0-1'
+            ])
+        ])
+
+    @mock.patch("builtins.input", return_value="yes")
+    @mock.patch("subprocess.call")
+    def test_should_install_coordinator_without_deployments_file(self, subprocess_call_mock, input_mock):
+
+        # given
+        self.version_resolver_mock.resolve_latest.return_value = "2.0.0-1"
+
+        # when
+        self.docker_platform_component_installer.install(_INSTALL_COORDINATOR_RESPONSE_DICT_WITHOUT_DEPLOYMENTS_FILE)
+
+        # then
+        input_mock.assert_called_once()
+        self.assertEqual(subprocess_call_mock.call_count, 2)
+        subprocess_call_mock.assert_has_calls([
+            mock.call(['docker', 'rm', '-f', 'domino_coordinator']),
+            mock.call(['docker', 'run',
+                       '--detach',
+                       '--restart', 'unless-stopped',
+                       '-e', 'NODE_ENV=coordinator_production',
+                       '-e', 'NODE_CONF_DIR=/opt/coordinator/config',
+                       '-e', 'NODE_OPTIONS=--max_old_space_size=128',
+                       '-v', '/opt/config:/opt/coordinator/config:ro',
+                       '-v', '/opt/data:/opt/coordinator/data',
                        '-p', '9987:9987',
                        '--name', 'domino_coordinator',
                        '--network', 'host',

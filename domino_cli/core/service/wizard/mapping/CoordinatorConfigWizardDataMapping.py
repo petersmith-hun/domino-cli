@@ -1,7 +1,7 @@
 from enum import Enum
 
 from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum, \
-    _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER, _STR_TO_INT_MAPPER, _BCRYPT_MAPPER
+    _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER, _STR_TO_INT_MAPPER, _BCRYPT_MAPPER, _UPPERCASE_MAPPER
 
 
 class MappingGroups(Enum):
@@ -19,6 +19,9 @@ class Mapping(WizardDataMappingBaseEnum):
     SERVER_HOST = (MappingGroups.BASE, "server_host", "$root.server.host")
     SERVER_PORT = (MappingGroups.BASE, "server_port", "$root.server.port", _STR_TO_INT_MAPPER)
 
+    DATASOURCE_SQLITE_PATH = (MappingGroups.BASE, "datasource_sqlite_datafile_path", "$root.datasource.sqlite-datafile-path")
+    DATASOURCE_AUTO_IMPORT = (MappingGroups.BASE, "datasource_enable_auto_import", "$root.datasource.enable-auto-import", _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER)
+
     LOGGING_MIN_LEVEL = (MappingGroups.BASE, "logging_min_level", "$root.logging.min-level")
     LOGGING_JSON = (MappingGroups.BASE, "logging_json", "$root.logging.enable-json-logging", _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER)
 
@@ -34,7 +37,7 @@ class Mapping(WizardDataMappingBaseEnum):
     AGENT_API_KEY = (MappingGroups.BASE, "agent_api_key", "$root.agent.api-key", _BCRYPT_MAPPER)
     AGENT_CONFIGURE_FIRST = ("", "agent_configure_first", "$root.agent.known-agents")
     AGENT_HOST_ID = (MappingGroups.FIRST_AGENT, "agent_host_id", "host-id")
-    AGENT_TYPE = (MappingGroups.FIRST_AGENT, "agent_type", "type")
+    AGENT_TYPE = (MappingGroups.FIRST_AGENT, "agent_type", "type", _UPPERCASE_MAPPER)
     AGENT_AGENT_KEY = (MappingGroups.FIRST_AGENT, "agent_key", "agent-key")
 
     INFO_APP_NAME = (MappingGroups.BASE, "info_app_name", "$root.info.app-name")
