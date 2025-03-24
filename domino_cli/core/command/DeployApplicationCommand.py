@@ -1,3 +1,4 @@
+from domino_cli.core.cli.Logging import warning
 from domino_cli.core.command.AbstractCommand import AbstractCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
 from domino_cli.core.domain.DominoCommand import DominoCommand
@@ -25,7 +26,7 @@ class DeployApplicationCommand(AbstractCommand):
         :param command_descriptor: CommandDescriptor object containing the command arguments
         """
         if not len(command_descriptor.arguments) == 2:
-            print("Application name and 'latest' keyword or explicit version is required")
+            warning("Application name and 'latest' keyword or explicit version is required")
         else:
             application: str = command_descriptor.arguments[0]
             version: str = command_descriptor.arguments[1]

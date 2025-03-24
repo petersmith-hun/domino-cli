@@ -3,6 +3,7 @@ import urllib.parse
 import requests
 from requests import Response
 
+from domino_cli.core.cli.Logging import info
 from domino_cli.core.domain.DominoRequest import DominoRequest
 from domino_cli.core.service.SessionContextHolder import SessionContextHolder
 
@@ -15,7 +16,7 @@ class DominoClient:
         self._domino_base_url = domino_base_url
         self._session_context_holder = session_context_holder
 
-        print("Domino CLI is configured to communicate with Domino on {0}".format(domino_base_url))
+        info("Domino CLI is configured to communicate with Domino on {0}".format(domino_base_url))
 
     def send_command(self, domino_request: DominoRequest) -> Response:
         """

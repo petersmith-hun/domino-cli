@@ -1,3 +1,4 @@
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 from domino_cli.core.service.wizard.step.BaseWizardStep import BaseWizardStep
 
@@ -17,7 +18,7 @@ class MultiAnswerWizardStep(BaseWizardStep):
         """
         result[self.get_step_id()] = []
         while True:
-            current_answer: str = input()
+            current_answer: str = RuntimeHelper.input_wrapper(lambda: input())
             if len(current_answer) > 0:
                 result[self.get_step_id()].append(current_answer)
             else:

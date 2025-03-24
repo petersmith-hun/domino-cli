@@ -2,6 +2,8 @@ import subprocess
 from abc import ABC, abstractmethod
 from typing import List
 
+from domino_cli.core.cli.Logging import info, warning
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.service.wizard.installer import VersionResolver
 from domino_cli.core.service.wizard.mapping.InstallerWizardDataMapping import Mapping
 from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
@@ -21,15 +23,15 @@ class PlatformComponentInstaller(ABC):
         :param wizard_data: raw wizard data to extract installation parameters from
         """
         component = self._extract_value(wizard_data, Mapping.COMPONENT)
-        print("Preparing to install {0} as {1} ...".format(component.value, self._reported_installation_method()))
-        print("Looking up latest version of component {0}, please wait ...".format(component.value))
+        info("Preparing to install {0} as {1} ...".format(component.value, self._reported_installation_method()))
+        info("Looking up latest version of component {0}, please wait ...".format(component.value))
         version = self._version_resolver.resolve_latest(component)
         command_lines = self._prepare_command_lines(component, wizard_data, version)
 
-        print("{0} {1} will be installed. Do you wish to proceed? (Type 'yes' to proceed)"
+        info("{0} {1} will be installed. Do you wish to proceed? (Type 'yes' to proceed)"
               .format(component.value, version))
-        if input() != "yes":
-            print("Installation aborted")
+        if RuntimeHelper.input_wrapper(lambda: input()) != "yes":
+            warning("Installation aborted")
             return
 
         [subprocess.call(command_line) for command_line in command_lines]

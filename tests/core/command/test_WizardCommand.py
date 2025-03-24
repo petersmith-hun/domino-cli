@@ -35,7 +35,7 @@ class WizardCommandTest(CommandBaseTest):
         self.wizard_command.execute_command(command_descriptor)
 
         # then
-        print_mock.assert_called_once_with("Wizard name required")
+        print_mock.assert_called_once_with("[warn ] Wizard name required")
         self.assertEqual(self.configuration_wizard_service_mock.show_available_wizards.call_count, 1)
         self.assertEqual(self.configuration_wizard_service_mock.run_wizard.call_count, 0)
 

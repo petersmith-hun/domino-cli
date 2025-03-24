@@ -1,5 +1,6 @@
-from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.command.AbstractCommand import AbstractCommand
+from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
 
 _COMMAND_NAME = "help"
 _HELP_CONTENT = """
@@ -30,3 +31,4 @@ class HelpCommand(AbstractCommand):
 
     def execute_command(self, command_descriptor: CommandDescriptor) -> None:
         [print(line, end="") for line in self._help_text]
+        RuntimeHelper.exit_with_error_in_cicd_mode()

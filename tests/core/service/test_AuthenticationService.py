@@ -64,7 +64,7 @@ class AuthenticationServiceTest(unittest.TestCase):
         self.authentication_service.generate_token()
 
         # then
-        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Generated auth token: jwt_token")
+        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "[info ] Generated auth token: jwt_token")
 
     @mock.patch("builtins.print", side_effect=print)
     @mock.patch("builtins.input", return_value=_TEST_USERNAME)
@@ -78,7 +78,7 @@ class AuthenticationServiceTest(unittest.TestCase):
         self.authentication_service.generate_token()
 
         # then
-        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Failed to generate token - reason: Failed to authenticate")
+        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "[error] Failed to generate token - reason: Failed to authenticate")
 
     @mock.patch("builtins.print", side_effect=print)
     @mock.patch("builtins.input", return_value=_TEST_USERNAME)
@@ -92,7 +92,7 @@ class AuthenticationServiceTest(unittest.TestCase):
         self.authentication_service.open_session()
 
         # then
-        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Session is open")
+        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "[info ] Session is open")
         self.assertEqual(self.session_context_holder_mock.update.call_count, 1)
         session_context: SessionContext = self._extract_session_context()
         self.assertEqual(session_context.username, _TEST_USERNAME)
@@ -110,7 +110,7 @@ class AuthenticationServiceTest(unittest.TestCase):
         self.authentication_service.open_session()
 
         # then
-        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Failed to open session - reason: Failed to authenticate")
+        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "[error] Failed to open session - reason: Failed to authenticate")
         self.assertEqual(self.session_context_holder_mock.call_count, 0)
 
     def test_should_set_mode_to_direct(self):
@@ -137,7 +137,7 @@ class AuthenticationServiceTest(unittest.TestCase):
 
         # then
         self.assertEqual(self.authentication_service._auth_mode, AuthMode.DIRECT)
-        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "Failed to change authentication mode, invalid mode defined: invalid")
+        self.assertEqual(AuthenticationServiceTest._extract_print_value(print_mock), "[error] Failed to change authentication mode, invalid mode defined: invalid")
 
     def _extract_session_context(self):
         return self.session_context_holder_mock.mock_calls[0][1][0]

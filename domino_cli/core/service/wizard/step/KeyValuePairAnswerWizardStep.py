@@ -1,3 +1,5 @@
+from domino_cli.core.cli.Logging import warning
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 from domino_cli.core.service.wizard.step.BaseWizardStep import BaseWizardStep
 
@@ -18,13 +20,13 @@ class KeyValuePairAnswerWizardStep(BaseWizardStep):
         """
         result[self.get_step_id()] = dict()
         while True:
-            current_answer: str = input()
+            current_answer: str = RuntimeHelper.input_wrapper(lambda: input())
             if len(current_answer) > 0:
                 split_answer = current_answer.split(sep=":", maxsplit=1)
                 try:
                     result[self.get_step_id()][split_answer[0]] = split_answer[1]
                 except IndexError:
-                    print("Invalid format - please specify your answer in key:value format")
+                    warning("Invalid format - please specify your answer in key:value format")
                     continue
             else:
                 break

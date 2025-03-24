@@ -28,11 +28,11 @@ class DominoServiceTest(unittest.TestCase):
         self._assert_client_call("/lifecycle/app1/deploy/1.0.0")
         self.assertEqual(print_mock.call_count, 6)
         print_mock.assert_has_calls([
-            mock.call("Sending DEPLOY_VERSION command for application app1 via Domino"),
-            mock.call("Command DEPLOY_VERSION successfully executed on application app1"),
-            mock.call(" --- Response details ---"),
-            mock.call("   message: some details"),
-            mock.call("    status: ALL_OK"),
+            mock.call("[info ] Sending DEPLOY_VERSION command for application app1 via Domino"),
+            mock.call("[info ] Command DEPLOY_VERSION successfully executed on application app1"),
+            mock.call("[info ]  --- Response details ---"),
+            mock.call("[info ]              message: some details"),
+            mock.call("[info ]               status: ALL_OK"),
             mock.call()
         ])
 
@@ -48,8 +48,8 @@ class DominoServiceTest(unittest.TestCase):
         # then
         self._assert_client_call("/lifecycle/app2/start")
         print_mock.assert_has_calls([
-            mock.call("Sending START command for application app2 via Domino"),
-            mock.call("Failed to execute command START on application app2 - Domino responded with 500")
+            mock.call("[info ] Sending START command for application app2 via Domino"),
+            mock.call("[error] Failed to execute command START on application app2 - Domino responded with 500")
         ])
 
     @mock.patch("builtins.print", side_effect=print)
@@ -64,8 +64,8 @@ class DominoServiceTest(unittest.TestCase):
         # then
         self._assert_client_call("/lifecycle/app3/stop", expected_method=HTTPMethod.DELETE)
         print_mock.assert_has_calls([
-            mock.call("Sending STOP command for application app3 via Domino"),
-            mock.call("Failed to execute HTTP request [DELETE /lifecycle/app3/stop] - reason Mock client call failure")
+            mock.call("[info ] Sending STOP command for application app3 via Domino"),
+            mock.call("[error] Failed to execute HTTP request [DELETE /lifecycle/app3/stop] - reason Mock client call failure")
         ])
 
     def _assert_client_call(self, expected_path, expected_method=HTTPMethod.PUT):

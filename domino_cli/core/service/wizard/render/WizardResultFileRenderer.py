@@ -5,6 +5,8 @@ from typing import Callable
 
 import yaml
 
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
+
 
 class WizardResultFileRenderer:
     """
@@ -19,7 +21,7 @@ class WizardResultFileRenderer:
         :param result: target dictionary to be rendered
         :param merge_node_selector_function: lambda function to select base node from where the merging should happen
         """
-        target_file: str = input("File path > ")
+        target_file: str = RuntimeHelper.input_wrapper(lambda: input("File path > "))
         to_write: dict = self._prepare_dict_to_write(target_file, result, merge_node_selector_function)
         with open(target_file, "w") as target_file:
             yaml.dump(to_write, target_file, sort_keys=False)

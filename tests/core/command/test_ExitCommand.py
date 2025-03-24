@@ -21,7 +21,7 @@ class ExitCommandTest(CommandBaseTest):
         self.exit_command.execute_command(command_descriptor)
 
         # then
-        print_mock.assert_called_once_with("Bye!")
+        print_mock.assert_called_once_with("[info ] Bye!")
 
     def test_should_command_be_applicable_for_exit_command(self):
 
