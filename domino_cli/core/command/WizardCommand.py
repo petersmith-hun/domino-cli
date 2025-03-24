@@ -1,3 +1,4 @@
+from domino_cli.core.cli.Logging import warning
 from domino_cli.core.command.AbstractCommand import AbstractCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
 from domino_cli.core.service.ConfigurationWizardService import ConfigurationWizardService
@@ -21,7 +22,7 @@ class WizardCommand(AbstractCommand):
         :param command_descriptor: CommandDescriptor object containing the command arguments
         """
         if not len(command_descriptor.arguments) == 1:
-            print("Wizard name required")
+            warning("Wizard name required")
             self._configuration_wizard_service.show_available_wizards()
         else:
             self._configuration_wizard_service.run_wizard(command_descriptor.arguments[0])

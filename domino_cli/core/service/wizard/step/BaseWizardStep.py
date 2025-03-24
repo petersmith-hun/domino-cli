@@ -1,5 +1,6 @@
 from typing import List, Callable
 
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 from domino_cli.core.service.wizard.step.WizardStep import WizardStep, WizardStepTransition
 
@@ -38,7 +39,7 @@ class BaseWizardStep(WizardStep):
         """
         See documentation of WizardStep.
         """
-        answer: str = input()
+        answer: str = RuntimeHelper.input_wrapper(lambda: input())
         result[self.get_step_id()] = self._default_answer \
             if len(answer) == 0 \
             else answer

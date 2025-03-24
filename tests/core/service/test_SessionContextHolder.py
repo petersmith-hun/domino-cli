@@ -18,7 +18,7 @@ class SessionContextHolderTest(unittest.TestCase):
 
         # then
         self.assertIsNone(result)
-        print_mock.assert_called_once_with("WARNING: Session is not yet open!")
+        print_mock.assert_called_once_with("[warn ] Session is not yet open!")
 
     def test_should_get_bearer_auth_return_authorization_header_after_updating_context(self):
 

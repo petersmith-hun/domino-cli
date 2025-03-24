@@ -1,5 +1,7 @@
 from typing import List, Dict
 
+from domino_cli.core.cli.Logging import warning, info
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.service.wizard.AbstractWizard import AbstractWizard
 
 _WIZARD_HELP_TEXT_LINE = "{}\n[{:>15}]: {}"
@@ -17,7 +19,8 @@ class ConfigurationWizardService:
         """
         Prints the name and the description of the available wizards.
         """
-        print("Available wizards:{0}".format(self._available_wizards_help))
+        RuntimeHelper.unsupported_in_cicd_mode()
+        info("Available wizards:{0}".format(self._available_wizards_help))
 
     def run_wizard(self, wizard_name: str) -> None:
         """
@@ -25,8 +28,9 @@ class ConfigurationWizardService:
 
         :param wizard_name: name of the wizard to be executed
         """
+        RuntimeHelper.unsupported_in_cicd_mode()
         if wizard_name not in self._wizards.keys():
-            print("Unknown wizard '{0}'".format(wizard_name))
+            warning("Unknown wizard '{0}'".format(wizard_name))
             self.show_available_wizards()
         else:
             wizard: AbstractWizard = self._wizards.get(wizard_name)

@@ -37,7 +37,7 @@ class StartApplicationCommandTest(CommandBaseTest):
 
         # then
         self.assertEqual(self.domino_service_mock.call_count, 0)
-        print_mock.assert_called_once_with("Application name required")
+        print_mock.assert_called_once_with("[warn ] Application name required")
 
     def test_should_command_be_applicable_for_start_command(self):
 

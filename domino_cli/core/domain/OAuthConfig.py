@@ -1,5 +1,7 @@
 import os
 
+from domino_cli.core.cli.Logging import warning
+
 _OAUTH_TOKEN_URL = "DOMINO_OAUTH_TOKEN_URL"
 _OAUTH_CLIENT_ID = "DOMINO_OAUTH_CLIENT_ID"
 _OAUTH_CLIENT_SECRET = "DOMINO_OAUTH_CLIENT_SECRET"
@@ -38,7 +40,7 @@ class OAuthConfig:
         present: bool = True
         if OAuthConfig._get_parameter(parameter) is None:
             present = False
-            print(f"Parameter {parameter} is missing")
+            warning(f"Parameter {parameter} is missing")
 
         return present
 

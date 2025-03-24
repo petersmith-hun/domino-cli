@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+from domino_cli.core.cli.Logging import info
 from domino_cli.core.command.AbstractCommand import AbstractCommand
 from domino_cli.core.command.ExitCommand import ExitCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
@@ -27,7 +28,7 @@ class CommandProcessor:
         """
 
         if _DEBUG_MODE:
-            print("Command to be executed: {0}".format(command_descriptor))
+            info("Command to be executed: {0}".format(command_descriptor))
 
         command_iterator = filter(lambda command: command.is_applicable(command_descriptor), self._registered_commands)
         selected_command = next(command_iterator, self._default_command)

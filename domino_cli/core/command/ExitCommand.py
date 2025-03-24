@@ -1,5 +1,6 @@
-from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
+from domino_cli.core.cli.Logging import info
 from domino_cli.core.command.AbstractCommand import AbstractCommand
+from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
 
 _COMMAND_NAME = "exit"
 
@@ -13,4 +14,4 @@ class ExitCommand(AbstractCommand):
         super().__init__(_COMMAND_NAME)
 
     def execute_command(self, command_descriptor: CommandDescriptor) -> None:
-        print("Bye!")
+        info("Bye!")

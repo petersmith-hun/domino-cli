@@ -1,6 +1,7 @@
 import os
 
 from domino_cli.core.cli.CLI import CLI
+from domino_cli.core.cli.Logging import info
 from domino_cli.core.client.DominoClient import DominoClient
 from domino_cli.core.client.OAuthAuthorizationClient import OAuthAuthorizationClient
 from domino_cli.core.command.AuthCommand import AuthCommand
@@ -50,7 +51,7 @@ class ApplicationContext:
     @staticmethod
     def init_cli(version: str) -> CLI:
 
-        print("Initializing Domino CLI...")
+        info("Initializing Domino CLI...")
 
         # configuration properties
         _domino_base_url = ApplicationContext._assert_config_value("DOMINO_BASE_URL")
@@ -129,8 +130,8 @@ class ApplicationContext:
 
         _cli = CLI(_command_processor)
 
-        print(f"Domino CLI v{version} initialized.")
-        print("-" * 30)
+        info(f"Domino CLI v{version} initialized")
+        info("-" * 30)
 
         return _cli
 

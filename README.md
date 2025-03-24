@@ -15,18 +15,20 @@ also generate configuration files for each Domino Platform components, as well a
 
 The tool can be configured via the following environment variables:
 
-| Environment variable       | Mandatory?    | Description                                                                                   |
-|----------------------------|---------------|-----------------------------------------------------------------------------------------------|
-| DOMINO_BASE_URL            | Yes           | URL of Domino instance to be controlled, e.g. http://localhost:8080/domino                    |
-| DOMINO_CLI_USERNAME        | No            | Optional predefined username for accessing Domino                                             |
-| DOMINO_CLI_PASSWORD        | No            | Optional predefined password for accessing Domino                                             |
-| DOMINO_CLI_DEBUG_MODE      | No            | Optional debug switch. Currently its only effect is echoing the parsed command                |
-| DOMINO_DEFAULT_AUTH_MODE   | No            | Changes how Domino CLI acquires the access token for Domino. Defaults to direct mode (legacy) |
-| DOMINO_OAUTH_TOKEN_URL     | In OAuth mode | OAuth 2.0 compliant authorization server address, including the token request endpoint path   |
-| DOMINO_OAUTH_CLIENT_ID     | In OAuth mode | OAuth 2.0 Client ID of Domino CLI                                                             |
-| DOMINO_OAUTH_CLIENT_SECRET | In OAuth mode | OAuth 2.0 Client Secret of Domino CLI                                                         |
-| DOMINO_OAUTH_SCOPE         | In OAuth mode | OAuth 2.0 access token scope                                                                  |                                                                                         
-| DOMINO_OAUTH_AUDIENCE      | No            | OAuth 2.0 audience of Domino                                                                  |
+| Environment variable           | Mandatory?    | Description                                                                                                      |
+|--------------------------------|---------------|------------------------------------------------------------------------------------------------------------------|
+| DOMINO_BASE_URL                | Yes           | URL of Domino instance to be controlled, e.g. http://localhost:8080/domino                                       |
+| DOMINO_CLI_USERNAME            | No            | Optional predefined username for accessing Domino                                                                |
+| DOMINO_CLI_PASSWORD            | No            | Optional predefined password for accessing Domino                                                                |
+| DOMINO_CLI_PREAUTHORIZED_TOKEN | No            | (For CI/CD mode) Passes an already generated access token - see further information in [CI/CD mode](#cicd-mode)) |
+| DOMINO_CLI_DEBUG_MODE          | No            | Optional debug switch. Currently its only effect is echoing the parsed command                                   |
+| DOMINO_CLI_DISABLE_COLORS      | No            | Optional switch to disable terminal colors.                                                                      |
+| DOMINO_DEFAULT_AUTH_MODE       | No            | Changes how Domino CLI acquires the access token for Domino. Defaults to direct mode (legacy)                    |
+| DOMINO_OAUTH_TOKEN_URL         | In OAuth mode | OAuth 2.0 compliant authorization server address, including the token request endpoint path                      |
+| DOMINO_OAUTH_CLIENT_ID         | In OAuth mode | OAuth 2.0 Client ID of Domino CLI                                                                                |
+| DOMINO_OAUTH_CLIENT_SECRET     | In OAuth mode | OAuth 2.0 Client Secret of Domino CLI                                                                            |
+| DOMINO_OAUTH_SCOPE             | In OAuth mode | OAuth 2.0 access token scope                                                                                     |                                                                                         
+| DOMINO_OAUTH_AUDIENCE          | No            | OAuth 2.0 audience of Domino                                                                                     |
 
 ## Installation
 
@@ -66,6 +68,29 @@ After this step, you can start Domino CLI:
 ```shell
 domino-cli
 ```
+
+### CI/CD mode
+
+Domino CLI now supports execution in so-called CI/CD mode, which is a simplified execution mode, primarily to be used on
+CI/CD environments, usually within a deployment script. There are a few things to note here:
+* To execute Domino CLI in CI/CD mode, pass the `--cicd` switch as the first command line parameter, then the command
+  you wish to execute, e.g. like this:
+   ```bash
+  domino-cli --cicd deploy your_app latest
+   ```
+* Interactive terminal is not available in CI/CD mode, you may only execute a single command at a time, then Domino CLI
+  immediately quits with `exit 0` status code, or `exit 1` in case of any error.
+* This also means, you can't open an authorized session. Instead, you may call the `auth --generate-token` command and 
+set the result (the generated access token) as the `DOMINO_CLI_PREAUTHORIZED_TOKEN` environment variable, e.g. as follows:
+   ```bash
+  export DOMINO_CLI_PREAUTHORIZED_TOKEN="$(domino-cli --cicd auth --generate-token)"
+  # the token in DOMINO_CLI_PREAUTHORIZED_TOKEN will be used by Domino CLI to authorize any further operations
+  domino-cli --cicd deploy your_app latest
+  domino-cli --cicd start your_app
+   ```
+* Please note, that without the interactive terminal, any operation that depends on user input, is not available,
+  including the configuration wizards, and manual authentication (you need to define the necessary parameters as
+  environment variables, as described above in the [Configuration section](#configuration))
 
 ## Usage
 After successfully starting up Domino CLI you should see its prompt (`Domino CLI >`) along with some start-up messages.

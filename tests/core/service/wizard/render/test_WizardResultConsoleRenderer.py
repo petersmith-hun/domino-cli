@@ -19,7 +19,7 @@ class WizardResultConsoleRendererTest(unittest.TestCase):
         self.wizard_result_console_renderer.render(source_dict)
 
         # then
-        self.assertEqual(print_mock.call_count, 4)
+        self.assertEqual(print_mock.call_count, 5)
         print_mock.assert_has_calls([
             mock.call("root:\n  key_b: true\n  key_a: value\n  key_c: 1234\n")
         ])

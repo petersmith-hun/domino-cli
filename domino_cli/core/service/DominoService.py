@@ -1,5 +1,7 @@
 from requests import Response
 
+from domino_cli.core.cli.Logging import info, error
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.client.DominoClient import DominoClient
 from domino_cli.core.domain.DominoCommand import DominoCommand
 from domino_cli.core.domain.DominoCommand import DominoRequestDescriptor
@@ -25,21 +27,23 @@ class DominoService:
         formatted_path = domino_request_descriptor.path_template.format(application, version)
         domino_request = DominoRequest(domino_request_descriptor.method, formatted_path, authenticated=True)
 
-        print("Sending {0} command for application {1} via Domino".format(domino_command.name, application))
+        info("Sending {0} command for application {1} via Domino".format(domino_command.name, application))
 
         try:
             response: Response = self._domino_client.send_command(domino_request)
 
             if DominoService._is_successful(response):
-                print("Command {0} successfully executed on application {1}".format(domino_command.name, application))
+                info("Command {0} successfully executed on application {1}".format(domino_command.name, application))
             else:
-                print("Failed to execute command {0} on application {1} - Domino responded with {2}"
+                error("Failed to execute command {0} on application {1} - Domino responded with {2}"
                       .format(domino_command.name, application, response.status_code))
+                RuntimeHelper.exit_with_error_in_cicd_mode()
 
             DominoService._render_response(response)
 
         except Exception as exc:
-            print("Failed to execute HTTP request {0} - reason {1}".format(domino_request, str(exc)))
+            error("Failed to execute HTTP request {0} - reason {1}".format(domino_request, str(exc)))
+            RuntimeHelper.exit_with_error_in_cicd_mode()
 
     @staticmethod
     def _is_successful(response: Response) -> bool:
@@ -48,6 +52,6 @@ class DominoService:
     @staticmethod
     def _render_response(response: Response):
         response_dict = response.json()
-        print(" --- Response details ---")
-        [print("{:>10}: {}".format(field, response_dict[field])) for field in response_dict]
+        info(" --- Response details ---")
+        [info("{:>20}: {}".format(field, response_dict[field])) for field in response_dict]
         print()

@@ -1,3 +1,4 @@
+from domino_cli.core.cli.Logging import warning
 from domino_cli.core.command.AbstractCommand import AbstractCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
 from domino_cli.core.domain.DominoCommand import DominoCommand
@@ -21,6 +22,6 @@ class AbstractLifecycleCommand(AbstractCommand):
         :param command_descriptor: CommandDescriptor object containing the command arguments
         """
         if not len(command_descriptor.arguments) == 1:
-            print("Application name required")
+            warning("Application name required")
         else:
             self._domino_service.execute_lifecycle_command(self._domino_command, command_descriptor.arguments[0])

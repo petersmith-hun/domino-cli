@@ -1,3 +1,4 @@
+from domino_cli.core.cli.Logging import warning
 from domino_cli.core.command.AbstractCommand import AbstractCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
 from domino_cli.core.service.AuthenticationService import AuthenticationService
@@ -42,5 +43,5 @@ class AuthCommand(AbstractCommand):
 
     @staticmethod
     def _show_help():
-        print("Auth command requires operation flag of: --encrypt-password | --generate-token | --open-session "
+        warning("Auth command requires operation flag of: --encrypt-password | --generate-token | --open-session "
               "| --set-mode direct|oauth")

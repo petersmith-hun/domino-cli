@@ -4,7 +4,7 @@ from unittest import mock
 from domino_cli.core.service.ConfigurationWizardService import ConfigurationWizardService
 from domino_cli.core.service.wizard.AbstractWizard import AbstractWizard
 
-_AVAILABLE_WIZARDS_EXPECTED_HELP = "Available wizards:\n[           wiz1]: wiz1_desc\n[           wiz2]: wiz2_desc"
+_AVAILABLE_WIZARDS_EXPECTED_HELP = "[info ] Available wizards:\n[           wiz1]: wiz1_desc\n[           wiz2]: wiz2_desc"
 
 
 class ConfigurationWizardServiceTest(unittest.TestCase):
@@ -47,7 +47,7 @@ class ConfigurationWizardServiceTest(unittest.TestCase):
 
         # then
         print_mock.assert_has_calls([
-            mock.call("Unknown wizard 'non-existing-wizard'"),
+            mock.call("[warn ] Unknown wizard 'non-existing-wizard'"),
             mock.call(_AVAILABLE_WIZARDS_EXPECTED_HELP)
         ])
         self.assertEqual(self.abstract_wizard_1.run.call_count, 0)

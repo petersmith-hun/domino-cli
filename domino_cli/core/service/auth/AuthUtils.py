@@ -1,6 +1,8 @@
 import os
 from getpass import getpass
 
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
+
 _DOMINO_CLI_USERNAME = "DOMINO_CLI_USERNAME"
 _DOMINO_CLI_PASSWORD = "DOMINO_CLI_PASSWORD"
 
@@ -20,7 +22,7 @@ class AuthUtils:
         """
         username = os.getenv(_DOMINO_CLI_USERNAME)
         if username is None:
-            username = input(" ** specify username: ")
+            username = RuntimeHelper.input_wrapper(lambda: input(" ** specify username: "))
 
         return username
 
@@ -34,6 +36,6 @@ class AuthUtils:
         """
         password = os.getenv(_DOMINO_CLI_PASSWORD)
         if password is None:
-            password = getpass(" ** specify password: ")
+            password = RuntimeHelper.input_wrapper(lambda: getpass(" ** specify password: "))
 
         return password

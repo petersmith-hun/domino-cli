@@ -1,5 +1,6 @@
 from typing import List
 
+from domino_cli.core.cli.Logging import warning
 from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 from domino_cli.core.service.wizard.step.BaseWizardStep import BaseWizardStep
 
@@ -44,7 +45,7 @@ class OptionSelectorWizardStep(BaseWizardStep):
             result[self.get_step_id()] = self.get_options()[index]
 
         except (IndexError, ValueError):
-            print("Your choice is invalid - please try again")
+            warning("Your choice is invalid - please try again")
             self.read_answer(result)
 
     def __repr__(self):
