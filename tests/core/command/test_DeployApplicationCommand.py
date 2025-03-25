@@ -48,7 +48,7 @@ class DeployApplicationCommandTest(CommandBaseTest):
 
         # then
         self.assertEqual(self.domino_service_mock.call_count, 0)
-        print_mock.assert_called_once_with("[warn ] Application name and 'latest' keyword or explicit version is required")
+        print_mock.assert_called_once_with("[error] Application name and 'latest' keyword or explicit version is required")
 
     def test_should_command_be_applicable_for_deploy_command(self):
 
