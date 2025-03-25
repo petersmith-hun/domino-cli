@@ -166,6 +166,14 @@ info <app>
 ```
 Instructs Domino to query the application's info endpoint and returns the results.
 
+### Deployment definition management commands
+
+```
+import <optional/path/to/deployment-definition.yml>
+```
+Imports a YAML formatted deployment definition. Without providing an absolute or relative path to your deployment 
+definition file, defaults to `.domino/deployment.yml`.
+
 ### Configuration wizards
 
 Domino CLI also provides configuration wizards which help to properly create Domino configuration files.

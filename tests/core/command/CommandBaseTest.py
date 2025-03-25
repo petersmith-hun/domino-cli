@@ -4,7 +4,7 @@ from domino_cli.core.command.AbstractCommand import AbstractCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
 
 
-_COMMAND_LIST = ["start", "stop", "restart", "deploy", "help", "exit", "auth", "wizard", "info"]
+_COMMAND_LIST = ["start", "stop", "restart", "deploy", "help", "exit", "auth", "wizard", "info", "import"]
 
 
 class CommandBaseTest(unittest.TestCase):

@@ -1,4 +1,5 @@
-from domino_cli.core.cli.Logging import warning
+from domino_cli.core.cli.Logging import error
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.command.AbstractCommand import AbstractCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
 from domino_cli.core.domain.DominoCommand import DominoCommand
@@ -26,7 +27,9 @@ class DeployApplicationCommand(AbstractCommand):
         :param command_descriptor: CommandDescriptor object containing the command arguments
         """
         if not len(command_descriptor.arguments) == 2:
-            warning("Application name and 'latest' keyword or explicit version is required")
+            error("Application name and 'latest' keyword or explicit version is required")
+            RuntimeHelper.exit_with_error_in_cicd_mode()
+
         else:
             application: str = command_descriptor.arguments[0]
             version: str = command_descriptor.arguments[1]

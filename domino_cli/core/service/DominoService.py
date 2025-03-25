@@ -42,7 +42,39 @@ class DominoService:
             DominoService._render_response(response)
 
         except Exception as exc:
-            error("Failed to execute HTTP request {0} - reason {1}".format(domino_request, str(exc)))
+            error("Failed to execute HTTP request {0} - reason: {1}".format(domino_request, str(exc)))
+            RuntimeHelper.exit_with_error_in_cicd_mode()
+
+    def import_definition(self, optional_definition_path: str | None = None) -> None:
+        """
+        Imports the given deployment definition. If path is not provided, defaults to ".domino/deployment.yml".
+
+        :param optional_definition_path: optional path to a deployment definition
+        """
+        definition_path = optional_definition_path \
+            if optional_definition_path \
+            else ".domino/deployment.yml"
+        info(f"Requesting Domino to import deployment definition from={definition_path}")
+
+        try:
+
+            with open(definition_path, "r") as definition_file:
+                definition = definition_file.read()
+                domino_request_descriptor: DominoRequestDescriptor = DominoCommand.IMPORT.value
+                domino_request = DominoRequest(domino_request_descriptor.method, domino_request_descriptor.path_template,
+                                               body=definition, authenticated=True, as_text=True)
+                response = self._domino_client.send_command(domino_request)
+
+                if DominoService._is_successful(response):
+                    info(f"Successfully imported definition {definition_path}")
+                else:
+                    error(f"Failed to import deployment definition {definition_path} - Domino responded with {response.status_code}")
+                    RuntimeHelper.exit_with_error_in_cicd_mode()
+
+            DominoService._render_response(response)
+
+        except Exception as exc:
+            error("Failed to import definition from {0} - reason: {1}".format(definition_path, str(exc)))
             RuntimeHelper.exit_with_error_in_cicd_mode()
 
     @staticmethod
@@ -51,6 +83,12 @@ class DominoService:
 
     @staticmethod
     def _render_response(response: Response):
+
+        if len(response.content) == 0:
+            info("No further response received from Domino")
+            print()
+            return
+
         response_dict = response.json()
         info(" --- Response details ---")
         [info("{:>20}: {}".format(field, response_dict[field])) for field in response_dict]

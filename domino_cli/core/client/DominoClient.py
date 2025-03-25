@@ -26,7 +26,14 @@ class DominoClient:
         :return: Response object
         """
         resolved_path = urllib.parse.urljoin(self._domino_base_url, domino_request.path)
-        json_body = domino_request.body
+        headers = {"Content-Type": "text/plain"} \
+            if domino_request.as_text \
+            else {"Content-Type": "application/json"}
         auth = self._session_context_holder.get_bearer_auth() if domino_request.authenticated else None
 
-        return requests.request(domino_request.method.value, resolved_path, json=json_body, headers=auth)
+        if auth:
+            headers.update(auth)
+
+        return requests.request(domino_request.method.value, resolved_path, headers=headers,
+                                json=None if domino_request.as_text else domino_request.body,
+                                data=domino_request.body if domino_request.as_text else None)
