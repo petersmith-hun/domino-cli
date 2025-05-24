@@ -18,8 +18,12 @@ class RetrievalSecretCommandProcessor(SecretCommandProcessor):
 
     def chain_to(self, arguments: List[str]) -> str | None:
 
-        if not len(arguments) == 2:
+        if len(arguments) < 1:
             error(f"Too few arguments, must be either: --key <key> | --context <context>")
+            return None
+
+        if len(arguments) > 2:
+            error(f"Too many arguments, must be either: --key <key> | --context <context>")
             return None
 
         subcommand = arguments.pop(0)
