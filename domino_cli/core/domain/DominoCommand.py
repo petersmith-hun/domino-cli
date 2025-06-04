@@ -25,3 +25,12 @@ class DominoCommand(Enum):
     DEPLOY_VERSION = DominoRequestDescriptor(HTTPMethod.PUT, "/lifecycle/{0}/deploy/{1}")
     INFO = DominoRequestDescriptor(HTTPMethod.GET, "/lifecycle/{0}/info")
     IMPORT = DominoRequestDescriptor(HTTPMethod.POST, "/deployments/import")
+
+    RETRIEVE_ALL_METADATA = DominoRequestDescriptor(HTTPMethod.GET, "/secrets")
+    RETRIEVE_SECRET = DominoRequestDescriptor(HTTPMethod.GET, "/secrets/{0}")
+    RETRIEVE_SECRET_METADATA = DominoRequestDescriptor(HTTPMethod.GET, "/secrets/{0}/metadata")
+    RETRIEVE_SECRETS_BY_CONTEXT = DominoRequestDescriptor(HTTPMethod.GET, "/secrets/context/{0}")
+    CREATE_SECRET = DominoRequestDescriptor(HTTPMethod.POST, "/secrets")
+    LOCK_SECRET = DominoRequestDescriptor(HTTPMethod.DELETE, "/secrets/{0}/retrieval")
+    UNLOCK_SECRET = DominoRequestDescriptor(HTTPMethod.PUT, "/secrets/{0}/retrieval")
+    DELETE_SECRET = DominoRequestDescriptor(HTTPMethod.DELETE, "/secrets/{0}")

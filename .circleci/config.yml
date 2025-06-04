@@ -1,9 +1,8 @@
 version: 2.1
 
 orbs:
-  jira: circleci/jira@2.1.0
-  jq: circleci/jq@3.0.0
-  gh: circleci/github-cli@2.3.0
+  jira: circleci/jira@2.2.0
+  gh: circleci/github-cli@2.7.0
 
 # Common parameters for CircleCI build config
 parameters:
@@ -120,7 +119,8 @@ workflows:
 
       - build:
           release-type: release
-          context: leaflet_ci
+          context:
+            - common-tech
           filters:
             branches:
               only:
@@ -137,7 +137,8 @@ workflows:
 
       - publish-to-pypi:
           name: publish-to-pypi-test
-          context: leaflet_ci
+          context:
+            - twine
           target-index: test
           requires:
             - rc-approval
@@ -149,7 +150,9 @@ workflows:
 
       - publish-to-pypi:
           name: publish-to-pypi-live
-          context: leaflet_ci
+          context:
+            - common-tech
+            - twine
           target-index: live
           requires:
             - release-approval
@@ -162,7 +165,8 @@ workflows:
                 pipeline_number: << pipeline.number >>
 
       - publish-github-release:
-          context: leaflet_ci
+          context:
+            - common-tech
           requires:
             - publish-to-pypi-live
 

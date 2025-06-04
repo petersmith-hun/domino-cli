@@ -27,4 +27,5 @@ class Mapping(WizardDataMappingBaseEnum):
     DEPLOYMENTS_FILENAME = (MappingGroups.CONFIGURATION, "deployments_filename", "")
     CONFIGURATION_FILE_LOCATION = (MappingGroups.CONFIGURATION, "config_location", "")
     SQLITE_DATAFILE_LOCATION = (MappingGroups.CONFIGURATION, "sqlite_location", "")
+    ENCRYPTION_KEYS_LOCATION = (MappingGroups.CONFIGURATION, "encryption_keys_location", "")
     TARGET_BINARY_LOCATION = (MappingGroups.CONFIGURATION, "target_binary_location", "")

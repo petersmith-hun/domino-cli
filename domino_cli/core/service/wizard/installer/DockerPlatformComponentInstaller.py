@@ -71,7 +71,9 @@ class DockerPlatformComponentInstaller(PlatformComponentInstaller):
 
         if self._is_coordinator(component):
             sqlite_datafile_volume = self._extract_value(wizard_data, Mapping.SQLITE_DATAFILE_LOCATION)
+            encryption_keys_location = self._extract_value(wizard_data, Mapping.ENCRYPTION_KEYS_LOCATION)
             volumes = volumes + ["-v", "{0}:/opt/{1}/data".format(sqlite_datafile_volume, component.value)]
+            volumes = volumes + ["-v", "{0}:/opt/{1}/encryption:ro".format(encryption_keys_location, component.value)]
 
         else:
             volumes = volumes + ["-v", "/var/run/docker.sock:/var/run/docker.sock"]

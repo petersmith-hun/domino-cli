@@ -14,3 +14,14 @@ class DominoRequest:
 
     def __repr__(self):
         return "[{0} {1}]".format(self.method.value, self.path)
+
+    def __eq__(self, other):
+
+        if other is None:
+            return False
+
+        return self.method == other.method \
+            and self.path == other.path \
+            and self.body == other.body \
+            and self.as_text == other.as_text \
+            and self.authenticated == other.authenticated

@@ -13,6 +13,15 @@ Known commands:
     --generate-token: authenticates with Domino and prints the generated token
     --open-session: authenticates with Domino and stores the token in the session context for further usage
     --set-mode <oauth|direct>: switches authentication mode (oauth or direct)
+ - secret <arguments>: secret management operations
+    --metadata --all: retrieves metadata of all existing secrets
+    --metadata <key>: retrieves metadata of the given secret
+    --retrieve --key <key>: retrieves the value of the given secret
+    --retrieve --context <context>: retrieves the value of all secrets under the given context
+    --create <key> <context>: create a new secret (you'll be prompted to enter the secret value as password)
+    --lock <key>: locks a secret (disables retrieval)
+    --unlock <key>: unlocks a secret (enables retrieval)
+    --delete <key>: deletes a secret 
  - start <app>: commands Domino to start the given app
  - stop <app>: commands Domino to stop the given app
  - restart <app>: commands Domino to restart the given app

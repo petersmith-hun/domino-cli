@@ -11,15 +11,25 @@ from domino_cli.core.command.HelpCommand import HelpCommand
 from domino_cli.core.command.ImportCommand import ImportCommand
 from domino_cli.core.command.InfoCommand import InfoCommand
 from domino_cli.core.command.RestartApplicationCommand import RestartApplicationCommand
+from domino_cli.core.command.SecretCommand import SecretCommand
 from domino_cli.core.command.StartApplicationCommand import StartApplicationCommand
 from domino_cli.core.command.StopApplicationCommand import StopApplicationCommand
 from domino_cli.core.command.WizardCommand import WizardCommand
+from domino_cli.core.command.dsl.dsm.DSLCreate import CreateSecretCommandProcessor
+from domino_cli.core.command.dsl.dsm.DSLDelete import DeleteSecretCommandProcessor
+from domino_cli.core.command.dsl.dsm.DSLLocking import LockSecretCommandProcessor, UnlockSecretCommandProcessor
+from domino_cli.core.command.dsl.dsm.DSLMain import MainSecretCommandProcessor
+from domino_cli.core.command.dsl.dsm.DSLMetadata import MetadataCommandProcessor, MetadataAllCommandProcessor, \
+    MetadataKeyCommandProcessor
+from domino_cli.core.command.dsl.dsm.DSLRetrieval import RetrievalSecretCommandProcessor, \
+    RetrieveByKeySecretCommandProcessor, RetrieveByContextSecretCommandProcessor
 from domino_cli.core.domain.AuthMode import AuthMode
 from domino_cli.core.domain.OAuthConfig import OAuthConfig
 from domino_cli.core.service.AuthenticationService import AuthenticationService
 from domino_cli.core.service.CommandProcessor import CommandProcessor
 from domino_cli.core.service.ConfigurationWizardService import ConfigurationWizardService
 from domino_cli.core.service.DominoService import DominoService
+from domino_cli.core.service.SecretService import SecretService
 from domino_cli.core.service.SessionContextHolder import SessionContextHolder
 from domino_cli.core.service.auth.DirectAuthHandler import DirectAuthHandler
 from domino_cli.core.service.auth.OAuthAuthHandler import OAuthAuthHandler
@@ -91,6 +101,7 @@ class ApplicationContext:
         _domino_client = DominoClient(_domino_base_url, _session_context_holder)
         _oauth_authorization_client = OAuthAuthorizationClient(_oauth_config)
         _domino_service = DominoService(_domino_client)
+        _secret_service = SecretService(_domino_client)
         _direct_auth_handler = DirectAuthHandler(_domino_client)
         _oauth_auth_handler = OAuthAuthHandler(_oauth_config, _oauth_authorization_client)
         _auth_service = AuthenticationService(_default_auth_mode, _session_context_holder, [
@@ -116,6 +127,19 @@ class ApplicationContext:
         _command_auth = AuthCommand(_auth_service)
         _command_wizard = WizardCommand(_config_wizard_service)
         _command_info = InfoCommand(_domino_service)
+        _command_secret = SecretCommand([
+            MainSecretCommandProcessor(),
+            CreateSecretCommandProcessor(_secret_service),
+            MetadataCommandProcessor(),
+            MetadataAllCommandProcessor(_secret_service),
+            MetadataKeyCommandProcessor(_secret_service),
+            RetrievalSecretCommandProcessor(),
+            RetrieveByKeySecretCommandProcessor(_secret_service),
+            RetrieveByContextSecretCommandProcessor(_secret_service),
+            LockSecretCommandProcessor(_secret_service),
+            UnlockSecretCommandProcessor(_secret_service),
+            DeleteSecretCommandProcessor(_secret_service),
+        ])
 
         # command processor
         _command_processor = CommandProcessor(_command_help, [
@@ -128,7 +152,8 @@ class ApplicationContext:
             _command_stop_app,
             _command_import,
             _command_wizard,
-            _command_info
+            _command_info,
+            _command_secret
         ])
 
         _cli = CLI(_command_processor)

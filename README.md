@@ -174,6 +174,65 @@ import <optional/path/to/deployment-definition.yml>
 Imports a YAML formatted deployment definition. Without providing an absolute or relative path to your deployment 
 definition file, defaults to `.domino/deployment.yml`.
 
+### Secret management commands
+
+Domino Coordinator, starting with v2.3.0, can act as a simple secret manager. Domino CLI provides an integration for
+these operations. Please note, that most of the commands do not support CI/CD mode, except for the --retrieve commands.
+
+```
+secret --create <key> <context>
+```
+Creates a new secret. You'll need to provide the secret key and a context (basically a group) name for the secret as
+arguments, then you'll be prompted to enter the secret value, without echoing the value to the terminal.  
+Notes:
+ * Context is an arbitrary value, that lets you return multiple, corresponding secrets with a single request.
+ * Created secrets are by default "locked", meaning they can't be returned via the API (only accessible by Domino 
+Coordinator directly, for deployment definitions).
+
+```
+secret --metadata --all
+```
+Returns the metadata of all existing secrets, grouped by their context.
+
+```
+secret --metadata <key>
+```
+Returns the metadata of the given secret.
+
+```
+secret --retrieve --key <key>
+```
+Returns the value of the given secret, if retrievable. In CI/CD mode, the result is returned in `<key>=<value>` format,
+that can be put in a `.env` file directly. 
+
+```
+secret --retrieve --context <context>
+```
+Returns the value of all secrets under the given context, if each of them is retrievable. In CI/CD mode, the result is 
+returned in `<key>=<value>` format, that can be used in a `.env` file directly. E.g.:
+```
+$ domino-cli --cicd secret --retrieve --context config > .env
+$ cat .env
+datasource.host=jdbc:mysql://localhost:3306/test
+datasource.username=root
+...
+```
+
+```
+secret --lock <key>
+```
+Locks (disables retrieval of) the given secret.
+
+```
+secret --unlock <key>
+```
+Unlocks (enables retrieval of) the given secret.
+
+```
+secret --delete <key>
+```
+Deletes the given secret.
+
 ### Configuration wizards
 
 Domino CLI also provides configuration wizards which help to properly create Domino configuration files.

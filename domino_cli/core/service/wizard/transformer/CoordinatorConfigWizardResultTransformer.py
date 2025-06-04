@@ -1,5 +1,4 @@
 from domino_cli.core.service.wizard.mapping.CoordinatorConfigWizardDataMapping import Mapping, MappingGroups
-
 from domino_cli.core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
 
 _ROOT = "domino"
@@ -21,6 +20,7 @@ class CoordinatorConfigWizardResultTransformer(AbstractWizardResultTransformer):
         self._define_base_dict(source, target_dict)
         self._add_conditional_auth_configuration(source, target_dict)
         self._add_conditional_agent_configuration(source, target_dict)
+        self._add_conditional_encryption_configuration(source, target_dict)
 
         return target_dict
 
@@ -49,3 +49,8 @@ class CoordinatorConfigWizardResultTransformer(AbstractWizardResultTransformer):
             source[configure_first_agent_field] = []
 
         self._assign(Mapping.AGENT_CONFIGURE_FIRST, _ROOT, source, target_dict)
+
+    def _add_conditional_encryption_configuration(self, source: dict, target_dict: dict) -> None:
+
+        if source[Mapping.ENCRYPTION_ENABLE.get_wizard_field()] == "yes":
+            [self._assign(mapping, _ROOT, source, target_dict) for mapping in Mapping.get_mappings_by_group(MappingGroups.ENCRYPTION)]
