@@ -5,7 +5,7 @@ import bcrypt
 from domino_cli.core.service.wizard.transformer.CoordinatorConfigWizardResultTransformer import \
     CoordinatorConfigWizardResultTransformer
 
-_DIRECT_AUTH_NO_FIRST_AGENT_RAW: dict = {
+_DIRECT_AUTH_NO_FIRST_AGENT_WITHOUT_ENCRYPTION_RAW: dict = {
     "server_context_path": "/api",
     "server_host": "127.0.0.1",
     "server_port": "9876",
@@ -13,6 +13,7 @@ _DIRECT_AUTH_NO_FIRST_AGENT_RAW: dict = {
     "datasource_enable_auto_import": "yes",
     "logging_min_level": "warn",
     "logging_json": "yes",
+    "encryption_enable": "no",
     "auth_mode": "direct",
     "auth_expiration": "2 hours",
     "auth_jwt_private_key": "jwt-pvt-key-1",
@@ -25,7 +26,7 @@ _DIRECT_AUTH_NO_FIRST_AGENT_RAW: dict = {
     "info_abbreviation": "DPC-TEST",
     "result_rendering": "console"
 }
-_DIRECT_AUTH_NO_FIRST_AGENT_TRANSFORMED: dict = {
+_DIRECT_AUTH_NO_FIRST_AGENT_WITHOUT_ENCRYPTION_TRANSFORMED: dict = {
     "domino": {
         "server": {
             "context-path": "/api",
@@ -39,6 +40,9 @@ _DIRECT_AUTH_NO_FIRST_AGENT_TRANSFORMED: dict = {
         "logging": {
             "min-level": "warn",
             "enable-json-logging": True
+        },
+        "encryption": {
+            "enabled": False,
         },
         "auth": {
             "auth-mode": "direct",
@@ -59,7 +63,7 @@ _DIRECT_AUTH_NO_FIRST_AGENT_TRANSFORMED: dict = {
     }
 }
 
-_OAUTH_AUTH_FIRST_AGENT_DEFAULTS_RAW: dict = {
+_OAUTH_AUTH_FIRST_AGENT_DEFAULTS_WITH_ENCRYPTION_RAW: dict = {
     "server_context_path": "/",
     "server_host": "0.0.0.0",
     "server_port": "9987",
@@ -67,6 +71,9 @@ _OAUTH_AUTH_FIRST_AGENT_DEFAULTS_RAW: dict = {
     "datasource_enable_auto_import": "no",
     "logging_min_level": "info",
     "logging_json": "no",
+    "encryption_enable": "yes",
+    "encryption_private_key": "/opt/keys/private-key.pem",
+    "encryption_public_key": "/opt/keys/public-key.pem",
     "auth_mode": "oauth",
     "auth_oauth_issuer": "http://localhost:9999/",
     "auth_oauth_audience": "dpc:test",
@@ -80,7 +87,7 @@ _OAUTH_AUTH_FIRST_AGENT_DEFAULTS_RAW: dict = {
     "info_abbreviation": "DPC-TEST2",
     "result_rendering": "file"
 }
-_OAUTH_AUTH_FIRST_AGENT_DEFAULTS_TRANSFORMED: dict = {
+_OAUTH_AUTH_FIRST_AGENT_DEFAULTS_WITH_ENCRYPTION_TRANSFORMED: dict = {
     "domino": {
         "server": {
             "context-path": "/",
@@ -94,6 +101,11 @@ _OAUTH_AUTH_FIRST_AGENT_DEFAULTS_TRANSFORMED: dict = {
         "logging": {
             "min-level": "info",
             "enable-json-logging": False
+        },
+        "encryption": {
+            "enabled": True,
+            "private-key-path": "/opt/keys/private-key.pem",
+            "public-key-path": "/opt/keys/public-key.pem",
         },
         "auth": {
             "auth-mode": "oauth",
@@ -144,8 +156,8 @@ class CoordinatorConfigWizardResultTransformerTest(unittest.TestCase):
     @staticmethod
     def _prepare_parameters():
         return [
-            (_DIRECT_AUTH_NO_FIRST_AGENT_RAW, _DIRECT_AUTH_NO_FIRST_AGENT_TRANSFORMED),
-            (_OAUTH_AUTH_FIRST_AGENT_DEFAULTS_RAW, _OAUTH_AUTH_FIRST_AGENT_DEFAULTS_TRANSFORMED)
+            (_DIRECT_AUTH_NO_FIRST_AGENT_WITHOUT_ENCRYPTION_RAW, _DIRECT_AUTH_NO_FIRST_AGENT_WITHOUT_ENCRYPTION_TRANSFORMED),
+            (_OAUTH_AUTH_FIRST_AGENT_DEFAULTS_WITH_ENCRYPTION_RAW, _OAUTH_AUTH_FIRST_AGENT_DEFAULTS_WITH_ENCRYPTION_TRANSFORMED)
         ]
 
     def _verify_encrypted_value(self, source: str, result: str) -> None:

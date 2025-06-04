@@ -9,6 +9,7 @@ class MappingGroups(Enum):
     JWT = "jwt"
     OAUTH = "oauth"
     FIRST_AGENT = "first-agent"
+    ENCRYPTION = "encryption"
 
 
 class Mapping(WizardDataMappingBaseEnum):
@@ -24,6 +25,10 @@ class Mapping(WizardDataMappingBaseEnum):
 
     LOGGING_MIN_LEVEL = (MappingGroups.BASE, "logging_min_level", "$root.logging.min-level")
     LOGGING_JSON = (MappingGroups.BASE, "logging_json", "$root.logging.enable-json-logging", _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER)
+
+    ENCRYPTION_ENABLE = (MappingGroups.BASE, "encryption_enable", "$root.encryption.enabled", _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER)
+    ENCRYPTION_PRIVATE_KEY = (MappingGroups.ENCRYPTION, "encryption_private_key", "$root.encryption.private-key-path")
+    ENCRYPTION_PUBLIC_KEY = (MappingGroups.ENCRYPTION, "encryption_public_key", "$root.encryption.public-key-path")
 
     AUTH_MODE = (MappingGroups.BASE, "auth_mode", "$root.auth.auth-mode")
     AUTH_EXPIRATION = (MappingGroups.JWT, "auth_expiration", "$root.auth.expiration")

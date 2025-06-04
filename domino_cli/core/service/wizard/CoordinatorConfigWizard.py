@@ -39,6 +39,10 @@ class CoordinatorConfigWizard(AbstractWizard):
         ws_logging_min_level = OptionSelectorWizardStep(Mapping.LOGGING_MIN_LEVEL, "Select minimum logging level", _AVAILABLE_LOGGING_LEVELS)
         ws_logging_enable_json = OptionSelectorWizardStep(Mapping.LOGGING_JSON, "Enable JSON logging?")
 
+        ws_encryption_enable = OptionSelectorWizardStep(Mapping.ENCRYPTION_ENABLE, "Do you want to enable secret encryption?")
+        ws_encryption_private_key = BaseWizardStep(Mapping.ENCRYPTION_PRIVATE_KEY, "Specify RSA private key path", "./encryption/private-key.pem")
+        ws_encryption_public_key = BaseWizardStep(Mapping.ENCRYPTION_PUBLIC_KEY, "Specify RSA public key path", "./encryption/public-key.pem")
+
         ws_auth_mode = OptionSelectorWizardStep(Mapping.AUTH_MODE, "Select authentication mode", _AVAILABLE_AUTH_MODES)
         ws_auth_expiration = BaseWizardStep(Mapping.AUTH_EXPIRATION, "Specify JWT token expiration in (in Node.js 'ms' library format)")
         ws_auth_jwt_private_key = BaseWizardStep(Mapping.AUTH_JWT_PRIVATE_KEY, "Specify JWT private key")
@@ -61,6 +65,7 @@ class CoordinatorConfigWizard(AbstractWizard):
 
         auth_mode_field = Mapping.AUTH_MODE.get_wizard_field()
         agent_configuration_field = Mapping.AGENT_CONFIGURE_FIRST.get_wizard_field()
+        enable_encryption_field = Mapping.ENCRYPTION_ENABLE.get_wizard_field()
 
         # transitions
         ws_server_context_path.add_transition(ws_server_host)
@@ -69,7 +74,12 @@ class CoordinatorConfigWizard(AbstractWizard):
         ws_datasource_sqlite_path.add_transition(ws_datasource_auto_import)
         ws_datasource_auto_import.add_transition(ws_logging_min_level)
         ws_logging_min_level.add_transition(ws_logging_enable_json)
-        ws_logging_enable_json.add_transition(ws_auth_mode)
+        ws_logging_enable_json.add_transition(ws_encryption_enable)
+
+        ws_encryption_enable.add_transition(ws_encryption_private_key, lambda context: context[enable_encryption_field] == "yes")
+        ws_encryption_enable.add_transition(ws_auth_mode, lambda context: context[enable_encryption_field] == "no")
+        ws_encryption_private_key.add_transition(ws_encryption_public_key)
+        ws_encryption_public_key.add_transition(ws_auth_mode)
 
         ws_auth_mode.add_transition(ws_auth_expiration, lambda context: context[auth_mode_field] == _AVAILABLE_AUTH_MODES[0])
         ws_auth_expiration.add_transition(ws_auth_jwt_private_key)

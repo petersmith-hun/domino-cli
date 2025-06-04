@@ -8,7 +8,7 @@ from domino_cli.core.service.wizard.transformer.AbstractWizardResultTransformer 
 
 _TRANSFORMED_VALUE = {"transformed": {}}
 
-_DIRECT_AUTH_NO_FIRST_AGENT_RAW_RESPONSES = [
+_DIRECT_AUTH_NO_FIRST_AGENT_WITHOUT_ENCRYPTION_RAW_RESPONSES = [
     "/api",
     "127.0.0.1",
     "9876",
@@ -16,6 +16,7 @@ _DIRECT_AUTH_NO_FIRST_AGENT_RAW_RESPONSES = [
     "1",
     "3",
     "1",
+    "2",
     "1",
     "2 hours",
     "jwt-pvt-key-1",
@@ -28,14 +29,15 @@ _DIRECT_AUTH_NO_FIRST_AGENT_RAW_RESPONSES = [
     "DPC-TEST",
     "1"
 ]
-_DIRECT_AUTH_NO_FIRST_AGENT_FORMATTED_RESPONSE_DICT: dict = {
+_DIRECT_AUTH_NO_FIRST_AGENT_WITHOUT_ENCRYPTION_FORMATTED_RESPONSE_DICT: dict = {
     "server_context_path": "/api", 
     "server_host": "127.0.0.1",
     "server_port": "9876",
     "datasource_sqlite_datafile_path": "/opt/dpc/data/database.sqlite",
     "datasource_enable_auto_import": "yes",
     "logging_min_level": "warn",
-    "logging_json": "yes", 
+    "logging_json": "yes",
+    "encryption_enable": "no",
     "auth_mode": "direct",
     "auth_expiration": "2 hours",
     "auth_jwt_private_key": "jwt-pvt-key-1",
@@ -49,7 +51,7 @@ _DIRECT_AUTH_NO_FIRST_AGENT_FORMATTED_RESPONSE_DICT: dict = {
     "result_rendering": "console"
 }
 
-_OAUTH_AUTH_FIRST_AGENT_RAW_RESPONSES = [
+_OAUTH_AUTH_FIRST_AGENT_WITH_ENCRYPTION_RAW_RESPONSES = [
     "",
     "",
     "",
@@ -57,6 +59,9 @@ _OAUTH_AUTH_FIRST_AGENT_RAW_RESPONSES = [
     "2",
     "2",
     "2",
+    "1",
+    "/opt/keys/private-key.pem",
+    "/opt/keys/public-key.pem",
     "2",
     "http://localhost:9999/",
     "dpc:test",
@@ -70,7 +75,7 @@ _OAUTH_AUTH_FIRST_AGENT_RAW_RESPONSES = [
     "DPC-TEST2",
     "2"
 ]
-_OAUTH_AUTH_FIRST_AGENT_FORMATTED_RESPONSE_DICT: dict = {
+_OAUTH_AUTH_FIRST_AGENT_WITH_ENCRYPTION_FORMATTED_RESPONSE_DICT: dict = {
     "server_context_path": "/",
     "server_host": "0.0.0.0",
     "server_port": "9987",
@@ -78,6 +83,9 @@ _OAUTH_AUTH_FIRST_AGENT_FORMATTED_RESPONSE_DICT: dict = {
     "datasource_enable_auto_import": "no",
     "logging_min_level": "info",
     "logging_json": "no",
+    "encryption_enable": "yes",
+    "encryption_private_key": "/opt/keys/private-key.pem",
+    "encryption_public_key": "/opt/keys/public-key.pem",
     "auth_mode": "oauth",
     "auth_oauth_issuer": "http://localhost:9999/",
     "auth_oauth_audience": "dpc:test",
@@ -107,17 +115,17 @@ class CoordinatorConfigWizardTest(unittest.TestCase):
             self.wizard_result_console_renderer_mock,
             self.wizard_result_file_renderer_mock)
 
-    @mock.patch("builtins.input", side_effect=_DIRECT_AUTH_NO_FIRST_AGENT_RAW_RESPONSES)
+    @mock.patch("builtins.input", side_effect=_DIRECT_AUTH_NO_FIRST_AGENT_WITHOUT_ENCRYPTION_RAW_RESPONSES)
     def test_should_run_wizard_for_configuration_with_direct_auth_and_no_first_agent_and_console_rendering(self, _):
 
         # when
         self.coordinator_config_wizard.run()
 
         # then
-        self.wizard_result_transformer_mock.transform.assert_called_once_with(_DIRECT_AUTH_NO_FIRST_AGENT_FORMATTED_RESPONSE_DICT)
+        self.wizard_result_transformer_mock.transform.assert_called_once_with(_DIRECT_AUTH_NO_FIRST_AGENT_WITHOUT_ENCRYPTION_FORMATTED_RESPONSE_DICT)
         self.wizard_result_console_renderer_mock.render.assert_called_once_with(_TRANSFORMED_VALUE)
 
-    @mock.patch("builtins.input", side_effect=_OAUTH_AUTH_FIRST_AGENT_RAW_RESPONSES)
+    @mock.patch("builtins.input", side_effect=_OAUTH_AUTH_FIRST_AGENT_WITH_ENCRYPTION_RAW_RESPONSES)
     def test_should_run_wizard_for_configuration_with_oauth_auth_and_with_agent_and_defaults_and_file_rendering(self, _):
 
         # when
@@ -127,7 +135,7 @@ class CoordinatorConfigWizardTest(unittest.TestCase):
         file_renderer_call_args = self.wizard_result_file_renderer_mock.render.call_args.args
         merge_lambda_result = file_renderer_call_args[1]({"domino": {"key": "value"}})
 
-        self.wizard_result_transformer_mock.transform.assert_called_once_with(_OAUTH_AUTH_FIRST_AGENT_FORMATTED_RESPONSE_DICT)
+        self.wizard_result_transformer_mock.transform.assert_called_once_with(_OAUTH_AUTH_FIRST_AGENT_WITH_ENCRYPTION_FORMATTED_RESPONSE_DICT)
         self.assertEqual(file_renderer_call_args[0], _TRANSFORMED_VALUE)
         self.assertEqual(merge_lambda_result, {"key": "value"})
 

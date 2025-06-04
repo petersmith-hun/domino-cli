@@ -34,6 +34,7 @@ class InstallerWizard(AbstractWizard):
         ws_target_binary_location = BaseWizardStep(Mapping.TARGET_BINARY_LOCATION, "Specify binary target location on host (as absolute path)")
         ws_config_location = BaseWizardStep(Mapping.CONFIGURATION_FILE_LOCATION, "Specify configuration location on host (as absolute path)")
         ws_sqlite_location = BaseWizardStep(Mapping.SQLITE_DATAFILE_LOCATION, "Specify SQLite datafile location on host (as absolute path)")
+        ws_encryption_keys_location = BaseWizardStep(Mapping.ENCRYPTION_KEYS_LOCATION, "Specify RSA encryption key pair location on host (as absolute path)")
         ws_host_port = BaseWizardStep(Mapping.DOCKER_HOST_PORT, "Specify container port to expose to host", "9987")
         ws_network_mode = BaseWizardStep(Mapping.DOCKER_NETWORK_MODE, "Specify container network mode", "host")
 
@@ -55,7 +56,8 @@ class InstallerWizard(AbstractWizard):
         ws_deployments_filename.add_transition(ws_config_location)
         ws_config_location.add_transition(ws_sqlite_location, lambda context: context[component_field] == "coordinator")
         ws_config_location.add_transition(ws_network_mode, lambda context: context[component_field] == "docker-agent")
-        ws_sqlite_location.add_transition(ws_host_port)
+        ws_sqlite_location.add_transition(ws_encryption_keys_location)
+        ws_encryption_keys_location.add_transition(ws_host_port)
         ws_host_port.add_transition(ws_network_mode)
 
         self.set_entry_point(ws_component_selector)

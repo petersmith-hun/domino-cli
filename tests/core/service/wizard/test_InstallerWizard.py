@@ -12,6 +12,7 @@ _INSTALL_COORDINATOR_DEFAULTS_RAW_RESPONSES = [
     "",
     "/opt/config",
     "/opt/data",
+    "/opt/encryption",
     "",
     ""
 ]
@@ -23,6 +24,7 @@ _INSTALL_COORDINATOR_DEFAULTS_RESPONSE_DICT: dict = {
     "deployments_filename": "deployments_production",
     "config_location": "/opt/config",
     "sqlite_location": "/opt/data",
+    "encryption_keys_location": "/opt/encryption",
     "host_port": "9987",
     "network_mode": "host"
 }
@@ -33,6 +35,7 @@ _INSTALL_COORDINATOR_OVERRIDES_RAW_RESPONSES_NO_DEPLOYMENTS_FILE = [
     "2",
     "/opt/config/test",
     "/opt/dpc/data",
+    "/opt/encryption",
     "1234",
     "bridge"
 ]
@@ -43,6 +46,7 @@ _INSTALL_COORDINATOR_OVERRIDES_RESPONSE_DICT_NO_DEPLOYMENTS_FILE: dict = {
     "enable_deployments_file": "no",
     "config_location": "/opt/config/test",
     "sqlite_location": "/opt/dpc/data",
+    "encryption_keys_location": "/opt/encryption",
     "host_port": "1234",
     "network_mode": "bridge"
 }
