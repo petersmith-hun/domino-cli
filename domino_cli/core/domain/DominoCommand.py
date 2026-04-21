@@ -25,6 +25,7 @@ class DominoCommand(Enum):
     DEPLOY_VERSION = DominoRequestDescriptor(HTTPMethod.PUT, "/lifecycle/{0}/deploy/{1}")
     INFO = DominoRequestDescriptor(HTTPMethod.GET, "/lifecycle/{0}/info")
     IMPORT = DominoRequestDescriptor(HTTPMethod.POST, "/deployments/import")
+    IMPORT_OAUTH = DominoRequestDescriptor(HTTPMethod.POST, "/deployments/{0}/oauth-application/import")
 
     RETRIEVE_ALL_METADATA = DominoRequestDescriptor(HTTPMethod.GET, "/secrets")
     RETRIEVE_SECRET = DominoRequestDescriptor(HTTPMethod.GET, "/secrets/{0}")

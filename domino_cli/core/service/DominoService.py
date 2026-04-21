@@ -77,3 +77,39 @@ class DominoService:
         except Exception as exc:
             error("Failed to import definition from {0} - reason: {1}".format(definition_path, str(exc)))
             RuntimeHelper.exit_with_error_in_cicd_mode()
+
+    def import_oauth_descriptor(self, application: str, dry_run: bool, optional_descriptor_path: str | None = None) -> None:
+        """
+        Imports the given OAuth descriptor. If path is not provided, defaults to ".domino/oauth.yml".
+
+        :param application: name of the application name to submit the OAuth descriptor for
+        :param dry_run: do not execute actual changes (verifies the descriptor and the relations defined by it, without saving it)
+        :param optional_descriptor_path: optional path to an OAuth descriptor
+        """
+        descriptor_path = optional_descriptor_path \
+            if optional_descriptor_path \
+            else ".domino/oauth.yml"
+        info(f"Requesting Domino to import OAuth application descriptor from={descriptor_path}")
+
+        try:
+
+            with open(descriptor_path, "r") as descriptor_file:
+                descriptor = descriptor_file.read()
+                domino_request_descriptor: DominoRequestDescriptor = DominoCommand.IMPORT_OAUTH.value
+                domino_request = DominoRequest(domino_request_descriptor.method,
+                                               domino_request_descriptor.path_template.format(application),
+                                               query={"dry-run": "true"} if dry_run else None,
+                                               body=descriptor, authenticated=True, as_text=True)
+                response = self._domino_client.send_command(domino_request)
+
+                if is_successful(response):
+                    info(f"Successfully imported OAuth application descriptor {descriptor_path}")
+                else:
+                    error(f"Failed to import OAuth application descriptor {descriptor_path} - Domino responded with {response.status_code}")
+                    RuntimeHelper.exit_with_error_in_cicd_mode()
+
+            render_response(response)
+
+        except Exception as exc:
+            error("Failed to import descriptor from {0} - reason: {1}".format(descriptor_path, str(exc)))
+            RuntimeHelper.exit_with_error_in_cicd_mode()

@@ -26,6 +26,8 @@ Known commands:
  - stop <app>: commands Domino to stop the given app
  - restart <app>: commands Domino to restart the given app
  - deploy <app> <latest|version>: commands Domino to deploy either the latest or the specified version of the given app
+ - import [<optional-path-to-definition.yml>]: commands Domino to import the deployment definition located on .domino/deployment.yml or the given location
+ - oauth-import <app> [--dry-run] [<optional-path-to-descriptor.yml>]: commands Domino to import an OAuth descriptor located on .domino/oauth.yml or the given location
  - wizard <wizard name>: starts the specified configuration wizard
  """
 

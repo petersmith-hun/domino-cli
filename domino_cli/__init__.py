@@ -2,7 +2,7 @@
 domino_cli.py :: Main entry point for Domino CLI application.
 """
 
-__version__ = "2.4.0"
+__version__ = "2.5.0"
 
 from domino_cli.core.ApplicationContext import ApplicationContext
 

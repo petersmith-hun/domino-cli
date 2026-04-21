@@ -34,6 +34,8 @@ class DominoClient:
         if auth:
             headers.update(auth)
 
-        return requests.request(domino_request.method.value, resolved_path, headers=headers,
+        return requests.request(domino_request.method.value, resolved_path,
+                                headers=headers,
+                                params=domino_request.query,
                                 json=None if domino_request.as_text else domino_request.body,
                                 data=domino_request.body if domino_request.as_text else None)

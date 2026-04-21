@@ -10,6 +10,7 @@ from domino_cli.core.command.ExitCommand import ExitCommand
 from domino_cli.core.command.HelpCommand import HelpCommand
 from domino_cli.core.command.ImportCommand import ImportCommand
 from domino_cli.core.command.InfoCommand import InfoCommand
+from domino_cli.core.command.OAuthImportCommand import OAuthImportCommand
 from domino_cli.core.command.RestartApplicationCommand import RestartApplicationCommand
 from domino_cli.core.command.SecretCommand import SecretCommand
 from domino_cli.core.command.StartApplicationCommand import StartApplicationCommand
@@ -124,6 +125,7 @@ class ApplicationContext:
         _command_restart_app = RestartApplicationCommand(_domino_service)
         _command_deploy_app = DeployApplicationCommand(_domino_service)
         _command_import = ImportCommand(_domino_service)
+        _command_oauth_import = OAuthImportCommand(_domino_service)
         _command_auth = AuthCommand(_auth_service)
         _command_wizard = WizardCommand(_config_wizard_service)
         _command_info = InfoCommand(_domino_service)
@@ -151,6 +153,7 @@ class ApplicationContext:
             _command_start_app,
             _command_stop_app,
             _command_import,
+            _command_oauth_import,
             _command_wizard,
             _command_info,
             _command_secret

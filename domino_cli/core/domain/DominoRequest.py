@@ -1,3 +1,5 @@
+from typing import Dict
+
 from domino_cli.core.domain.HTTPMethod import HTTPMethod
 
 
@@ -5,9 +7,10 @@ class DominoRequest:
     """
     REST request parameter wrapper.
     """
-    def __init__(self, method: HTTPMethod, path: str, body=None, as_text: bool = False, authenticated: bool = False):
+    def __init__(self, method: HTTPMethod, path: str, query: Dict[str, str] = None, body=None, as_text: bool = False, authenticated: bool = False):
         self.method = method
         self.path = path
+        self.query = query
         self.body = body
         self.as_text = as_text
         self.authenticated = authenticated
@@ -22,6 +25,7 @@ class DominoRequest:
 
         return self.method == other.method \
             and self.path == other.path \
+            and self.query == other.query \
             and self.body == other.body \
             and self.as_text == other.as_text \
             and self.authenticated == other.authenticated

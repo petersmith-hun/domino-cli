@@ -33,7 +33,7 @@ class DominoClientTest(unittest.TestCase):
 
         # given
         self.session_context_holder.get_bearer_auth.return_value = _AUTH_HEADER
-        domino_request: DominoRequest = DominoRequest(_HTTP_METHOD, _LIFECYCLE_PATH, body=_BODY, authenticated=True)
+        domino_request: DominoRequest = DominoRequest(_HTTP_METHOD, _LIFECYCLE_PATH, body=_BODY, authenticated=True, query={"dry-run": "true"})
         expected_header = _JSON_CONTENT_TYPE_HEADER.copy()
         expected_header.update(_AUTH_HEADER)
 
@@ -41,7 +41,7 @@ class DominoClientTest(unittest.TestCase):
         self.domino_client.send_command(domino_request)
 
         # then
-        request_mock.assert_called_once_with(_HTTP_METHOD.value, _RESOLVED_LIFECYCLE_PATH, json=_BODY, headers=expected_header, data=None)
+        request_mock.assert_called_once_with(_HTTP_METHOD.value, _RESOLVED_LIFECYCLE_PATH, json=_BODY, headers=expected_header, data=None, params={"dry-run": "true"})
 
     @mock.patch("requests.request")
     def test_should_send_command_execute_http_request_with_authentication_and_text_data(self, request_mock) -> None:
@@ -56,7 +56,7 @@ class DominoClientTest(unittest.TestCase):
         self.domino_client.send_command(domino_request)
 
         # then
-        request_mock.assert_called_once_with(_IMPORT_HTTP_METHOD.value, _RESOLVED_IMPORT_PATH, json=None, headers=expected_header, data=_TEXT_DATA)
+        request_mock.assert_called_once_with(_IMPORT_HTTP_METHOD.value, _RESOLVED_IMPORT_PATH, json=None, headers=expected_header, data=_TEXT_DATA, params=None)
 
     @mock.patch("requests.request")
     def test_should_send_command_execute_http_request_without_authentication_and_body(self, request_mock) -> None:
@@ -68,7 +68,7 @@ class DominoClientTest(unittest.TestCase):
         self.domino_client.send_command(domino_request)
 
         # then
-        request_mock.assert_called_once_with(_HTTP_METHOD.value, _RESOLVED_LIFECYCLE_PATH, json=None, headers=_JSON_CONTENT_TYPE_HEADER, data=None)
+        request_mock.assert_called_once_with(_HTTP_METHOD.value, _RESOLVED_LIFECYCLE_PATH, json=None, headers=_JSON_CONTENT_TYPE_HEADER, data=None, params=None)
         self.assertEqual(self.session_context_holder.get_bearer_auth.call_count, 0)
 
     @mock.patch("requests.request")
@@ -82,7 +82,7 @@ class DominoClientTest(unittest.TestCase):
         self.domino_client.send_command(domino_request)
 
         # then
-        request_mock.assert_called_once_with(_HTTP_METHOD.value, _RESOLVED_LIFECYCLE_PATH, json=None, headers=_JSON_CONTENT_TYPE_HEADER, data=None)
+        request_mock.assert_called_once_with(_HTTP_METHOD.value, _RESOLVED_LIFECYCLE_PATH, json=None, headers=_JSON_CONTENT_TYPE_HEADER, data=None, params=None)
 
 
 if __name__ == "__main__":
