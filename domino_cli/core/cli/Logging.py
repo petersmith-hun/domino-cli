@@ -1,5 +1,4 @@
 import os
-import string
 import sys
 from enum import Enum
 
@@ -26,7 +25,7 @@ _terminal_color_mapping: dict[LogLevel, TerminalColor] = {
 }
 
 
-def info(message: string) -> None:
+def info(message: str) -> None:
     """
     Logs the given message on info level. Ignores logging in CI/CD mode.
 
@@ -34,7 +33,7 @@ def info(message: string) -> None:
     """
     _log(LogLevel.INFO, message, False)
 
-def warning(message: string) -> None:
+def warning(message: str) -> None:
     """
     Logs the given message on warn level. Ignores logging in CI/CD mode.
 
@@ -42,7 +41,7 @@ def warning(message: string) -> None:
     """
     _log(LogLevel.WARNING, message, False)
 
-def error(message: string) -> None:
+def error(message: str) -> None:
     """
     Logs the given message on error level. Logs the given message even in CI/CD mode.
 
@@ -62,7 +61,7 @@ def get_color(color: TerminalColor) -> str:
         if os.getenv("DOMINO_CLI_DISABLE_COLORS") is not None or "unittest" in sys.modules \
         else color.value
 
-def _log(log_level: LogLevel, message: string, force: bool = False) -> None:
+def _log(log_level: LogLevel, message: str, force: bool = False) -> None:
 
     if not RuntimeHelper.is_cicd_mode() or force:
         print(f"[{get_color(_terminal_color_mapping[log_level])}{log_level.value:5}{get_color(TerminalColor.NORMAL)}] {message}")

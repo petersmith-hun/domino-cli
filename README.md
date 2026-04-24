@@ -174,6 +174,15 @@ import <optional/path/to/deployment-definition.yml>
 Imports a YAML formatted deployment definition. Without providing an absolute or relative path to your deployment 
 definition file, defaults to `.domino/deployment.yml`.
 
+### OAuth descriptor management commands
+
+```
+oauth-import <app> [--dry-run] <optional/path/to/deployment-definition.yml>
+```
+Imports a YAML formatted OAuth descriptor. Without providing an absolute or relative path to your OAuth descriptor
+file, defaults to `.domino/oauth.yml`. The `--dry-run` switch causes Domino not to save, but to verify only the
+descriptor's contents, including the permission and application relations defined by it.
+
 ### Secret management commands
 
 Domino Coordinator, starting with v2.3.0, can act as a simple secret manager. Domino CLI provides an integration for

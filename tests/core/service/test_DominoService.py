@@ -146,7 +146,82 @@ class DominoServiceTest(unittest.TestCase):
             mock.call("[error] Failed to import definition from .domino/deployment.yml - reason: Failed to open file")
         ])
 
-    def _assert_client_call(self, expected_path, expected_method=HTTPMethod.PUT, expected_body=None):
+    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=_TEXT_DATA)
+    @mock.patch("builtins.print", side_effect=print)
+    def test_should_import_oauth_descriptor_command_using_default_path_with_success(self, print_mock, open_mock):
+
+        # given
+        self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True, True)
+
+        # when
+        self.domino_service.import_oauth_descriptor("app", False)
+
+        # then
+        self._assert_client_call("/deployments/app/oauth-application/import", HTTPMethod.POST, _TEXT_DATA)
+        self.assertEqual(print_mock.call_count, 4)
+        print_mock.assert_has_calls([
+            mock.call("[info ] Requesting Domino to import OAuth application descriptor from=.domino/oauth.yml"),
+            mock.call("[info ] Successfully imported OAuth application descriptor .domino/oauth.yml"),
+            mock.call("[info ] No further response received from Domino"),
+            mock.call()
+        ])
+
+    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=_TEXT_DATA)
+    @mock.patch("builtins.print", side_effect=print)
+    def test_should_import_oauth_descriptor_command_using_given_path_with_success(self, print_mock, open_mock):
+
+        # given
+        self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True, True)
+
+        # when
+        self.domino_service.import_oauth_descriptor("app", True, "/opt/custom-oauth.yml")
+
+        # then
+        self._assert_client_call("/deployments/app/oauth-application/import", HTTPMethod.POST, _TEXT_DATA, {"dry-run": "true"})
+        self.assertEqual(print_mock.call_count, 4)
+        print_mock.assert_has_calls([
+            mock.call("[info ] Requesting Domino to import OAuth application descriptor from=/opt/custom-oauth.yml"),
+            mock.call("[info ] Successfully imported OAuth application descriptor /opt/custom-oauth.yml"),
+            mock.call("[info ] No further response received from Domino"),
+            mock.call()
+        ])
+
+    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=_TEXT_DATA)
+    @mock.patch("builtins.print", side_effect=print)
+    def test_should_import_oauth_descriptor_command_with_server_error(self, print_mock, open_mock):
+
+        # given
+        self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(False)
+
+        # when
+        self.domino_service.import_oauth_descriptor("app", False)
+
+        # then
+        self._assert_client_call("/deployments/app/oauth-application/import", HTTPMethod.POST, _TEXT_DATA)
+        self.assertEqual(print_mock.call_count, 4)
+        print_mock.assert_has_calls([
+            mock.call("[info ] Requesting Domino to import OAuth application descriptor from=.domino/oauth.yml"),
+            mock.call("[error] Failed to import OAuth application descriptor .domino/oauth.yml - Domino responded with 500"),
+            mock.call("[info ] No further response received from Domino"),
+            mock.call()
+        ])
+
+    @mock.patch("builtins.open", side_effect=IOError("Failed to open file"))
+    @mock.patch("builtins.print", side_effect=print)
+    def test_should_import_oauth_descriptor_command_with_client_error(self, print_mock, open_mock):
+
+        # when
+        self.domino_service.import_oauth_descriptor("app", False)
+
+        # then
+        self.assertEqual(self.domino_client_mock.send_command.call_count, 0)
+        self.assertEqual(print_mock.call_count, 2)
+        print_mock.assert_has_calls([
+            mock.call("[info ] Requesting Domino to import OAuth application descriptor from=.domino/oauth.yml"),
+            mock.call("[error] Failed to import descriptor from .domino/oauth.yml - reason: Failed to open file")
+        ])
+
+    def _assert_client_call(self, expected_path, expected_method=HTTPMethod.PUT, expected_body=None, expected_query_params=None):
 
         self.assertEqual(self.domino_client_mock.send_command.call_count, 1)
         domino_request: DominoRequest = self._extract_call_parameter()
@@ -154,6 +229,7 @@ class DominoServiceTest(unittest.TestCase):
         self.assertEqual(domino_request.path, expected_path)
         self.assertEqual(domino_request.authenticated, True)
         self.assertEqual(domino_request.body, expected_body)
+        self.assertEqual(domino_request.query, expected_query_params)
 
     def _extract_call_parameter(self):
         return self.domino_client_mock.send_command.mock_calls[0][1][0]
