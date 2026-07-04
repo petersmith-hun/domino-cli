@@ -22,13 +22,61 @@ class DominoServiceTest(unittest.TestCase):
     def test_should_execute_lifecycle_command_with_success(self, print_mock):
 
         # given
+        query = {"roll": "false"}
+
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True)
 
         # when
         self.domino_service.execute_lifecycle_command(DominoCommand.DEPLOY_VERSION, "app1", version="1.0.0")
 
         # then
-        self._assert_client_call("/lifecycle/app1/deploy/1.0.0")
+        self._assert_client_call("/lifecycle/app1/deploy/1.0.0", expected_query_params=query)
+        self.assertEqual(print_mock.call_count, 6)
+        print_mock.assert_has_calls([
+            mock.call("[info ] Sending DEPLOY_VERSION command for application app1 via Domino"),
+            mock.call("[info ] Command DEPLOY_VERSION successfully executed on application app1"),
+            mock.call("[info ]  --- Response details ---"),
+            mock.call("[info ]              message: some details"),
+            mock.call("[info ]               status: ALL_OK"),
+            mock.call()
+        ])
+
+    @mock.patch("builtins.print", side_effect=print)
+    def test_should_execute_lifecycle_command_of_rolling_deploy_with_success(self, print_mock):
+
+        # given
+        query = {"roll": "true"}
+
+        self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True)
+
+        # when
+        self.domino_service.execute_lifecycle_command(DominoCommand.DEPLOY_VERSION, "app1", version="1.0.0", roll=True)
+
+        # then
+        self._assert_client_call("/lifecycle/app1/deploy/1.0.0", expected_query_params=query)
+        self.assertEqual(print_mock.call_count, 6)
+        print_mock.assert_has_calls([
+            mock.call("[info ] Sending DEPLOY_VERSION command for application app1 via Domino"),
+            mock.call("[info ] Command DEPLOY_VERSION successfully executed on application app1"),
+            mock.call("[info ]  --- Response details ---"),
+            mock.call("[info ]              message: some details"),
+            mock.call("[info ]               status: ALL_OK"),
+            mock.call()
+        ])
+
+    @mock.patch("builtins.print", side_effect=print)
+    def test_should_execute_lifecycle_command_of_instance_deploy_with_success(self, print_mock):
+
+        # given
+        query = {"roll": "false", "instance": "primary"}
+
+        self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True)
+
+        # when
+        self.domino_service.execute_lifecycle_command(DominoCommand.DEPLOY_VERSION, "app1", version="1.0.0", instance="primary")
+
+        # then
+        self._assert_client_call("/lifecycle/app1/deploy/1.0.0", expected_query_params=query)
         self.assertEqual(print_mock.call_count, 6)
         print_mock.assert_has_calls([
             mock.call("[info ] Sending DEPLOY_VERSION command for application app1 via Domino"),
@@ -43,13 +91,15 @@ class DominoServiceTest(unittest.TestCase):
     def test_should_execute_lifecycle_command_with_failure(self, print_mock):
 
         # given
+        query = {"roll": "false"}
+
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(False)
 
         # when
         self.domino_service.execute_lifecycle_command(DominoCommand.START, "app2")
 
         # then
-        self._assert_client_call("/lifecycle/app2/start")
+        self._assert_client_call("/lifecycle/app2/start", expected_query_params=query)
         print_mock.assert_has_calls([
             mock.call("[info ] Sending START command for application app2 via Domino"),
             mock.call("[error] Failed to execute command START on application app2 - Domino responded with 500")
@@ -59,13 +109,15 @@ class DominoServiceTest(unittest.TestCase):
     def test_should_execute_lifecycle_command_handle_exception(self, print_mock):
 
         # given
+        query = {"roll": "false"}
+
         self.domino_client_mock.send_command.side_effect = Exception("Mock client call failure")
 
         # when
         self.domino_service.execute_lifecycle_command(DominoCommand.STOP, "app3")
 
         # then
-        self._assert_client_call("/lifecycle/app3/stop", expected_method=HTTPMethod.DELETE)
+        self._assert_client_call("/lifecycle/app3/stop", expected_method=HTTPMethod.DELETE, expected_query_params=query)
         print_mock.assert_has_calls([
             mock.call("[info ] Sending STOP command for application app3 via Domino"),
             mock.call("[error] Failed to execute HTTP request [DELETE /lifecycle/app3/stop] - reason: Mock client call failure")

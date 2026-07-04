@@ -46,6 +46,8 @@ class DeploymentConfigWizardResultTransformer(AbstractWizardResultTransformer):
 
         target_dict: dict = {}
         [self._assign(mapping, root_node, source, target_dict) for mapping in Mapping.get_mappings_by_group(MappingGroups.BASE)]
+        if self._read_current_value(Mapping.MULTI_INSTANCE_ENABLE, root_node, target_dict):
+            [self._assign(mapping, root_node, source, target_dict) for mapping in Mapping.get_mappings_by_group(MappingGroups.MULTI_INSTANCE)]
 
         return target_dict
 

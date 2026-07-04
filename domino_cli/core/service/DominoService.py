@@ -16,17 +16,23 @@ class DominoService:
     def __init__(self, domino_client: DominoClient):
         self._domino_client = domino_client
 
-    def execute_lifecycle_command(self, domino_command: DominoCommand, application: str, version: str = None) -> None:
+    def execute_lifecycle_command(self, domino_command: DominoCommand, application: str, version: str | None = None, roll: bool = False, instance: str | None = None) -> None:
         """
         Executes the given lifecycle command for the given application.
 
         :param domino_command: DominoCommand object specifying the command to be executed
         :param application: application name to send the command to
-        :param version: optional version number
+        :param version: (optional) version number
+        :param roll: instructs Domino to roll the application instances of multi-instance deployments
+        :param instance: instructs Domino to only apply the command to a specific instance of a multi-instance deployment
         """
+        query: dict[str, str] = {"roll": "true" if roll else "false"}
+        if instance:
+            query["instance"] = instance
+
         domino_request_descriptor: DominoRequestDescriptor = domino_command.value
         formatted_path = domino_request_descriptor.path_template.format(application, version)
-        domino_request = DominoRequest(domino_request_descriptor.method, formatted_path, authenticated=True)
+        domino_request = DominoRequest(domino_request_descriptor.method, formatted_path, authenticated=True, query=query)
 
         info("Sending {0} command for application {1} via Domino".format(domino_command.name, application))
 
@@ -48,7 +54,7 @@ class DominoService:
 
     def import_definition(self, optional_definition_path: str | None = None) -> None:
         """
-        Imports the given deployment definition. If path is not provided, defaults to ".domino/deployment.yml".
+        Imports the given deployment definition. If a path is not provided, defaults to ".domino/deployment.yml".
 
         :param optional_definition_path: optional path to a deployment definition
         """
@@ -80,7 +86,7 @@ class DominoService:
 
     def import_oauth_descriptor(self, application: str, dry_run: bool, optional_descriptor_path: str | None = None) -> None:
         """
-        Imports the given OAuth descriptor. If path is not provided, defaults to ".domino/oauth.yml".
+        Imports the given OAuth descriptor. If a path is not provided, defaults to ".domino/oauth.yml".
 
         :param application: name of the application name to submit the OAuth descriptor for
         :param dry_run: do not execute actual changes (verifies the descriptor and the relations defined by it, without saving it)

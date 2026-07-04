@@ -17,11 +17,19 @@ class AbstractLifecycleCommand(AbstractCommand):
     def execute_command(self, command_descriptor: CommandDescriptor) -> None:
         """
         Executes a simple lifecycle command (currently supported commands are start, stop, restart).
-        Argument array should only contain the name of the application.
+        Argument array must contain the name of the application. Besides, --roll and --instance flags can be used to
+        trigger rolling all instances of a multi-instance deployment or just a specific instance, respectively.
 
         :param command_descriptor: CommandDescriptor object containing the command arguments
         """
-        if not len(command_descriptor.arguments) == 1:
+        if len(command_descriptor.arguments) == 0:
             warning("Application name required")
         else:
-            self._domino_service.execute_lifecycle_command(self._domino_command, command_descriptor.arguments[0])
+
+            roll = "--roll" in command_descriptor.arguments
+            instance = command_descriptor.arguments[2] \
+                if "--instance" in command_descriptor.arguments and len(command_descriptor.arguments) == 3 \
+                else None
+
+            self._domino_service.execute_lifecycle_command(self._domino_command, command_descriptor.arguments[0],
+                                                           version=None, roll=roll, instance=instance)

@@ -24,7 +24,29 @@ class RestartApplicationCommandTest(CommandBaseTest):
         self.restart_application_command.execute_command(command_descriptor)
 
         # then
-        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.RESTART, "app1")
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.RESTART, "app1", None, False, None)
+
+    def test_should_execute_command_for_rolling_restart_with_success(self):
+
+        # given
+        command_descriptor: CommandDescriptor = CommandDescriptor("restart app1 --roll")
+
+        # when
+        self.restart_application_command.execute_command(command_descriptor)
+
+        # then
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.RESTART, "app1", None, True, None)
+
+    def test_should_execute_command_for_instance_restart_with_success(self):
+
+        # given
+        command_descriptor: CommandDescriptor = CommandDescriptor("restart app1 --instance primary")
+
+        # when
+        self.restart_application_command.execute_command(command_descriptor)
+
+        # then
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.RESTART, "app1", None, False, "primary")
 
     @mock.patch("builtins.print", side_effect=print)
     def test_should_execute_command_fail_on_validation(self, print_mock):

@@ -26,7 +26,7 @@ class DeployApplicationCommand(AbstractCommand):
 
         :param command_descriptor: CommandDescriptor object containing the command arguments
         """
-        if not len(command_descriptor.arguments) == 2:
+        if len(command_descriptor.arguments) < 2:
             error("Application name and 'latest' keyword or explicit version is required")
             RuntimeHelper.exit_with_error_in_cicd_mode()
 
@@ -37,4 +37,9 @@ class DeployApplicationCommand(AbstractCommand):
                 if version == _LATEST_KEYWORD \
                 else DominoCommand.DEPLOY_VERSION
 
-            self._domino_service.execute_lifecycle_command(command, application, version)
+            roll = "--roll" in command_descriptor.arguments
+            instance = command_descriptor.arguments[3] \
+                if "--instance" in command_descriptor.arguments and len(command_descriptor.arguments) == 4 \
+                else None
+
+            self._domino_service.execute_lifecycle_command(command, application, version, roll, instance)
