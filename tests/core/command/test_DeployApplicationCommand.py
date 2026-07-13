@@ -24,7 +24,7 @@ class DeployApplicationCommandTest(CommandBaseTest):
         self.deploy_application_command.execute_command(command_descriptor)
 
         # then
-        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.DEPLOY_LATEST, "app1", "latest")
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.DEPLOY_LATEST, "app1", "latest", False, None)
 
     def test_should_execute_command_for_specified_version(self):
 
@@ -35,7 +35,29 @@ class DeployApplicationCommandTest(CommandBaseTest):
         self.deploy_application_command.execute_command(command_descriptor)
 
         # then
-        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.DEPLOY_VERSION, "app1", "1.0.0")
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.DEPLOY_VERSION, "app1", "1.0.0", False, None)
+
+    def test_should_execute_command_for_specified_version_and_rolling_deploy(self):
+
+        # given
+        command_descriptor: CommandDescriptor = CommandDescriptor("deploy app1 1.0.0 --roll")
+
+        # when
+        self.deploy_application_command.execute_command(command_descriptor)
+
+        # then
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.DEPLOY_VERSION, "app1", "1.0.0", True, None)
+
+    def test_should_execute_command_for_specified_version_and_instance_deploy(self):
+
+        # given
+        command_descriptor: CommandDescriptor = CommandDescriptor("deploy app1 1.0.0 --instance 1")
+
+        # when
+        self.deploy_application_command.execute_command(command_descriptor)
+
+        # then
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.DEPLOY_VERSION, "app1", "1.0.0", False, "1")
 
     @mock.patch("builtins.print", side_effect=print)
     def test_should_execute_command_fail_on_validation(self, print_mock):

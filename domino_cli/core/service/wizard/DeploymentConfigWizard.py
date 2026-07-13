@@ -11,6 +11,8 @@ from domino_cli.core.service.wizard.transformer.AbstractWizardResultTransformer 
 _WIZARD_NAME = "deployment"
 _WIZARD_DESCRIPTION = "Creates a properly configured Domino application deployment"
 _AVAILABLE_SOURCE_TYPES = ["filesystem", "docker"]
+_AVAILABLE_SPREAD_MODES = ["replicate", "one-per-host"]
+_AVAILABLE_NAMING_STRATEGIES = ["incremental-suffix", "custom-predefined"]
 _AVAILABLE_EXEC_TYPES = ["executable", "runtime", "service"]
 _AVAILABLE_DOCKER_EXEC_TYPES = ["standard"]
 _AVAILABLE_RESULT_RENDERERS = ["console", "file"]
@@ -35,6 +37,13 @@ class DeploymentConfigWizard(AbstractWizard):
         ws_deployment_name = BaseWizardStep(Mapping.DEPLOYMENT_NAME, "Specify an identifier for the deployment (e.g. abbreviation of app)")
         ws_source_type = OptionSelectorWizardStep(Mapping.SOURCE_TYPE, "Application will be filesystem or Docker based?", _AVAILABLE_SOURCE_TYPES)
         ws_target_hosts = MultiAnswerWizardStep(Mapping.TARGET_HOSTS, "Hosts to deploy application to (host IDs)")
+        ws_multi_instance = OptionSelectorWizardStep(Mapping.MULTI_INSTANCE_ENABLE, "Do you want to configure the application as multi-instance?")
+        ws_instance_count = BaseWizardStep(Mapping.INSTANCE_COUNT, "Specify the number of instances to be deployed")
+        ws_spread_mode = OptionSelectorWizardStep(Mapping.SPREAD_MODE, "Specify the spread mode", _AVAILABLE_SPREAD_MODES)
+        ws_naming_strategy = OptionSelectorWizardStep(Mapping.NAMING_STRATEGY, "Specify the naming strategy", _AVAILABLE_NAMING_STRATEGIES)
+        ws_defined_names = MultiAnswerWizardStep(Mapping.DEFINED_NAMES, "Specify the names of the instances")
+        ws_port_offset = BaseWizardStep(Mapping.PORT_OFFSET, "Specify the port offset")
+        ws_host_network_base_port = BaseWizardStep(Mapping.HOST_NETWORK_BASE_PORT, "Specify the base port for host network mode")
         ws_exec_type = OptionSelectorWizardStep(Mapping.EXEC_TYPE, "Specify the execution type", _AVAILABLE_EXEC_TYPES)
         ws_exec_type_docker = OptionSelectorWizardStep(Mapping.EXEC_TYPE, "Specify the Docker execution type", _AVAILABLE_DOCKER_EXEC_TYPES)
         ws_home = BaseWizardStep(Mapping.SOURCE_HOME, "What will be the home directory of the application?")
@@ -63,13 +72,26 @@ class DeploymentConfigWizard(AbstractWizard):
         ws_result_rendering = OptionSelectorWizardStep(Mapping.RESULT_RENDERING, "Write result to", _AVAILABLE_RESULT_RENDERERS)
 
         source_type_field = Mapping.SOURCE_TYPE.get_wizard_field()
+        multi_instance_enabled = Mapping.MULTI_INSTANCE_ENABLE.get_wizard_field()
+        naming_strategy_field = Mapping.NAMING_STRATEGY.get_wizard_field()
         exec_type_field = Mapping.EXEC_TYPE.get_wizard_field()
         health_check_enable_field = Mapping.HEALTH_CHECK_ENABLE.get_wizard_field()
         info_enable_field = Mapping.INFO_ENABLE.get_wizard_field()
 
         # transitions
         ws_deployment_name.add_transition(ws_target_hosts)
-        ws_target_hosts.add_transition(ws_source_type)
+
+        ws_target_hosts.add_transition(ws_multi_instance)
+        ws_multi_instance.add_transition(ws_instance_count, lambda context: context[multi_instance_enabled] == "yes")
+        ws_multi_instance.add_transition(ws_source_type, lambda context: context[multi_instance_enabled] == "no")
+        ws_instance_count.add_transition(ws_spread_mode)
+        ws_spread_mode.add_transition(ws_naming_strategy)
+        ws_naming_strategy.add_transition(ws_defined_names, lambda context: context[naming_strategy_field] == _AVAILABLE_NAMING_STRATEGIES[1])
+        ws_naming_strategy.add_transition(ws_port_offset, lambda context: context[naming_strategy_field] == _AVAILABLE_NAMING_STRATEGIES[0])
+        ws_defined_names.add_transition(ws_port_offset)
+        ws_port_offset.add_transition(ws_host_network_base_port)
+        ws_host_network_base_port.add_transition(ws_source_type)
+
         ws_source_type.add_transition(ws_exec_type, lambda context: context[source_type_field] == _AVAILABLE_SOURCE_TYPES[0])
         ws_source_type.add_transition(ws_exec_type_docker, lambda context: context[source_type_field] == _AVAILABLE_SOURCE_TYPES[1])
         ws_exec_type.add_transition(ws_home)

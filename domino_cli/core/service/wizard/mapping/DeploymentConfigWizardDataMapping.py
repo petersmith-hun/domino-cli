@@ -10,6 +10,7 @@ class MappingGroups(Enum):
     HEALTH_CHECK = "healthcheck"
     INFO = "info"
     SOURCE_COMMON = "source-common"
+    MULTI_INSTANCE = "multi-instance"
 
 
 class Mapping(WizardDataMappingBaseEnum):
@@ -23,6 +24,15 @@ class Mapping(WizardDataMappingBaseEnum):
 
     SOURCE_HOME = (MappingGroups.SOURCE_COMMON, "src_home", "$root.source.home")
     BINARY_NAME = (MappingGroups.SOURCE_COMMON, "src_bin_name", "$root.source.resource")
+
+    MULTI_INSTANCE_ENABLE = (MappingGroups.BASE, "multi_instance_enable", "$root.target.multi-instance.enabled", _DEFAULT_OPTIONS_TO_BOOLEAN_MAPPER)
+    INSTANCE_COUNT = (MappingGroups.MULTI_INSTANCE, "instance_count", "$root.target.multi-instance.instance-count", _STR_TO_INT_MAPPER)
+    SPREAD_MODE = (MappingGroups.MULTI_INSTANCE, "spread_mode", "$root.target.multi-instance.spread-mode")
+    NAMING_STRATEGY = (MappingGroups.MULTI_INSTANCE, "naming_strategy", "$root.target.multi-instance.naming-strategy")
+    DEFINED_NAMES = (MappingGroups.MULTI_INSTANCE, "defined_names", "$root.target.multi-instance.defined-names")
+    PORT_OFFSET = (MappingGroups.MULTI_INSTANCE, "port_offset", "$root.target.multi-instance.port-offset", _STR_TO_INT_MAPPER)
+    HOST_NETWORK_BASE_PORT = (MappingGroups.MULTI_INSTANCE, "host_network_base_port", "$root.target.multi-instance.host-network-base-port", _STR_TO_INT_MAPPER)
+
     RUNTIME_NAME = ("", "runtime_name", "$root.runtime")
     EXEC_COMMAND_NAME = ("", "exec_cmd_name", "$root.execution.command-name")
     EXEC_USER = ("", "exec_user", "$root.execution.as-user")

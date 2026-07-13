@@ -13,6 +13,7 @@ _EXECUTABLE_TYPE_RAW_RESPONSES = [
     "devlocal",
     "localhost",
     "",
+    "2",
     "1",
     "1",
     "/home",
@@ -35,6 +36,7 @@ _EXECUTABLE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
         "devlocal",
         "localhost"
     ],
+    "multi_instance_enable": "no",
     "source_type": "filesystem",
     "exec_type": "executable",
     "src_home": "/home",
@@ -57,6 +59,7 @@ _RUNTIME_TYPE_RAW_RESPONSES = [
     "app2",
     "localhost",
     "",
+    "2",
     "1",
     "2",
     "/home",
@@ -75,6 +78,7 @@ _RUNTIME_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "target_hosts": [
         "localhost"
     ],
+    "multi_instance_enable": "no",
     "exec_type": "runtime",
     "src_home": "/home",
     "src_bin_name": "app2-exec.jar",
@@ -92,6 +96,7 @@ _SERVICE_TYPE_RAW_RESPONSES = [
     "app3",
     "localhost",
     "",
+    "2",
     "1",
     "3",
     "/home",
@@ -108,6 +113,7 @@ _SERVICE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "target_hosts": [
         "localhost"
     ],
+    "multi_instance_enable": "no",
     "exec_type": "service",
     "src_home": "/home",
     "src_bin_name": "app3-exec.jar",
@@ -121,6 +127,12 @@ _SERVICE_TYPE_FORMATTED_RESPONSE_DICT: dict = {
 _DOCKER_STANDARD_TYPE_RAW_RESPONSES = [
     "app4",
     "localhost",
+    "",
+    "1",
+    "2",
+    "1",
+    "1",
+    "+100",
     "",
     "2",
     "1",
@@ -157,6 +169,12 @@ _DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "target_hosts": [
         "localhost"
     ],
+    "multi_instance_enable": "yes",
+    "instance_count": "2",
+    "spread_mode": "replicate",
+    "naming_strategy": "incremental-suffix",
+    "port_offset": "+100",
+    "host_network_base_port": None,
     "exec_type": "standard",
     "src_home": "http://localhost:5000/apps",
     "src_bin_name": "img_app4",
@@ -191,6 +209,103 @@ _DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT: dict = {
     "result_rendering": "console"
 }
 
+_DOCKER_STANDARD_TYPE_RAW_RESPONSES_2 = [
+    "app4",
+    "localhost",
+    "host2",
+    "host3",
+    "",
+    "1",
+    "3",
+    "2",
+    "2",
+    "primary",
+    "secondary",
+    "standby",
+    "",
+    "-200",
+    "8200",
+    "2",
+    "1",
+    "http://localhost:5000/apps",
+    "img_app4",
+    "container_app4",
+    "9000:9000/tcp",
+    "8080:8080",
+    "",
+    "ENV_VAR1:value1",
+    "ENV_VAR2:value2",
+    "ENV_VAR3:value3",
+    "",
+    "/tmp1:/tmp1",
+    "/tmp2/something:/app/tmp:rw",
+    "/tmp3/tmp:/app/something:ro",
+    "",
+    "host",
+    "4",
+    "--param1",
+    "--param2",
+    "",
+    "2",
+    "1",
+    "http://localhost:9000/actuator/info",
+    "name:$.app.name",
+    "version:$.build.version",
+    "",
+    "1"
+]
+_DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT_2: dict = {
+    "deployment_name": "app4",
+    "source_type": "docker",
+    "target_hosts": [
+        "localhost",
+        "host2",
+        "host3"
+    ],
+    "multi_instance_enable": "yes",
+    "instance_count": "3",
+    "spread_mode": "one-per-host",
+    "naming_strategy": "custom-predefined",
+    "defined_names": [
+        "primary",
+        "secondary",
+        "standby"
+    ],
+    "port_offset": "-200",
+    "host_network_base_port": "8200",
+    "exec_type": "standard",
+    "src_home": "http://localhost:5000/apps",
+    "src_bin_name": "img_app4",
+    "exec_cmd_name": "container_app4",
+    "exec_args_docker_ports": {
+        "9000": "9000/tcp",
+        "8080": "8080"
+    },
+    "exec_args_docker_env": {
+        "ENV_VAR1": "value1",
+        "ENV_VAR2": "value2",
+        "ENV_VAR3": "value3"
+    },
+    "exec_args_docker_volumes": {
+        "/tmp1": "/tmp1",
+        "/tmp2/something": "/app/tmp:rw",
+        "/tmp3/tmp": "/app/something:ro"
+    },
+    "exec_args_docker_network": "host",
+    "exec_args_docker_restart": "unless-stopped",
+    "exec_args_docker_cmd": [
+        "--param1",
+        "--param2"
+    ],
+    "hc_enable": "no",
+    "info_enable": "yes",
+    "info_endpoint": "http://localhost:9000/actuator/info",
+    "info_field_mapping": {
+        "name": "$.app.name",
+        "version": "$.build.version"
+    },
+    "result_rendering": "console"
+}
 
 class DeploymentConfigWizardTest(unittest.TestCase):
 
@@ -248,6 +363,16 @@ class DeploymentConfigWizardTest(unittest.TestCase):
 
         # then
         self.wizard_result_transformer_mock.transform.assert_called_once_with(_DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT)
+        self.wizard_result_console_renderer_mock.render.assert_called_once_with(_TRANSFORMED_VALUE)
+
+    @mock.patch("builtins.input", side_effect=_DOCKER_STANDARD_TYPE_RAW_RESPONSES_2)
+    def test_should_run_wizard_for_docker_standard_type_and_console_rendering_2(self, input_mock):
+
+        # when
+        self.deployment_config_wizard.run()
+
+        # then
+        self.wizard_result_transformer_mock.transform.assert_called_once_with(_DOCKER_STANDARD_TYPE_FORMATTED_RESPONSE_DICT_2)
         self.wizard_result_console_renderer_mock.render.assert_called_once_with(_TRANSFORMED_VALUE)
 
 

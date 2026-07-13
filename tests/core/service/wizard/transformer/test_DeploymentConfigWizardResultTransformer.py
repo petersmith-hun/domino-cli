@@ -8,6 +8,7 @@ _DEPLOYMENT_CONFIG_EXECUTABLE_RAW: dict = {
         "devlocal",
         "localhost"
     ],
+    "multi_instance_enable": "no",
     "source_type": "filesystem",
     "exec_type": "executable",
     "src_home": "/home",
@@ -37,7 +38,10 @@ _DEPLOYMENT_CONFIG_EXECUTABLE_TRANSFORMED: dict = {
                     "hosts": [
                         "devlocal",
                         "localhost"
-                    ]
+                    ],
+                    "multi-instance": {
+                        "enabled": False
+                    }
                 },
                 "execution": {
                     "via": "EXECUTABLE",
@@ -67,6 +71,7 @@ _DEPLOYMENT_CONFIG_RUNTIME_RAW: dict = {
     "target_hosts": [
         "localhost"
     ],
+    "multi_instance_enable": "no",
     "source_type": "filesystem",
     "exec_type": "runtime",
     "src_home": "/home",
@@ -96,7 +101,10 @@ _DEPLOYMENT_CONFIG_RUNTIME_TRANSFORMED: dict = {
                 "target": {
                     "hosts": [
                         "localhost"
-                    ]
+                    ],
+                    "multi-instance": {
+                        "enabled": False
+                    }
                 },
                 "execution": {
                     "via": "RUNTIME",
@@ -127,6 +135,7 @@ _DEPLOYMENT_CONFIG_SERVICE_RAW: dict = {
     "target_hosts": [
         "localhost"
     ],
+    "multi_instance_enable": "no",
     "source_type": "filesystem",
     "exec_type": "service",
     "src_home": "/home",
@@ -148,7 +157,10 @@ _DEPLOYMENT_CONFIG_SERVICE_TRANSFORMED: dict = {
                 "target": {
                     "hosts": [
                         "localhost"
-                    ]
+                    ],
+                    "multi-instance": {
+                        "enabled": False
+                    }
                 },
                 "execution": {
                     "via": "SERVICE",
@@ -171,6 +183,11 @@ _DEPLOYMENT_CONFIG_DOCKER_STANDARD_RAW: dict = {
     "target_hosts": [
         "localhost"
     ],
+    "multi_instance_enable": "yes",
+    "instance_count": "2",
+    "spread_mode": "replicate",
+    "naming_strategy": "incremental-suffix",
+    "port_offset": "+100",
     "source_type": "docker",
     "exec_type": "standard",
     "src_home": "http://localhost:5000/apps",
@@ -211,7 +228,16 @@ _DEPLOYMENT_CONFIG_DOCKER_STANDARD_TRANSFORMED: dict = {
                 "target": {
                     "hosts": [
                         "localhost"
-                    ]
+                    ],
+                    "multi-instance": {
+                        "enabled": True,
+                        "instance-count": 2,
+                        "spread-mode": "replicate",
+                        "naming-strategy": "incremental-suffix",
+                        "defined-names": None,
+                        "port-offset": 100,
+                        "host-network-base-port": None
+                    }
                 },
                 "execution": {
                     "via": "STANDARD",
@@ -250,6 +276,117 @@ _DEPLOYMENT_CONFIG_DOCKER_STANDARD_TRANSFORMED: dict = {
     }
 }
 
+_DEPLOYMENT_CONFIG_DOCKER_STANDARD_RAW_2: dict = {
+    "deployment_name": "app4",
+    "target_hosts": [
+        "localhost",
+        "host2",
+        "host3"
+    ],
+    "multi_instance_enable": "yes",
+    "instance_count": "3",
+    "spread_mode": "one-per-host",
+    "naming_strategy": "custom-predefined",
+    "defined_names": [
+        "primary",
+        "secondary",
+        "standby"
+    ],
+    "port_offset": "-200",
+    "host_network_base_port": "8200",
+    "source_type": "docker",
+    "exec_type": "standard",
+    "src_home": "http://localhost:5000/apps",
+    "src_bin_name": "img_app4",
+    "exec_cmd_name": "container_app4",
+    "exec_args_docker_ports": {
+        "9000": "9000/tcp",
+        "8080": "8080"
+    },
+    "exec_args_docker_env": {
+        "ENV_VAR1": "value1",
+        "ENV_VAR2": "value2",
+        "ENV_VAR3": "value3"
+    },
+    "exec_args_docker_volumes": {
+        "/tmp1": "/tmp1",
+        "/tmp2/something": "/app/tmp:rw",
+        "/tmp3/tmp": "/app/something:ro"
+    },
+    "exec_args_docker_network": "host",
+    "exec_args_docker_restart": "unless-stopped",
+    "exec_args_docker_cmd": [
+        "--param1",
+        "--param2"
+    ],
+    "hc_enable": "no",
+    "info_enable": "no"
+}
+_DEPLOYMENT_CONFIG_DOCKER_STANDARD_TRANSFORMED_2: dict = {
+    "domino": {
+        "deployments": {
+            "app4": {
+                "source": {
+                    "type": "DOCKER",
+                    "home": "http://localhost:5000/apps",
+                    "resource": "img_app4"
+                },
+                "target": {
+                    "hosts": [
+                        "localhost",
+                        "host2",
+                        "host3"
+                    ],
+                    "multi-instance": {
+                        "enabled": True,
+                        "instance-count": 3,
+                        "spread-mode": "one-per-host",
+                        "naming-strategy": "custom-predefined",
+                        "defined-names": [
+                            "primary",
+                            "secondary",
+                            "standby"
+                        ],
+                        "port-offset": -200,
+                        "host-network-base-port": 8200
+                    }
+                },
+                "execution": {
+                    "via": "STANDARD",
+                    "command-name": "container_app4",
+                    "args": {
+                        "ports": {
+                            "9000": "9000/tcp",
+                            "8080": "8080"
+                        },
+                        "environment": {
+                            "ENV_VAR1": "value1",
+                            "ENV_VAR2": "value2",
+                            "ENV_VAR3": "value3"
+                        },
+                        "volumes": {
+                            "/tmp1": "/tmp1",
+                            "/tmp2/something": "/app/tmp:rw",
+                            "/tmp3/tmp": "/app/something:ro"
+                        },
+                        "network-mode": "host",
+                        "restart-policy": "unless-stopped",
+                        "command-args": [
+                            "--param1",
+                            "--param2"
+                        ]
+                    }
+                },
+                "health-check": {
+                    "enabled": False
+                },
+                "info": {
+                    "enabled": False
+                }
+            }
+        }
+    }
+}
 
 class DeploymentConfigWizardResultTransformerTest(unittest.TestCase):
 
@@ -273,7 +410,8 @@ class DeploymentConfigWizardResultTransformerTest(unittest.TestCase):
             (_DEPLOYMENT_CONFIG_EXECUTABLE_RAW, _DEPLOYMENT_CONFIG_EXECUTABLE_TRANSFORMED),
             (_DEPLOYMENT_CONFIG_RUNTIME_RAW, _DEPLOYMENT_CONFIG_RUNTIME_TRANSFORMED),
             (_DEPLOYMENT_CONFIG_SERVICE_RAW, _DEPLOYMENT_CONFIG_SERVICE_TRANSFORMED),
-            (_DEPLOYMENT_CONFIG_DOCKER_STANDARD_RAW, _DEPLOYMENT_CONFIG_DOCKER_STANDARD_TRANSFORMED)
+            (_DEPLOYMENT_CONFIG_DOCKER_STANDARD_RAW, _DEPLOYMENT_CONFIG_DOCKER_STANDARD_TRANSFORMED),
+            (_DEPLOYMENT_CONFIG_DOCKER_STANDARD_RAW_2, _DEPLOYMENT_CONFIG_DOCKER_STANDARD_TRANSFORMED_2)
         ]
 
 

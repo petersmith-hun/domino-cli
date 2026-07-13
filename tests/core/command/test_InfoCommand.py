@@ -24,7 +24,7 @@ class InfoCommandTest(CommandBaseTest):
         self.info_command.execute_command(command_descriptor)
 
         # then
-        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.INFO, "app1")
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.INFO, "app1", None, False, None)
 
     @mock.patch("builtins.print", side_effect=print)
     def test_should_execute_command_fail_on_validation(self, print_mock):

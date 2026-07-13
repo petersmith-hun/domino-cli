@@ -24,7 +24,29 @@ class StopApplicationCommandTest(CommandBaseTest):
         self.stop_application_command.execute_command(command_descriptor)
 
         # then
-        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.STOP, "app1")
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.STOP, "app1", None, False, None)
+
+    def test_should_execute_command_for_rolling_stop_with_success(self):
+
+        # given
+        command_descriptor: CommandDescriptor = CommandDescriptor("stop app1 --roll")
+
+        # when
+        self.stop_application_command.execute_command(command_descriptor)
+
+        # then
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.STOP, "app1", None, True, None)
+
+    def test_should_execute_command_for_instance_stop_with_success(self):
+
+        # given
+        command_descriptor: CommandDescriptor = CommandDescriptor("stop app1 --instance standby")
+
+        # when
+        self.stop_application_command.execute_command(command_descriptor)
+
+        # then
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.STOP, "app1", None, False, "standby")
 
     @mock.patch("builtins.print", side_effect=print)
     def test_should_execute_command_fail_on_validation(self, print_mock):

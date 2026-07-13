@@ -140,31 +140,36 @@ The commands below work only in case the proper application registrations have a
 The `app` parameter of the commands always refer to an application's registered identifier.
 
 ```
-deploy <app> <latest|version>
+deploy <app> <latest|version> [--roll|--instance <instance-suffix>]
 ```
 Instructs Domino to deploy the specified version of the given application. The application and its selected version 
 must be already uploaded to the target server via Domino. Specify the keyword `latest` to let Domino decide which 
-version to be deployed, or provide an existing version number of the application.
+version to be deployed, or provide an existing version number of the application. Passing the `--roll` switch instructs
+Domino to automatically deploy and auto-start all instances of a multi-instance deployment, while 
+`--instance <instance-suffix>` can be used to deploy only the selected single instance of a multi-instance deployment 
+(auto-start is not applicable in this case). Neither of these switches are available for single-instance deployments.
 
 ```
-start <app>
+start <app> [--roll|--instance <instance-suffix>]
 ```
-Instructs Domino to start the currently deployed version of the application.
+Instructs Domino to start the currently deployed version of the application. The `--roll` switch can be used to 
+start/stop/restart all available instances of a multi-instance deployment, while `--instance <instance-suffix>` can be
+used to start/stop/restart only the specified instance of a multi-instance deployment.
 
 ```
-stop <app>
+stop <app> [--roll|--instance <instance-suffix>]
 ```
 Instructs Domino to stop the currently running instance of the application.
 
 ```
-restart <app>
+restart <app> [--roll|--instance <instance-suffix>]
 ```
 Instructs Domino to restart the currently running instance of the application.
 
 ```
-info <app>
+info <app> [--instance <instance-suffix>]
 ```
-Instructs Domino to query the application's info endpoint and returns the results.
+Instructs Domino to query the application's info endpoint and returns the results. 
 
 ### Deployment definition management commands
 
