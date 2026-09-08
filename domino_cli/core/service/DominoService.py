@@ -1,11 +1,15 @@
+from typing import List
+
 from requests import Response
 
 from domino_cli.core.cli.Logging import info, error
 from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.client.DominoClient import DominoClient
+from domino_cli.core.domain.Deployments import DeploymentSummary, ResponseContainer
 from domino_cli.core.domain.DominoCommand import DominoCommand
 from domino_cli.core.domain.DominoCommand import DominoRequestDescriptor
 from domino_cli.core.domain.DominoRequest import DominoRequest
+from domino_cli.core.service.utility.APIRequestHandler import APIRequestHandler
 from domino_cli.core.util.ResponseUtils import is_successful, render_response
 
 
@@ -13,8 +17,9 @@ class DominoService:
     """
     Service implementation handling command processing.
     """
-    def __init__(self, domino_client: DominoClient):
+    def __init__(self, domino_client: DominoClient, api_request_handler: APIRequestHandler):
         self._domino_client = domino_client
+        self._api_request_handler = api_request_handler
 
     def execute_lifecycle_command(self, domino_command: DominoCommand, application: str, version: str | None = None, roll: bool = False, instance: str | None = None) -> None:
         """
@@ -119,3 +124,22 @@ class DominoService:
         except Exception as exc:
             error("Failed to import descriptor from {0} - reason: {1}".format(descriptor_path, str(exc)))
             RuntimeHelper.exit_with_error_in_cicd_mode()
+
+    def get_deployments_page(self) -> List[DeploymentSummary]:
+        """
+        Lists deployments.
+        """
+        response = self._api_request_handler.send_command(DominoCommand.LIST_DEPLOYMENTS)
+        response_container = ResponseContainer[List[DeploymentSummary]]()
+        self._api_request_handler.handle_response(response, lambda result: response_container.set_result(self._parse_deployments_page(result)))
+
+        return response_container.get_result()
+
+    @staticmethod
+    def _parse_deployments_page(response: dict | List[dict] | object) -> List[DeploymentSummary]:
+
+        if not isinstance(response, dict):
+            return []
+
+        return [DeploymentSummary(item) for item in response["body"]]
+

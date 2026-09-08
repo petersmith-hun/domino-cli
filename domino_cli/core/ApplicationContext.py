@@ -34,6 +34,7 @@ from domino_cli.core.service.SecretService import SecretService
 from domino_cli.core.service.SessionContextHolder import SessionContextHolder
 from domino_cli.core.service.auth.DirectAuthHandler import DirectAuthHandler
 from domino_cli.core.service.auth.OAuthAuthHandler import OAuthAuthHandler
+from domino_cli.core.service.utility.APIRequestHandler import APIRequestHandler
 from domino_cli.core.service.wizard.BinaryExecutableAgentConfigWizard import BinaryExecutableAgentConfigWizard
 from domino_cli.core.service.wizard.CoordinatorConfigWizard import CoordinatorConfigWizard
 from domino_cli.core.service.wizard.DeploymentConfigWizard import DeploymentConfigWizard
@@ -77,12 +78,12 @@ class ApplicationContext:
     @staticmethod
     def init_tui(version: str) -> TUIMain:
 
-        _command_processor, _secret_service = ApplicationContext._init_command_processor()
+        _command_processor, _domino_service = ApplicationContext._init_command_processor()
 
-        return TUIMain(_command_processor, _secret_service, version)
+        return TUIMain(_command_processor, _domino_service, version)
 
     @staticmethod
-    def _init_command_processor() -> tuple[CommandProcessor, SecretService]:
+    def _init_command_processor() -> tuple[CommandProcessor, DominoService]:
 
         # configuration properties
         _domino_base_url = ApplicationContext._assert_config_value("DOMINO_BASE_URL")
@@ -120,8 +121,9 @@ class ApplicationContext:
         _session_context_holder = SessionContextHolder()
         _domino_client = DominoClient(_domino_base_url, _session_context_holder)
         _oauth_authorization_client = OAuthAuthorizationClient(_oauth_config)
-        _domino_service = DominoService(_domino_client)
-        _secret_service = SecretService(_domino_client)
+        _api_request_handler = APIRequestHandler(_domino_client)
+        _domino_service = DominoService(_domino_client, _api_request_handler)
+        _secret_service = SecretService(_api_request_handler)
         _direct_auth_handler = DirectAuthHandler(_domino_client)
         _oauth_auth_handler = OAuthAuthHandler(_oauth_config, _oauth_authorization_client)
         _auth_service = AuthenticationService(_default_auth_mode, _session_context_holder, [
@@ -176,7 +178,7 @@ class ApplicationContext:
             _command_wizard,
             _command_info,
             _command_secret
-        ]), _secret_service)
+        ]), _domino_service)
 
     @staticmethod
     def _assert_config_value(config_parameter: str) -> str:
