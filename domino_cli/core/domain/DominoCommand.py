@@ -35,3 +35,5 @@ class DominoCommand(Enum):
     LOCK_SECRET = DominoRequestDescriptor(HTTPMethod.DELETE, "/secrets/{0}/retrieval")
     UNLOCK_SECRET = DominoRequestDescriptor(HTTPMethod.PUT, "/secrets/{0}/retrieval")
     DELETE_SECRET = DominoRequestDescriptor(HTTPMethod.DELETE, "/secrets/{0}")
+
+    LIST_DEPLOYMENTS = DominoRequestDescriptor(HTTPMethod.GET, "/deployments")

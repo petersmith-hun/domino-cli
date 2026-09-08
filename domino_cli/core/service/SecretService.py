@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Any
 
 from requests import Response
 
@@ -93,6 +93,16 @@ class SecretService:
         """
         response = self._send_command(DominoCommand.DELETE_SECRET, key)
         self._handle_response(response)
+
+    def get_deployments_page(self) -> dict[str, Any]: # TODO this is in the wrong place, because it was convenient for testing
+        """
+        Lists deployments.
+        """
+        response = self._send_command(DominoCommand.LIST_DEPLOYMENTS)
+        extracted_response = {"result": None}
+        self._handle_response(response, lambda result: extracted_response.update({"result": result}))
+
+        return extracted_response
 
     def _send_command(self, command: DominoCommand, path_variable: str | None = None, body: dict | None = None) -> Response | None:
 

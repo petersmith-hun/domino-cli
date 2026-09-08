@@ -8,6 +8,7 @@ from domino_cli.core.service.SessionContextHolder import SessionContextHolder
 from domino_cli.core.service.auth.AbstractAuthHandler import AbstractAuthHandler
 from domino_cli.core.service.auth.AuthUtils import AuthUtils
 from domino_cli.core.service.utility.BCryptUtil import encrypt
+from domino_cli.core.tui.TUIRuntimeHelper import TUIRuntimeHelper
 
 
 class AuthenticationService:
@@ -58,6 +59,8 @@ class AuthenticationService:
             self._session_context_holder.update(session_context)
 
             info("Session is open")
+            TUIRuntimeHelper.set_authenticated()
+
         except Exception as exc:
             error("Failed to open session - reason: {0}".format(str(exc)))
             RuntimeHelper.exit_with_error_in_cicd_mode()

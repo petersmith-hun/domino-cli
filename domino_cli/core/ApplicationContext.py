@@ -54,6 +54,7 @@ from domino_cli.core.service.wizard.transformer.DeploymentConfigWizardResultTran
     DeploymentConfigWizardResultTransformer
 from domino_cli.core.service.wizard.transformer.DockerAgentConfigWizardResultTransformer import \
     DockerAgentConfigWizardResultTransformer
+from domino_cli.core.tui.TUIMain import TUIMain
 
 
 class ApplicationContext:
@@ -64,6 +65,24 @@ class ApplicationContext:
     def init_cli(version: str) -> CLI:
 
         info("Initializing Domino CLI...")
+        _command_processor, _ = ApplicationContext._init_command_processor()
+
+        _cli = CLI(_command_processor)
+
+        info(f"Domino CLI v{version} initialized")
+        info("-" * 30)
+
+        return _cli
+
+    @staticmethod
+    def init_tui(version: str) -> TUIMain:
+
+        _command_processor, _secret_service = ApplicationContext._init_command_processor()
+
+        return TUIMain(_command_processor, _secret_service, version)
+
+    @staticmethod
+    def _init_command_processor() -> tuple[CommandProcessor, SecretService]:
 
         # configuration properties
         _domino_base_url = ApplicationContext._assert_config_value("DOMINO_BASE_URL")
@@ -144,7 +163,7 @@ class ApplicationContext:
         ])
 
         # command processor
-        _command_processor = CommandProcessor(_command_help, [
+        return (CommandProcessor(_command_help, [
             _command_help,
             _command_exit,
             _command_auth,
@@ -157,14 +176,7 @@ class ApplicationContext:
             _command_wizard,
             _command_info,
             _command_secret
-        ])
-
-        _cli = CLI(_command_processor)
-
-        info(f"Domino CLI v{version} initialized")
-        info("-" * 30)
-
-        return _cli
+        ]), _secret_service)
 
     @staticmethod
     def _assert_config_value(config_parameter: str) -> str:
