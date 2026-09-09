@@ -22,18 +22,6 @@ class LifecycleOperationModal(CustomModalScreen):
             max-width: 50;
             max-height: 30;
         }
-    
-        .mt2 {
-            margin-top: 2;
-        }
-        
-        .full_width {
-            width: 100%;
-        }
-        
-        .align_right {
-            align-horizontal: right;
-        }
         """
 
     _SYMBOL_MAP = {

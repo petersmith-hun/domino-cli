@@ -7,6 +7,7 @@ from textual.widgets.option_list import Option
 from domino_cli.core.service.CommandProcessor import CommandProcessor
 from domino_cli.core.tui.modals import CustomModalScreen
 from domino_cli.core.tui.modals.LifecycleOperationModal import LifecycleOperationModal
+from domino_cli.core.tui.modals.OAuthDescriptorImportModal import OAuthDescriptorImportModal
 
 
 class DeploymentOptionsModal(CustomModalScreen):
@@ -53,3 +54,6 @@ class DeploymentOptionList(OptionList):
 
         if option_id in ["deploy_latest", "deploy_version", "start", "restart", "stop", "info"]:
             self.app.push_screen(LifecycleOperationModal(self._command_processor, self._deployment_id, operation=option_id))
+
+        if option_id == "import_oauth":
+            self.app.push_screen(OAuthDescriptorImportModal(self._command_processor, self._deployment_id))

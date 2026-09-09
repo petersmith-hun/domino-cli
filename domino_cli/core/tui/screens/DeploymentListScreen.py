@@ -5,8 +5,6 @@ from textual.widgets import Label, ListItem, ListView
 
 from domino_cli.core.domain.Deployments import DeploymentSummary
 from domino_cli.core.service.CommandProcessor import CommandProcessor
-from domino_cli.core.service.DominoService import DominoService
-from domino_cli.core.tui.actions import LongRunningActionAdapter
 from domino_cli.core.tui.modals.DeploymentOptionsModal import DeploymentOptionsModal
 
 
@@ -81,7 +79,7 @@ class DeploymentListHeader(DeploymentListItem):
         super().__init__(self._HEADER)
 
 
-class DeploymentsListScreen(ListView, LongRunningActionAdapter):
+class DeploymentsListScreen(ListView):
     """
     TODO.
     """
@@ -94,10 +92,8 @@ class DeploymentsListScreen(ListView, LongRunningActionAdapter):
         outline-bottom: ascii $accent;
     }
     """
-    def __init__(self, domino_service: DominoService, command_processor: CommandProcessor):
+    def __init__(self, command_processor: CommandProcessor):
         super().__init__(id="deployments")
-        super(LongRunningActionAdapter, self).__init__(self.app)
-        self._domino_service = domino_service
         self._command_processor = command_processor
 
     def action_select_cursor(self) -> None:
@@ -105,24 +101,3 @@ class DeploymentsListScreen(ListView, LongRunningActionAdapter):
         if not isinstance(self.highlighted_child, DeploymentListHeader):
             deployment = cast(DeploymentListItem, self.highlighted_child)
             self.app.push_screen(DeploymentOptionsModal(self._command_processor, deployment.deployment_id))
-
-    def _action(self, event: None):
-        deployments = self._domino_service.get_deployments_page()
-
-        if deployments is None or len(deployments) == 0:
-            return
-
-        deployments_list_view = self._app.query_one("#deployments", ListView)
-
-        if deployments_list_view.children:
-            self._app.call_from_thread(lambda: deployments_list_view.clear())
-
-        self._app.call_from_thread(lambda: deployments_list_view.append(DeploymentListHeader()))
-
-        for index, deployment in enumerate(deployments):
-            item = DeploymentListItem(deployment)
-
-            if index == 0:
-                item.styles.border_top = ("ascii", self._app.theme_variables["accent"])
-
-            self._app.call_from_thread(lambda: deployments_list_view.append(item))

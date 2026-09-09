@@ -1,12 +1,11 @@
 from textual.app import App
-from textual.message import Message
 
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
 from domino_cli.core.service.CommandProcessor import CommandProcessor
 from domino_cli.core.tui.actions import LongRunningActionAdapter
 
 
-class LifecycleMessage(Message):
+class LifecycleMessage:
     """
     TODO.
     """
@@ -16,7 +15,6 @@ class LifecycleMessage(Message):
         self.roll = roll
         self.instance = instance
         self.version = version
-        super().__init__()
 
 
 class LifecycleOperationActionAdapter(LongRunningActionAdapter[LifecycleMessage]):
@@ -28,9 +26,9 @@ class LifecycleOperationActionAdapter(LongRunningActionAdapter[LifecycleMessage]
         self._command_processor = command_processor
 
     def _action(self, event: LifecycleMessage):
-        version_segment = f" {event.version}" if event and event.version and len(event.version) > 0 else ""
-        roll_segment = "--roll" if event and event.roll else ""
-        instance_segment = f"--instance {event.instance}" if event and event.instance and len(event.instance) > 0 else ""
+        version_segment = f" {event.version}" if event.version and len(event.version) > 0 else ""
+        roll_segment = "--roll" if event.roll else ""
+        instance_segment = f"--instance {event.instance}" if event.instance and len(event.instance) > 0 else ""
 
         command = CommandDescriptor(f"{event.operation} {event.deployment_id}{version_segment} {roll_segment}{instance_segment}")
 
