@@ -1,7 +1,9 @@
-from abc import abstractmethod
 from abc import ABCMeta
+from abc import abstractmethod
 
+from domino_cli.core.cli.Logging import info
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
+from domino_cli.core.domain.DominoCommand import DominoCommand
 
 
 class AbstractCommand(object, metaclass=ABCMeta):
@@ -29,3 +31,11 @@ class AbstractCommand(object, metaclass=ABCMeta):
         :param command_descriptor: CommandDescriptor object containing the requested command with its arguments
         """
         pass
+
+    def _print_result(self, command: DominoCommand, application: str, result: object) -> None:
+
+        info("Command {0} successfully executed on application {1}".format(command.name, application))
+        info(" --- Response details ---")
+        for field in result.__dict__:
+            info("{:>20}: {}".format(field, result.__dict__[field]))
+        print()

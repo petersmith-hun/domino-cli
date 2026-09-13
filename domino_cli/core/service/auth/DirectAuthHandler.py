@@ -1,4 +1,8 @@
+import datetime
+from base64 import b64decode
+
 from requests import Response
+from rich import json
 
 from domino_cli.core.client.DominoClient import DominoClient
 from domino_cli.core.domain.AuthMode import AuthMode
@@ -44,4 +48,8 @@ class DirectAuthHandler(AbstractAuthHandler):
         if not response.status_code == 201:
             raise Exception("Failed to authenticate - Domino responded with {0}".format(response.status_code))
 
-        return SessionContext(auth_request.username, response.json()["jwt"])
+        token_response = response.json()
+        jwt_payload = json.loads(b64decode(str(token_response["jwt"]).split(".")[1] + "=="))
+        expires_at = datetime.datetime.fromtimestamp(jwt_payload["exp"])
+
+        return SessionContext(auth_request.username, token_response["jwt"], expires_at)

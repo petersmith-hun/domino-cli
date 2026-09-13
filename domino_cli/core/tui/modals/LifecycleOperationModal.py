@@ -6,7 +6,7 @@ from textual.containers import HorizontalGroup, VerticalGroup
 from textual.widget import Widget
 from textual.widgets import Label, Input, Checkbox, Button
 
-from domino_cli.core.service.CommandProcessor import CommandProcessor
+from domino_cli.core.service.DominoService import DominoService
 from domino_cli.core.tui.actions.LifecycleOperationActionAdapter import LifecycleOperationActionAdapter, \
     LifecycleMessage
 from domino_cli.core.tui.modals import CustomModalScreen
@@ -33,11 +33,11 @@ class LifecycleOperationModal(CustomModalScreen):
         "info": "ℹ"
     }
 
-    def __init__(self, command_processor: CommandProcessor, deployment_id: str, operation: Literal["deploy_latest", "deploy_version", "start", "stop", "restart", "info"]):
+    def __init__(self, domino_service: DominoService, deployment_id: str, operation: Literal["deploy_latest", "deploy_version", "start", "stop", "restart", "info"]):
         super().__init__(deployment_id)
-        self._command_processor = command_processor
+        self._domino_service = domino_service
         self._operation = operation
-        self._lifecycle_operation_action_adapter = LifecycleOperationActionAdapter(self.app, self._command_processor)
+        self._lifecycle_operation_action_adapter = LifecycleOperationActionAdapter(self.app, self._domino_service)
 
     def _get_title(self) -> Label:
         return Label(f"{self._SYMBOL_MAP.get(self._operation)} {self._operation} {self._deployment_id}")
@@ -83,7 +83,7 @@ class LifecycleOperationModal(CustomModalScreen):
         version_input = self.query_one_optional("#version", Input)
 
         lifecycle_message = LifecycleMessage(
-            operation="deploy" if self._operation.startswith("deploy") else self._operation,
+            operation=self._operation,
             deployment_id=self._deployment_id,
             roll=roll_checkbox.value if isinstance(roll_checkbox, Checkbox) else False,
             instance=self.query_one("#instance_suffix", Input).value,

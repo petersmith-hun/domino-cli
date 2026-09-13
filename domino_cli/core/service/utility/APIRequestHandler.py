@@ -1,10 +1,11 @@
-from typing import Callable, List
+from typing import Callable, List, Any
 
 from requests import Response
 
 from domino_cli.core.cli.Logging import error, info
 from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.client.DominoClient import DominoClient
+from domino_cli.core.domain.CustomExceptions import ValidationException, DominoServiceException
 from domino_cli.core.domain.DominoCommand import DominoCommand
 from domino_cli.core.domain.DominoRequest import DominoRequest
 
@@ -34,7 +35,7 @@ class APIRequestHandler:
         try:
             return self._domino_client.send_command(request)
 
-        except Exception as exc:
+        except Exception as exc: # TODO should refactor this one as well, return should never be "none"
             error("Failed to execute HTTP request {0} - reason: {1}".format(request, str(exc)))
             RuntimeHelper.exit_with_error_in_cicd_mode()
             return None
@@ -61,6 +62,25 @@ class APIRequestHandler:
         elif handler is not None:
             handler(response.json())
 
+    def handle_response_new[T](self, response: Response, mapper: Callable[[Any], T] | None = None) -> T | None:
+
+        if response.status_code == 400:
+            raise ValidationException(response)
+
+        if response.status_code >= 300:
+            raise DominoServiceException(response)
+
+        if len(response.content) == 0:
+            return None
+
+        try:
+            if mapper is None:
+                mapper = lambda data: data
+
+            return mapper(response.json())
+
+        except:
+            return response.text
 
     @staticmethod
     def _try_extract_message(response: Response) -> str:

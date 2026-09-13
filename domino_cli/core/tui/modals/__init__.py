@@ -25,6 +25,7 @@ class CustomModalScreen(ModalScreen):
             max-width: 80%;
             max-height: 80%;
             align: center middle;
+            padding-top: 1;
         }
         
         #custom_modal_controls {
@@ -40,6 +41,10 @@ class CustomModalScreen(ModalScreen):
         
         .ml2 {
             margin-left: 2;
+        }
+        
+        .h4 {
+            height: 4;
         }
         
         .h12 {
@@ -60,15 +65,23 @@ class CustomModalScreen(ModalScreen):
         self._deployment_id = deployment_id
 
     def compose(self) -> ComposeResult:
+
+        sub_title = self._get_sub_title()
+
         with Vertical(id="custom_modal_frame"):
             with VerticalGroup(id="custom_modal_controls"):
                 yield self._get_title()
+                if sub_title:
+                    yield sub_title
                 yield Rule()
                 for widget in self._get_content():
                     yield widget
             yield Footer(id="custom_modal_footer")
 
     def _get_title(self) -> Label:
+        pass
+
+    def _get_sub_title(self) -> Label:
         pass
 
     def _get_content(self) -> List[Widget]:

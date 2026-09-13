@@ -4,7 +4,7 @@ from textual.widget import Widget
 from textual.widgets import Label, OptionList
 from textual.widgets.option_list import Option
 
-from domino_cli.core.service.CommandProcessor import CommandProcessor
+from domino_cli.core.service.DominoService import DominoService
 from domino_cli.core.tui.modals import CustomModalScreen
 from domino_cli.core.tui.modals.LifecycleOperationModal import LifecycleOperationModal
 from domino_cli.core.tui.modals.OAuthDescriptorImportModal import OAuthDescriptorImportModal
@@ -14,16 +14,16 @@ class DeploymentOptionsModal(CustomModalScreen):
     """
     TODO.
     """
-    def __init__(self, command_processor: CommandProcessor, deployment_id: str):
+    def __init__(self, domino_service: DominoService, deployment_id: str):
         super().__init__(deployment_id)
-        self._command_processor = command_processor
+        self._domino_service = domino_service
 
     def _get_title(self) -> Label:
         return Label(f"{self._deployment_id} lifecycle operations")
 
     def _get_content(self) -> List[Widget]:
         return [
-            DeploymentOptionList(self._command_processor, self._deployment_id)
+            DeploymentOptionList(self._domino_service, self._deployment_id)
         ]
 
 
@@ -31,7 +31,7 @@ class DeploymentOptionList(OptionList):
     """
     TODO.
     """
-    def __init__(self, command_processor: CommandProcessor, deployment_id: str):
+    def __init__(self, domino_service: DominoService, deployment_id: str):
         super().__init__(
             Option("Deploy latest", id="deploy_latest"),
             Option("Deploy specific version", id="deploy_version"),
@@ -42,7 +42,7 @@ class DeploymentOptionList(OptionList):
             Option("Import OAuth configuration", id="import_oauth"),
         )
         self._deployment_id = deployment_id
-        self._command_processor = command_processor
+        self._domino_service = domino_service
 
 
     def action_select(self) -> None:
@@ -53,7 +53,7 @@ class DeploymentOptionList(OptionList):
         option_id = self.highlighted_option.id
 
         if option_id in ["deploy_latest", "deploy_version", "start", "restart", "stop", "info"]:
-            self.app.push_screen(LifecycleOperationModal(self._command_processor, self._deployment_id, operation=option_id))
+            self.app.push_screen(LifecycleOperationModal(self._domino_service, self._deployment_id, operation=option_id))
 
         if option_id == "import_oauth":
-            self.app.push_screen(OAuthDescriptorImportModal(self._command_processor, self._deployment_id))
+            self.app.push_screen(OAuthDescriptorImportModal(self._domino_service, self._deployment_id))

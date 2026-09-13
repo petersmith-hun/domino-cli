@@ -4,7 +4,7 @@ from textual.containers import HorizontalGroup
 from textual.widgets import Label, ListItem, ListView
 
 from domino_cli.core.domain.Deployments import DeploymentSummary
-from domino_cli.core.service.CommandProcessor import CommandProcessor
+from domino_cli.core.service.DominoService import DominoService
 from domino_cli.core.tui.modals.DeploymentOptionsModal import DeploymentOptionsModal
 
 
@@ -92,12 +92,12 @@ class DeploymentsListScreen(ListView):
         outline-bottom: ascii $accent;
     }
     """
-    def __init__(self, command_processor: CommandProcessor):
+    def __init__(self, domino_service: DominoService):
         super().__init__(id="deployments")
-        self._command_processor = command_processor
+        self._domino_service = domino_service
 
     def action_select_cursor(self) -> None:
 
         if not isinstance(self.highlighted_child, DeploymentListHeader):
             deployment = cast(DeploymentListItem, self.highlighted_child)
-            self.app.push_screen(DeploymentOptionsModal(self._command_processor, deployment.deployment_id))
+            self.app.push_screen(DeploymentOptionsModal(self._domino_service, deployment.deployment_id))

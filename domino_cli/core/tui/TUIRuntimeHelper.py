@@ -1,9 +1,12 @@
+import datetime
+
 from textual.app import App
 from textual.notifications import SeverityLevel
 from textual.widgets import Label
 from typing_extensions import Any
 
 from domino_cli.core.cli import LogLevel
+from domino_cli.core.domain.SessionContext import SessionContext
 
 
 class Observer:
@@ -37,12 +40,21 @@ class TUIRuntimeHelper:
         cls._is_authenticated_label = is_authenticated_label
 
     @classmethod
-    def set_authenticated(cls):
+    def set_authenticated(cls, session_context: SessionContext):
 
         if cls._is_authenticated_label is None:
             return
 
-        cls._is_authenticated_label.update("✔")
+        expiration_delta = session_context.expires_at - datetime.datetime.now()
+
+        if expiration_delta.days > 0:
+            expires_in = f"{expiration_delta.days} day(s)"
+        elif expiration_delta.seconds > 3600:
+            expires_in = f"{expiration_delta.seconds // 3600} hour(s)"
+        else:
+            expires_in = f"{expiration_delta.seconds // 60} minute(s)"
+
+        cls._is_authenticated_label.update(f"✔ (Expires in {expires_in})")
         cls._is_authenticated_label.styles.color = "green"
 
     @classmethod

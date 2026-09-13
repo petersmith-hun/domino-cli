@@ -1,7 +1,7 @@
 from textual.app import App
 
-from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
-from domino_cli.core.service.CommandProcessor import CommandProcessor
+from domino_cli.core.domain.CustomExceptions import DominoServiceException
+from domino_cli.core.service.DominoService import DominoService
 from domino_cli.core.tui.actions import LongRunningActionAdapter
 
 
@@ -19,14 +19,19 @@ class OAuthImportActionAdapter(LongRunningActionAdapter[OAuthImportMessage]):
     """
     TODO.
     """
-    def __init__(self, app: App, command_processor: CommandProcessor):
+    def __init__(self, app: App, domino_service: DominoService):
         super().__init__(app)
-        self._command_processor = command_processor
+        self._domino_service = domino_service
 
     def _action(self, event: OAuthImportMessage):
-        dry_run_segment = " --dry-run" if event.dry_run else ""
 
-        command = CommandDescriptor(f"oauth-import {event.deployment_id}{dry_run_segment} {event.file_path} ")
+        try:
+            self._domino_service.import_oauth_descriptor(event.deployment_id, event.dry_run, event.file_path)
+            self._app.notify(f"Successfully imported OAuth definition from [i]{event.file_path}[/i]",
+                             title="OAuth definition import completed", severity="information", markup=True, timeout=10)
 
-        self._command_processor.execute_command(command)
-        self._app.call_from_thread(self._show_loading_indicator, False)
+        except DominoServiceException as exc:
+            self._app.notify(str(exc), title="Failed to import OAuth definition", severity="error")
+
+        finally:
+            self._app.call_from_thread(self._show_loading_indicator, False)

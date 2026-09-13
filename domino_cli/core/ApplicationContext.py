@@ -66,7 +66,7 @@ class ApplicationContext:
     def init_cli(version: str) -> CLI:
 
         info("Initializing Domino CLI...")
-        _command_processor, _ = ApplicationContext._init_command_processor()
+        _command_processor, _, _ = ApplicationContext._init_command_processor()
 
         _cli = CLI(_command_processor)
 
@@ -78,12 +78,12 @@ class ApplicationContext:
     @staticmethod
     def init_tui(version: str) -> TUIMain:
 
-        _command_processor, _domino_service = ApplicationContext._init_command_processor()
+        _, _domino_service, _auth_service = ApplicationContext._init_command_processor()
 
-        return TUIMain(_command_processor, _domino_service, version)
+        return TUIMain(_domino_service, _auth_service, version)
 
     @staticmethod
-    def _init_command_processor() -> tuple[CommandProcessor, DominoService]:
+    def _init_command_processor() -> tuple[CommandProcessor, DominoService, AuthenticationService]:
 
         # configuration properties
         _domino_base_url = ApplicationContext._assert_config_value("DOMINO_BASE_URL")
@@ -178,7 +178,7 @@ class ApplicationContext:
             _command_wizard,
             _command_info,
             _command_secret
-        ]), _domino_service)
+        ]), _domino_service, _auth_service)
 
     @staticmethod
     def _assert_config_value(config_parameter: str) -> str:

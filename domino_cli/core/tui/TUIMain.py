@@ -4,11 +4,12 @@ from textual.app import App, ComposeResult
 from textual.containers import Vertical, HorizontalGroup, VerticalScroll
 from textual.widgets import Header, Footer, Label, LoadingIndicator
 
-from domino_cli.core.service.CommandProcessor import CommandProcessor
+from domino_cli.core.service.AuthenticationService import AuthenticationService
 from domino_cli.core.service.DominoService import DominoService
 from domino_cli.core.tui.TUIRuntimeHelper import TUIRuntimeHelper
 from domino_cli.core.tui.actions.AuthenticateActionAdapter import AuthenticateActionAdapter
 from domino_cli.core.tui.actions.DeploymentListActionAdapter import DeploymentListActionAdapter
+from domino_cli.core.tui.modals.AuthUtilOptionsModal import AuthUtilOptionsModal
 from domino_cli.core.tui.modals.DeploymentDescriptorImportModal import DeploymentDescriptorImportModal
 from domino_cli.core.tui.screens.DeploymentListScreen import DeploymentLabel, DeploymentsListScreen
 
@@ -34,17 +35,21 @@ class TUIMain(App):
 
     BINDINGS = [
         ("a", "authenticate", "Authenticate"),
+        ("u", "auth_utils", "Auth utils"),
         ("d", "list_deployments", "List deployments"),
         ("i", "import_deployment", "Import deployment"),
         ("q", "quit", "Quit")
     ]
 
-    def __init__(self, command_processor: CommandProcessor, domino_service: DominoService, version: str):
+    def __init__(self,
+                 domino_service: DominoService,
+                 authentication_service: AuthenticationService,
+                 version: str):
         super().__init__()
-        self._command_processor = command_processor
         self._domino_service = domino_service
         self._version = version
-        self._authenticate_action_adapter = AuthenticateActionAdapter(self, self._command_processor)
+        self._authentication_service = authentication_service
+        self._authenticate_action_adapter = AuthenticateActionAdapter(self, authentication_service)
         self._deployment_list_action_adapter = DeploymentListActionAdapter(self, self._domino_service)
 
         self.theme = "textual-dark"
@@ -57,7 +62,7 @@ class TUIMain(App):
             yield EnvironmentHeader()
             yield LoadingIndicator(id="loading")
             with VerticalScroll(id="deployments_scroll"):
-                yield DeploymentsListScreen(self._command_processor)
+                yield DeploymentsListScreen(self._domino_service)
 
         yield Footer()
 
@@ -70,9 +75,12 @@ class TUIMain(App):
     def action_authenticate(self):
         self._authenticate_action_adapter.execute()
 
+    def action_auth_utils(self):
+        self.push_screen(AuthUtilOptionsModal(self._authentication_service))
+
     def action_list_deployments(self):
         self._deployment_list_action_adapter.execute()
 
     def action_import_deployment(self):
-        self.push_screen(DeploymentDescriptorImportModal(self._command_processor))
+        self.push_screen(DeploymentDescriptorImportModal(self._domino_service))
 

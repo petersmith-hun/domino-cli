@@ -6,7 +6,7 @@ from textual.containers import HorizontalGroup
 from textual.widget import Widget
 from textual.widgets import Label, Checkbox, Button
 
-from domino_cli.core.service.CommandProcessor import CommandProcessor
+from domino_cli.core.service.DominoService import DominoService
 from domino_cli.core.tui.actions.OAuthImportActionAdapter import OAuthImportActionAdapter, OAuthImportMessage
 from domino_cli.core.tui.modals import CustomModalScreen, FilteredDirectoryTree
 
@@ -23,10 +23,10 @@ class OAuthDescriptorImportModal(CustomModalScreen):
     }
     """
 
-    def __init__(self, command_processor: CommandProcessor, deployment_id: str):
+    def __init__(self, domino_service: DominoService, deployment_id: str):
         super().__init__(deployment_id)
-        self._command_processor = command_processor
-        self._oauth_import_action_adapter = OAuthImportActionAdapter(self.app, self._command_processor)
+        self._domino_service = domino_service
+        self._oauth_import_action_adapter = OAuthImportActionAdapter(self.app, self._domino_service)
         self._path: Path | None = None
 
     def _get_title(self) -> Label:
@@ -35,6 +35,7 @@ class OAuthDescriptorImportModal(CustomModalScreen):
     def _get_content(self) -> List[Widget]:
         return [
             FilteredDirectoryTree(),
+            Label("❌ No file has been selected yet", id="file_selection_indicator", classes="mt2"),
             HorizontalGroup(
                 Checkbox("Dry-run", id="dry_run"),
                 Button("OK", id="import_oauth_descriptor", variant="primary", classes="ml2"),
@@ -44,6 +45,7 @@ class OAuthDescriptorImportModal(CustomModalScreen):
 
     def on_directory_tree_file_selected(self, event: FilteredDirectoryTree.FileSelected):
         self._path = event.path
+        self.query_one("#file_selection_indicator", Label).update(f"✔ File selected: {event.path}")
 
     @on(Button.Pressed)
     def _handle_lifecycle_operation(self):

@@ -3,12 +3,12 @@ from typing import List, Dict
 from domino_cli.core.cli.Logging import info, error
 from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.domain.AuthMode import AuthMode
+from domino_cli.core.domain.CustomExceptions import AuthenticationException
 from domino_cli.core.domain.SessionContext import SessionContext
 from domino_cli.core.service.SessionContextHolder import SessionContextHolder
 from domino_cli.core.service.auth.AbstractAuthHandler import AbstractAuthHandler
 from domino_cli.core.service.auth.AuthUtils import AuthUtils
 from domino_cli.core.service.utility.BCryptUtil import encrypt
-from domino_cli.core.tui.TUIRuntimeHelper import TUIRuntimeHelper
 
 
 class AuthenticationService:
@@ -23,32 +23,26 @@ class AuthenticationService:
 
         info(f"Domino authentication mode is set to {self._auth_mode.name}. Use 'auth --set-mode' command to change")
 
-    def encrypt_password(self) -> None:
+    def encrypt_password(self, password: str | None = None) -> str:
         """
         Utility to encrypt a password with BCrypt for usage in Domino (as service user password).
         """
         RuntimeHelper.unsupported_in_cicd_mode()
-        encrypted_password: str = encrypt(AuthUtils.input_password())
+        encrypted_password: str = encrypt(AuthUtils.input_password() if password is None else password)
 
-        info("Encrypted password: {0}".format(encrypted_password))
+        return encrypted_password
 
-    def generate_token(self) -> None:
+    def generate_token(self) -> str:
         """
         Utility to generate a Domino authentication token for usage by external services (eg. Jenkins).
         """
         try:
-            session_context: SessionContext = self._request_token()
-
-            if RuntimeHelper.is_cicd_mode():
-                print(session_context.authentication_token)
-            else:
-                info("Generated auth token: {0}".format(session_context.authentication_token))
+            return self._request_token().authentication_token
 
         except Exception as exc:
-            error("Failed to generate token - reason: {0}".format(str(exc)))
-            RuntimeHelper.exit_with_error_in_cicd_mode()
+            raise AuthenticationException("Failed to generate token - reason: {0}".format(str(exc)))
 
-    def open_session(self) -> None:
+    def open_session(self) -> SessionContext:
         """
         Opens an authenticated session for Domino CLI.
         This step is required before executing any lifecycle command, otherwise Domino rejects every request.
@@ -58,12 +52,10 @@ class AuthenticationService:
             session_context: SessionContext = self._request_token()
             self._session_context_holder.update(session_context)
 
-            info("Session is open")
-            TUIRuntimeHelper.set_authenticated()
+            return session_context
 
         except Exception as exc:
-            error("Failed to open session - reason: {0}".format(str(exc)))
-            RuntimeHelper.exit_with_error_in_cicd_mode()
+            raise AuthenticationException("Failed to open session - reason: {0}".format(str(exc)))
 
     def set_mode(self, new_mode: str) -> None:
         """
@@ -77,6 +69,12 @@ class AuthenticationService:
             self._auth_mode = AuthMode.by_value(new_mode)
         except KeyError:
             error(f"Failed to change authentication mode, invalid mode defined: {new_mode}")
+
+    def get_username(self) -> str:
+        return self._session_context_holder.get_username()
+
+    def get_auth_mode(self) -> AuthMode:
+        return self._auth_mode
 
     def _request_token(self) -> SessionContext:
 

@@ -1,4 +1,4 @@
-from domino_cli.core.cli.Logging import error
+from domino_cli.core.cli.Logging import error, info
 from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.command.AbstractCommand import AbstractCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
@@ -33,4 +33,10 @@ class OAuthImportCommand(AbstractCommand):
         elif not dry_run and len(command_descriptor.arguments) == 2:
             descriptor_path = command_descriptor.arguments[1]
 
-        self._domino_service.import_oauth_descriptor(application, dry_run, descriptor_path)
+        try:
+            self._domino_service.import_oauth_descriptor(application, dry_run, descriptor_path)
+            info(f"Successfully imported OAuth application descriptor {descriptor_path}")
+
+        except Exception as exc:
+            error(f"Failed to import OAuth application descriptor {descriptor_path}: {str(exc)}")
+            RuntimeHelper.exit_with_error_in_cicd_mode()

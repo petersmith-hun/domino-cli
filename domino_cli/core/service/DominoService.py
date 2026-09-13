@@ -2,15 +2,15 @@ from typing import List
 
 from requests import Response
 
-from domino_cli.core.cli.Logging import info, error
-from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
+from domino_cli.core.cli.Logging import info
 from domino_cli.core.client.DominoClient import DominoClient
-from domino_cli.core.domain.Deployments import DeploymentSummary, ResponseContainer
+from domino_cli.core.domain.CustomExceptions import DominoServiceException
+from domino_cli.core.domain.Deployments import DeploymentSummary, LifecycleResponse, Page
 from domino_cli.core.domain.DominoCommand import DominoCommand
 from domino_cli.core.domain.DominoCommand import DominoRequestDescriptor
 from domino_cli.core.domain.DominoRequest import DominoRequest
 from domino_cli.core.service.utility.APIRequestHandler import APIRequestHandler
-from domino_cli.core.util.ResponseUtils import is_successful, render_response
+from domino_cli.core.util.ResponseUtils import is_successful
 
 
 class DominoService:
@@ -21,7 +21,7 @@ class DominoService:
         self._domino_client = domino_client
         self._api_request_handler = api_request_handler
 
-    def execute_lifecycle_command(self, domino_command: DominoCommand, application: str, version: str | None = None, roll: bool = False, instance: str | None = None) -> None:
+    def execute_lifecycle_command(self, domino_command: DominoCommand, application: str, version: str | None = None, roll: bool = False, instance: str | None = None) -> LifecycleResponse | dict:
         """
         Executes the given lifecycle command for the given application.
 
@@ -41,21 +41,14 @@ class DominoService:
 
         info("Sending {0} command for application {1} via Domino".format(domino_command.name, application))
 
-        try:
-            response: Response = self._domino_client.send_command(domino_request)
+        response: Response = self._domino_client.send_command(domino_request)
 
-            if is_successful(response):
-                info("Command {0} successfully executed on application {1}".format(domino_command.name, application))
-            else:
-                error("Failed to execute command {0} on application {1} - Domino responded with {2}"
-                      .format(domino_command.name, application, response.status_code))
-                RuntimeHelper.exit_with_error_in_cicd_mode()
-
-            render_response(response)
-
-        except Exception as exc:
-            error("Failed to execute HTTP request {0} - reason: {1}".format(domino_request, str(exc)))
-            RuntimeHelper.exit_with_error_in_cicd_mode()
+        if is_successful(response):
+            return response.json() \
+                if domino_command == DominoCommand.INFO \
+                else LifecycleResponse(response.json())
+        else:
+            raise DominoServiceException(response)
 
     def import_definition(self, optional_definition_path: str | None = None) -> None:
         """
@@ -68,26 +61,15 @@ class DominoService:
             else ".domino/deployment.yml"
         info(f"Requesting Domino to import deployment definition from={definition_path}")
 
-        try:
+        with open(definition_path, "r") as definition_file:
+            definition = definition_file.read()
+            domino_request_descriptor: DominoRequestDescriptor = DominoCommand.IMPORT.value
+            domino_request = DominoRequest(domino_request_descriptor.method, domino_request_descriptor.path_template,
+                                           body=definition, authenticated=True, as_text=True)
+            response = self._domino_client.send_command(domino_request)
 
-            with open(definition_path, "r") as definition_file:
-                definition = definition_file.read()
-                domino_request_descriptor: DominoRequestDescriptor = DominoCommand.IMPORT.value
-                domino_request = DominoRequest(domino_request_descriptor.method, domino_request_descriptor.path_template,
-                                               body=definition, authenticated=True, as_text=True)
-                response = self._domino_client.send_command(domino_request)
-
-                if is_successful(response):
-                    info(f"Successfully imported definition {definition_path}")
-                else:
-                    error(f"Failed to import deployment definition {definition_path} - Domino responded with {response.status_code}")
-                    RuntimeHelper.exit_with_error_in_cicd_mode()
-
-            render_response(response)
-
-        except Exception as exc:
-            error("Failed to import definition from {0} - reason: {1}".format(definition_path, str(exc)))
-            RuntimeHelper.exit_with_error_in_cicd_mode()
+            if not is_successful(response):
+                raise DominoServiceException(response)
 
     def import_oauth_descriptor(self, application: str, dry_run: bool, optional_descriptor_path: str | None = None) -> None:
         """
@@ -102,38 +84,26 @@ class DominoService:
             else ".domino/oauth.yml"
         info(f"Requesting Domino to import OAuth application descriptor from={descriptor_path}")
 
-        try:
+        with open(descriptor_path, "r") as descriptor_file:
+            descriptor = descriptor_file.read()
+            domino_request_descriptor: DominoRequestDescriptor = DominoCommand.IMPORT_OAUTH.value
+            domino_request = DominoRequest(domino_request_descriptor.method,
+                                           domino_request_descriptor.path_template.format(application),
+                                           query={"dry-run": "true"} if dry_run else None,
+                                           body=descriptor, authenticated=True, as_text=True)
+            response = self._domino_client.send_command(domino_request)
 
-            with open(descriptor_path, "r") as descriptor_file:
-                descriptor = descriptor_file.read()
-                domino_request_descriptor: DominoRequestDescriptor = DominoCommand.IMPORT_OAUTH.value
-                domino_request = DominoRequest(domino_request_descriptor.method,
-                                               domino_request_descriptor.path_template.format(application),
-                                               query={"dry-run": "true"} if dry_run else None,
-                                               body=descriptor, authenticated=True, as_text=True)
-                response = self._domino_client.send_command(domino_request)
-
-                if is_successful(response):
-                    info(f"Successfully imported OAuth application descriptor {descriptor_path}")
-                else:
-                    error(f"Failed to import OAuth application descriptor {descriptor_path} - Domino responded with {response.status_code}")
-                    RuntimeHelper.exit_with_error_in_cicd_mode()
-
-            render_response(response)
-
-        except Exception as exc:
-            error("Failed to import descriptor from {0} - reason: {1}".format(descriptor_path, str(exc)))
-            RuntimeHelper.exit_with_error_in_cicd_mode()
+            if not is_successful(response):
+                raise DominoServiceException(response)
 
     def get_deployments_page(self) -> List[DeploymentSummary]:
         """
         Lists deployments.
         """
         response = self._api_request_handler.send_command(DominoCommand.LIST_DEPLOYMENTS)
-        response_container = ResponseContainer[List[DeploymentSummary]]()
-        self._api_request_handler.handle_response(response, lambda result: response_container.set_result(self._parse_deployments_page(result)))
+        deployments_page: Page[DeploymentSummary] = self._api_request_handler.handle_response_new(response, lambda data: Page[DeploymentSummary](data, DeploymentSummary))
 
-        return response_container.get_result()
+        return deployments_page.body
 
     @staticmethod
     def _parse_deployments_page(response: dict | List[dict] | object) -> List[DeploymentSummary]:

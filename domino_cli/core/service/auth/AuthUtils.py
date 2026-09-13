@@ -22,7 +22,7 @@ class AuthUtils:
         """
         username = os.getenv(_DOMINO_CLI_USERNAME)
         if username is None:
-            username = RuntimeHelper.input_wrapper(lambda: input(" ** specify username: "))
+            username = RuntimeHelper.input_wrapper(lambda: input(" ** specify username: "))  # TODO this needs to be smartened up, needs to be aware of the current exec mode (tui / cli)
 
         return username
 
