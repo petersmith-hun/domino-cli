@@ -32,6 +32,3 @@ class OAuthImportActionAdapter(LongRunningActionAdapter[OAuthImportMessage]):
 
         except DominoServiceException as exc:
             self._app.notify(str(exc), title="Failed to import OAuth definition", severity="error")
-
-        finally:
-            self._app.call_from_thread(self._show_loading_indicator, False)

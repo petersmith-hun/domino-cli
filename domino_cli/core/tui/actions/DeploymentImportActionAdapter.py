@@ -30,6 +30,3 @@ class DeploymentImportActionAdapter(LongRunningActionAdapter[DeploymentImportMes
 
         except DominoServiceException as exc:
             self._app.notify(str(exc), title="Failed to import deployment definition", severity="error")
-
-        finally:
-            self._app.call_from_thread(self._show_loading_indicator, False)

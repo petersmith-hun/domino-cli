@@ -1,6 +1,7 @@
 from textual.app import App
 from textual.widgets import ListView
 
+from domino_cli.core.domain.CustomExceptions import DominoServiceException
 from domino_cli.core.service.DominoService import DominoService
 from domino_cli.core.tui.actions import LongRunningActionAdapter
 from domino_cli.core.tui.screens.DeploymentListScreen import DeploymentListHeader, DeploymentListItem
@@ -15,7 +16,13 @@ class DeploymentListActionAdapter(LongRunningActionAdapter[None]):
         self._domino_service = domino_service
 
     def _action(self, event: None):
-        deployments = self._domino_service.get_deployments_page()
+
+        try:
+            deployments = self._domino_service.get_deployments_page()
+
+        except DominoServiceException as exc:
+            self._app.call_from_thread(lambda: self._app.notify(f"Error fetching deployments: {str(exc)}", title="Failed fetching deployments", severity="error"))
+            return
 
         if deployments is None or len(deployments) == 0:
             return

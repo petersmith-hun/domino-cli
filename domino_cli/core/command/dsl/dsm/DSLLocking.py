@@ -22,7 +22,10 @@ class LockSecretCommandProcessor(SecretCommandProcessor):
             return False
 
         key = arguments.pop(0)
-        self._secret_service.lock_secret(key)
+        try:
+            self._secret_service.lock_secret(key)
+        except Exception as exc:
+            error(f"Failed to lock secret: {exc}")
 
         return True
 
@@ -48,7 +51,10 @@ class UnlockSecretCommandProcessor(SecretCommandProcessor):
             return False
 
         key = arguments.pop(0)
-        self._secret_service.unlock_secret(key)
+        try:
+            self._secret_service.unlock_secret(key)
+        except Exception as exc:
+            error(f"Failed to unlock secret: {exc}")
 
         return True
 

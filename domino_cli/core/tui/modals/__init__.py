@@ -1,11 +1,12 @@
 from pathlib import Path
-from typing import List, Iterable
+from typing import List, Iterable, Callable
 
+from textual import on
 from textual.app import ComposeResult
-from textual.containers import Vertical, VerticalGroup
+from textual.containers import Vertical, VerticalGroup, HorizontalGroup
 from textual.screen import ModalScreen
 from textual.widget import Widget
-from textual.widgets import Rule, Footer, Label, DirectoryTree
+from textual.widgets import Rule, Footer, Label, DirectoryTree, Button
 
 
 class CustomModalScreen(ModalScreen):
@@ -32,7 +33,6 @@ class CustomModalScreen(ModalScreen):
             padding: 0 3;
             outline-left: ascii $accent;
             outline-right: ascii $accent;
-            # outline-bottom: ascii $accent;
         }
         
         .mt2 {
@@ -62,7 +62,7 @@ class CustomModalScreen(ModalScreen):
 
     def __init__(self, deployment_id: str):
         super().__init__()
-        self._deployment_id = deployment_id
+        self._deployment_id = deployment_id # TODO I should be able to remove this, only the child implementations use it
 
     def compose(self) -> ComposeResult:
 
@@ -97,3 +97,45 @@ class FilteredDirectoryTree(DirectoryTree):
 
     def filter_paths(self, paths: Iterable[Path]):
         return [path for path in paths if path.is_dir() or path.name.endswith(".yml") or path.name.endswith(".yaml")]
+
+
+class ConfirmationModal(CustomModalScreen):
+    """
+    TODO.
+    """
+    DEFAULT_CSS = """
+        #custom_modal_frame {
+            max-width: 80;
+            max-height: 20;
+        }
+    """
+
+    def __init__(self, confirmation_text: str, callback: Callable[[], None]):
+        super().__init__("")
+        self._confirmation_text = confirmation_text
+        self._callback = callback
+
+    def _get_title(self) -> Label:
+        return Label("Are you sure you want to continue?")
+
+    def _get_sub_title(self) -> Label:
+        return Label(self._confirmation_text)
+
+    def _get_content(self) -> List[Widget]:
+        return [
+            HorizontalGroup(
+                Button("Cancel", id="cancel_button"),
+                Button("OK", id="confirmation_button", classes="ml2", variant="warning"),
+                classes="full_width align_right"
+            )
+        ]
+
+    @on(Button.Pressed, "#confirmation_button")
+    def _handle_confirmation(self):
+        self.dismiss()
+        self.dismiss()
+        self._callback()
+
+    @on(Button.Pressed, "#cancel_button")
+    def _handle_cancel(self):
+        self.dismiss()

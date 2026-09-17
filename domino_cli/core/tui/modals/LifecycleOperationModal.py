@@ -59,7 +59,7 @@ class LifecycleOperationModal(CustomModalScreen):
             ))
 
         if self._operation != "info":
-            widgets.append(Checkbox("Roll all instances", id="roll", classes="full_width"))
+            widgets.append(Checkbox("Roll all instances", id="roll", classes="full_width mt2"))
 
         widgets.extend([
             Input(

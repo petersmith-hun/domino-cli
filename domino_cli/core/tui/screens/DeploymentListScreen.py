@@ -42,16 +42,21 @@ class DeploymentListItem(ListItem):
     """
 
     def __init__(self, deployment: DeploymentSummary):
-        super().__init__(
-            HorizontalGroup(
-                DeploymentLabel(deployment.id),
-                DeploymentLabel(deployment.source_type),
-                DeploymentLabel(deployment.execution_type),
-                DeploymentLabel(deployment.home, True),
-                DeploymentLabel(deployment.resource, True),
-                DeploymentLabel("Yes" if deployment.locked else "No")
-            )
-        )
+
+        labels = [
+            DeploymentLabel(deployment.id),
+            DeploymentLabel(deployment.source_type),
+            DeploymentLabel(deployment.execution_type),
+            DeploymentLabel(deployment.home, True),
+            DeploymentLabel(deployment.resource, True)
+        ]
+
+        if deployment.locked == "Locked":
+            labels.append(DeploymentLabel("Locked"))
+        else:
+            labels.append(DeploymentLabel("Yes" if deployment.locked else "No"))
+
+        super().__init__(HorizontalGroup(*labels))
         self.deployment_id = deployment.id
 
 
@@ -72,7 +77,7 @@ class DeploymentListHeader(DeploymentListItem):
         "executionType": "Execution Type",
         "home": "Home",
         "resource": "Resource",
-        "locked": True
+        "locked": "Locked"
     })
 
     def __init__(self):
@@ -98,6 +103,8 @@ class DeploymentsListScreen(ListView):
 
     def action_select_cursor(self) -> None:
 
-        if not isinstance(self.highlighted_child, DeploymentListHeader):
-            deployment = cast(DeploymentListItem, self.highlighted_child)
-            self.app.push_screen(DeploymentOptionsModal(self._domino_service, deployment.deployment_id))
+        if isinstance(self.highlighted_child, DeploymentListHeader):
+            return
+
+        deployment = cast(DeploymentListItem, self.highlighted_child)
+        self.app.push_screen(DeploymentOptionsModal(self._domino_service, deployment.deployment_id))
