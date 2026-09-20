@@ -21,6 +21,7 @@ class CoordinatorConfigWizardResultTransformer(AbstractWizardResultTransformer):
         self._add_conditional_auth_configuration(source, target_dict)
         self._add_conditional_agent_configuration(source, target_dict)
         self._add_conditional_encryption_configuration(source, target_dict)
+        self._add_defaults(source, target_dict)
 
         return target_dict
 
@@ -54,3 +55,7 @@ class CoordinatorConfigWizardResultTransformer(AbstractWizardResultTransformer):
 
         if source[Mapping.ENCRYPTION_ENABLE.get_wizard_field()] == "yes":
             [self._assign(mapping, _ROOT, source, target_dict) for mapping in Mapping.get_mappings_by_group(MappingGroups.ENCRYPTION)]
+
+    def _add_defaults(self, source: dict, target_dict: dict) -> None:
+        source[Mapping.FIRST_OAUTH_PROVIDER.get_wizard_field()] = []
+        self._assign(Mapping.FIRST_OAUTH_PROVIDER, _ROOT, source, target_dict)

@@ -64,6 +64,8 @@ class APIRequestHandler:
 
     def handle_response_new[T](self, response: Response, mapper: Callable[[Any], T] | None = None) -> T | None:
 
+        # TODO calling this crashes the application if session is not yet open
+
         if response.status_code == 400:
             raise ValidationException(response)
 

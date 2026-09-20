@@ -32,8 +32,8 @@ class BinaryExecutablePlatformComponentInstaller(PlatformComponentInstaller):
     set up the service).
     """
 
-    def __init__(self, version_resolver: VersionResolver):
-        super().__init__(version_resolver)
+    def __init__(self, version_resolver: VersionResolver, auto_install: bool = False):
+        super().__init__(version_resolver, auto_install)
 
     def _prepare_command_lines(self, component: DominoComponent, wizard_data: dict, version: str) -> List[List[str]]:
 

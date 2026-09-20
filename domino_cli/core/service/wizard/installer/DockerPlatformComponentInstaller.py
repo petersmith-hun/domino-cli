@@ -11,8 +11,8 @@ class DockerPlatformComponentInstaller(PlatformComponentInstaller):
     PlatformComponentInstaller implementation for Docker based installations. Prepares the necessary Docker CLI calls
     (docker rm ... for clean-up, docker run ... for installation).
     """
-    def __init__(self, version_resolver: VersionResolver):
-        super().__init__(version_resolver)
+    def __init__(self, version_resolver: VersionResolver, auto_install: bool = False):
+        super().__init__(version_resolver, auto_install)
 
     def _prepare_command_lines(self, component: DominoComponent, wizard_data: dict, version: str) -> List[List[str]]:
 

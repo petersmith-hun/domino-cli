@@ -1,6 +1,6 @@
 import subprocess
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Any
 
 from domino_cli.core.cli.Logging import info, warning
 from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
@@ -14,8 +14,9 @@ class PlatformComponentInstaller(ABC):
     """
     Abstract base implementation for Domino Platform component installers.
     """
-    def __init__(self, version_resolver: VersionResolver):
+    def __init__(self, version_resolver: VersionResolver, auto_install: bool = False):
         self._version_resolver = version_resolver
+        self._auto_install = auto_install
 
     def install(self, wizard_data: dict) -> None:
         """
@@ -28,13 +29,16 @@ class PlatformComponentInstaller(ABC):
         version = self._version_resolver.resolve_latest(component)
         command_lines = self._prepare_command_lines(component, wizard_data, version)
 
-        info("{0} {1} will be installed. Do you wish to proceed? (Type 'yes' to proceed)"
-              .format(component.value, version))
-        if RuntimeHelper.input_wrapper(lambda: input()) != "yes":
-            warning("Installation aborted")
-            return
+        if not self._auto_install:
+            info("{0} {1} will be installed. Do you wish to proceed? (Type 'yes' to proceed)"
+                  .format(component.value, version))
+            if RuntimeHelper.input_wrapper(lambda: input()) != "yes":
+                warning("Installation aborted")
+                return
+        else:
+            info("{0} {1} will be installed automatically".format(component.value, version))
 
-        [subprocess.call(command_line) for command_line in command_lines]
+        [subprocess.check_call(command_line) for command_line in command_lines] # TODO handle in CLI mode!
 
     @abstractmethod
     def _prepare_command_lines(self, component: DominoComponent, wizard_data: dict, version: str) -> List[List[str]]:
@@ -56,5 +60,5 @@ class PlatformComponentInstaller(ABC):
         pass
 
     @staticmethod
-    def _extract_value(wizard_data: dict, mapping: WizardDataMappingBaseEnum) -> any:
+    def _extract_value(wizard_data: dict, mapping: WizardDataMappingBaseEnum) -> Any:
         return mapping.get_mapper()(wizard_data[mapping.get_wizard_field()])

@@ -19,6 +19,7 @@ from domino_cli.core.tui.modals.CreateSecretModal import CreateSecretModal
 from domino_cli.core.tui.modals.DeploymentDescriptorImportModal import DeploymentDescriptorImportModal
 from domino_cli.core.tui.screens.DeploymentListScreen import DeploymentLabel, DeploymentsListScreen
 from domino_cli.core.tui.screens.SecretListScreen import SecretListScreen
+from domino_cli.core.tui.screens.WizardSelectorScreen import WizardSelectorScreen
 
 
 class EnvironmentHeader(HorizontalGroup):
@@ -47,6 +48,7 @@ class TUIMain(App):
         ("alt+d", "import_deployment", "Import deployment"),
         ("s", "list_secrets", "List secrets"),
         ("alt+s", "create_secret", "Create secret"),
+        ("w", "wizards", "Wizards"),
         ("q", "quit", "Quit")
     ]
 
@@ -96,6 +98,9 @@ class TUIMain(App):
                 with TabPane("Secrets", id="tab_secrets"):
                     with VerticalScroll(id="secrets_scroll"):
                         yield SecretListScreen(self._secret_service)
+                with TabPane("Wizards", id="tab_wizards"):
+                    with VerticalScroll(id="wizards_scroll"):
+                        yield WizardSelectorScreen()
 
         yield Footer()
 
@@ -118,14 +123,20 @@ class TUIMain(App):
     def action_import_deployment(self):
         self.query_one(TabbedContent).active = "tab_deployments"
         self.push_screen(DeploymentDescriptorImportModal(self._domino_service))
+        self.query_one(DeploymentsListScreen).focus()
 
     def action_list_secrets(self):
         self.query_one(TabbedContent).active = "tab_secrets"
         self._secret_list_action_adapter.execute()
+        self.query_one(SecretListScreen).focus()
 
     def action_create_secret(self):
         self.query_one(TabbedContent).active = "tab_secrets"
         self.push_screen(CreateSecretModal(self._secret_service))
+
+    def action_wizards(self):
+        self.query_one(TabbedContent).active = "tab_wizards"
+        self.query_one(WizardSelectorScreen).focus()
 
     @on(SecretManagementActionAdapter.SecretListRefreshMessage)
     @on(CreateSecretActionAdapter.SecretCreatedMessage)
