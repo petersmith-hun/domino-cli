@@ -1,5 +1,6 @@
 from typing import List
 
+import pyperclip
 from textual.containers import HorizontalGroup
 from textual.widget import Widget
 from textual.widgets import Label
@@ -31,8 +32,12 @@ class RetrievedSecretsModal(CustomModalScreen):
         }
     """
 
+    BINDINGS = [
+        ("c", "copy_result", "Copy retrieved secret(s) to clipboard")
+    ]
+
     def __init__(self, retrieved_secrets: dict[str, str]):
-        super().__init__("")
+        super().__init__()
         self.retrieved_secrets = retrieved_secrets
 
     def _get_title(self) -> Label:
@@ -42,3 +47,10 @@ class RetrievedSecretsModal(CustomModalScreen):
         return [HorizontalGroup(Label(key, classes="secret_key"), Label(value, classes="secret_value"), classes="secret_line")
                 for key, value
                 in self.retrieved_secrets.items()]
+
+    def action_copy_result(self) -> None:
+
+        secrets = "\n".join([f"{key}={value}" for key, value in self.retrieved_secrets.items()])
+
+        pyperclip.copy(secrets)
+        self.app.notify("Retrieved secrets has been copied to clipboard in env file format", title="Copy successful", severity="information")

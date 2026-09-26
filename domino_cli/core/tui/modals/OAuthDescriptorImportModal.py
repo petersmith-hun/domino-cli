@@ -21,7 +21,8 @@ class OAuthDescriptorImportModal(CustomModalScreen):
     """
 
     def __init__(self, domino_service: DominoService, deployment_id: str):
-        super().__init__(deployment_id)
+        super().__init__()
+        self._deployment_id = deployment_id
         self._domino_service = domino_service
         self._oauth_import_action_adapter = OAuthImportActionAdapter(self.app, self._domino_service)
         self._path: Path | None = None

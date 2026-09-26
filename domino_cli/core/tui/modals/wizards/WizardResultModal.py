@@ -2,6 +2,7 @@ import os
 from enum import Enum
 from typing import List
 
+import pyperclip
 from textual import on
 from textual.containers import VerticalScroll, HorizontalGroup
 from textual.widget import Widget
@@ -25,6 +26,10 @@ class WizardResultModal(BaseWizardModal):
             max-height: 80%;
         }
     """
+
+    BINDINGS = [
+        ("c", "copy_result", "Copy config to clipboard")
+    ]
 
     def __init__(self, config_type: ConfigType, yaml_content: str):
         super().__init__()
@@ -54,7 +59,12 @@ class WizardResultModal(BaseWizardModal):
             with open(target_file_path, "w") as file:
                 file.write(self._yaml_content)
                 absolute_path = os.path.realpath(file.name)
-                self.app.notify(f"Configuration saved successfully to file {absolute_path}", title="Configuration save", severity="information", timeout=5)
+                self.app.notify(f"Configuration saved successfully to file {absolute_path}", title="Configuration save", severity="information")
 
         except Exception as exc:
             self.app.notify(f"Failed to save the configuration file: {exc}", title="Configuration save", severity="error")
+
+    def action_copy_result(self) -> None:
+
+        pyperclip.copy(self._yaml_content)
+        self.app.notify("Configuration has been copied to clipboard", title="Copy successful", severity="information")

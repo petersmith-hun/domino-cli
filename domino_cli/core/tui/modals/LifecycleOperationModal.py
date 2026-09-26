@@ -31,7 +31,8 @@ class LifecycleOperationModal(CustomModalScreen):
     }
 
     def __init__(self, domino_service: DominoService, deployment_id: str, operation: Literal["deploy_latest", "deploy_version", "start", "stop", "restart", "info"]):
-        super().__init__(deployment_id)
+        super().__init__()
+        self._deployment_id = deployment_id
         self._domino_service = domino_service
         self._operation = operation
         self._lifecycle_operation_action_adapter = LifecycleOperationActionAdapter(self.app, self._domino_service)

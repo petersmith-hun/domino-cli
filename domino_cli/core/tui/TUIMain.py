@@ -69,10 +69,11 @@ class TUIMain(App):
         self._tui_wizard_components_factory = tui_wizard_components_factory
         self._authenticate_action_adapter = self._tui_main_components_factory.create_authenticate_action_adapter(self)
         self._deployment_list_action_adapter = self._tui_main_components_factory.create_deployment_list_action_adapter(self)
-        self._secret_list_action_adapter = self._tui_main_components_factory.create_create_secret_action_adapter(self)
+        self._secret_list_action_adapter = self._tui_main_components_factory.create_secret_list_action_adapter(self)
 
-        self.theme = "textual-dark"
         self.title = f"Domino CLI Next {self._version}"
+
+        self.app.NOTIFICATION_TIMEOUT = 10
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -108,11 +109,11 @@ class TUIMain(App):
     def action_list_deployments(self):
         self.query_one(TabbedContent).active = "tab_deployments"
         self._deployment_list_action_adapter.execute()
+        self.query_one(DeploymentsListScreen).focus()
 
     def action_import_deployment(self):
         self.query_one(TabbedContent).active = "tab_deployments"
         self.push_screen(self._tui_main_components_factory.create_deployment_descriptor_import_modal())
-        self.query_one(DeploymentsListScreen).focus()
 
     def action_list_secrets(self):
         self.query_one(TabbedContent).active = "tab_secrets"

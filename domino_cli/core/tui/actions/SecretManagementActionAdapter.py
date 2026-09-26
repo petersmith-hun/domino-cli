@@ -43,10 +43,10 @@ class SecretManagementActionAdapter(LongRunningActionAdapter[SecretManagementMes
 
             past_tense_suffix = "d" if event.operation == SecretManagementOperation.DELETE else "ed"
             self._app.notify(f"Successfully [i]{event.operation.value}{past_tense_suffix}[/i] secret [i]{event.secret_key}[/i]",
-                             title="Secret management operation completed", severity="information", markup=True, timeout=10)
+                             title="Secret management operation completed", severity="information", markup=True)
 
             self._app.post_message(self.SecretListRefreshMessage())
 
         except DominoServiceException as exc:
             self._app.notify(f"Failed to [i]{event.operation.value}[/i] secret [i]{event.secret_key}[/i]: {str(exc)}",
-                             title="Secret management operation failed", severity="error", markup=True, timeout=10)
+                             title="Secret management operation failed", severity="error", markup=True)

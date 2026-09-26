@@ -31,7 +31,7 @@ class CreateSecretModal(CustomModalScreen):
     """
 
     def __init__(self, secret_service: SecretService):
-        super().__init__("")
+        super().__init__()
         self._secret_service = secret_service
         self._create_secret_action_adapter = CreateSecretActionAdapter(self.app, self._secret_service)
 

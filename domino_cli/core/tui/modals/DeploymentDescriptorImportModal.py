@@ -22,7 +22,7 @@ class DeploymentDescriptorImportModal(CustomModalScreen):
     """
 
     def __init__(self, domino_service: DominoService):
-        super().__init__("")
+        super().__init__()
         self._domino_service = domino_service
         self._deployment_import_action_adapter = DeploymentImportActionAdapter(self.app, self._domino_service)
         self._path: Path | None = None

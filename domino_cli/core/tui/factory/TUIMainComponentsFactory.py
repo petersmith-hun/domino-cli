@@ -6,6 +6,7 @@ from domino_cli.core.service.SecretService import SecretService
 from domino_cli.core.tui.actions.AuthenticateActionAdapter import AuthenticateActionAdapter
 from domino_cli.core.tui.actions.CreateSecretActionAdapter import CreateSecretActionAdapter
 from domino_cli.core.tui.actions.DeploymentListActionAdapter import DeploymentListActionAdapter
+from domino_cli.core.tui.actions.SecretListActionAdapter import SecretListActionAdapter
 from domino_cli.core.tui.modals.AuthUtilOptionsModal import AuthUtilOptionsModal
 from domino_cli.core.tui.modals.CreateSecretModal import CreateSecretModal
 from domino_cli.core.tui.modals.DeploymentDescriptorImportModal import DeploymentDescriptorImportModal
@@ -44,6 +45,9 @@ class TUIMainComponentsFactory:
 
     def create_create_secret_modal(self) -> CreateSecretModal:
         return CreateSecretModal(self._secret_service)
+
+    def create_secret_list_action_adapter(self, app: App) -> SecretListActionAdapter:
+        return SecretListActionAdapter(app, self._secret_service)
 
     def create_create_secret_action_adapter(self, app: App) -> CreateSecretActionAdapter:
         return CreateSecretActionAdapter(app, self._secret_service)

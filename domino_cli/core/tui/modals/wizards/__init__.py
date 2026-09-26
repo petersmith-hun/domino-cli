@@ -2,6 +2,7 @@ from typing import List
 
 from textual import on
 from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
+from textual.validation import Length
 from textual.widget import Widget
 from textual.widgets import Label, Input, Select, Rule, Switch, TextArea, Button
 
@@ -45,11 +46,15 @@ class BaseWizardModal(CustomModalScreen):
             width: 70%;
             height: 5;
         }
-
+        
+        .input_required {
+            color: red;
+            text-style: bold;
+        }
     """
 
     def __init__(self):
-        super().__init__("")
+        super().__init__()
 
     def _get_content(self) -> List[Widget]:
         return [VerticalScroll(
@@ -72,20 +77,34 @@ class BaseWizardModal(CustomModalScreen):
     def _select_input(self, input_id: str, title: str, description: str, options: List[tuple[str, str]], disabled: bool = False, control_group: str | None = None) -> VerticalGroup:
         return self._input_frame(title, description, Select(id=input_id, options=options, classes=f"input input_text_input {control_group}", disabled=disabled, allow_blank=False))
 
-    def _text_input(self, input_id: str, title: str, description: str, disabled: bool = False, control_group: str | None = None, default_value: str | None = None) -> VerticalGroup:
-        return self._input_frame(title, description, Input(id=input_id, classes=f"input input_text_input {control_group}", disabled=disabled, value=default_value))
+    def _text_input(self, input_id: str, title: str, description: str, disabled: bool = False, control_group: str | None = None, default_value: str | None = None, required: bool = False) -> VerticalGroup:
 
-    def _textarea_input(self, input_id: str, title: str, description: str, disabled: bool = False, control_group: str | None = None) -> VerticalGroup:
-        return self._input_frame(title, description, TextArea(id=input_id, classes=f"input input_textarea {control_group}", disabled=disabled))
+        validators = []
+        if required:
+            validators.append(Length(minimum=1))
+
+        return self._input_frame(title, description,
+                                 Input(id=input_id, classes=f"input input_text_input {control_group}", disabled=disabled,
+                                       value=default_value, valid_empty=not required, validators=validators),
+                                 required=required)
+
+    def _textarea_input(self, input_id: str, title: str, description: str, disabled: bool = False, control_group: str | None = None, required: bool = False) -> VerticalGroup:
+        return self._input_frame(title, description, TextArea(id=input_id, classes=f"input input_textarea {control_group}", disabled=disabled), required=required)
 
     def _switch_input(self, input_id: str, title: str, description: str, disabled: bool = False, control_group: str | None = None, default_value: bool = False) -> VerticalGroup:
         return self._input_frame(title, description, Switch(id=input_id, disabled=disabled, classes=f"input {control_group}", value=default_value))
 
-    def _input_frame(self, title: str, description: str, input_widget: Widget) -> VerticalGroup:
+    def _input_frame(self, title: str, description: str, input_widget: Widget, required: bool = False) -> VerticalGroup:
+
+        input_label = [Label(title)]
+
+        if required:
+            input_label.append(Label(" *", classes="input_required"))
+
         return VerticalGroup(
             HorizontalGroup(
-                Label(title, classes="input_name"),
-                input_widget,
+                HorizontalGroup(*input_label, classes="input_name"),
+                input_widget
             ),
             Label(f"ⓘ {description}", classes="input_description"),
             classes="input_row"
@@ -112,6 +131,9 @@ class BaseWizardModal(CustomModalScreen):
 
             field_value: str | list[str] | None = None
             if isinstance(input_field, Input):
+                if not input_field.is_valid:
+                    self.app.notify(f"Value for required field {input_field.id} is not provided", title="Validation error", severity="error")
+                    return
                 field_value = input_field.value
             elif isinstance(input_field, TextArea):
                 field_value = [line.strip() for line in input_field.text.split("\n")] if len(input_field.text) > 0 else None
@@ -121,7 +143,7 @@ class BaseWizardModal(CustomModalScreen):
                 field_value = "yes" if input_field.value else "no"
 
             if field_value is not None and len(field_value) > 0:
-                responses[input_field.id] = field_value
+                responses[str(input_field.id)] = field_value
 
         self._handle_result(responses)
 

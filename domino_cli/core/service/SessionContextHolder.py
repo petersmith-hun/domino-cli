@@ -1,9 +1,9 @@
-import datetime
 import os
 from typing import Optional
 
 from domino_cli.core.cli.Logging import warning
 from domino_cli.core.domain.SessionContext import SessionContext
+from domino_cli.core.service.auth import parse_token_expiration
 
 
 class SessionContextHolder:
@@ -15,7 +15,7 @@ class SessionContextHolder:
 
         preauthorized_token = os.getenv("DOMINO_CLI_PREAUTHORIZED_TOKEN")
         if preauthorized_token is not None:
-            self._session_context = SessionContext("preauthorized", preauthorized_token, datetime.datetime.now()) # TODO expiration does not matter here, but token could be read
+            self._session_context = SessionContext("preauthorized", preauthorized_token, parse_token_expiration(preauthorized_token))
 
     def update(self, session_context: SessionContext) -> None:
         """

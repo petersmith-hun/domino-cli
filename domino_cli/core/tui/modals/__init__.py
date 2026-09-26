@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Iterable, Callable
 
-from textual import on
+from textual import on, events
 from textual.app import ComposeResult
 from textual.containers import Vertical, VerticalGroup, HorizontalGroup
 from textual.screen import ModalScreen
@@ -12,7 +12,7 @@ from textual.widgets import Rule, Footer, Label, DirectoryTree, Button
 class CustomModalScreen(ModalScreen):
 
     BINDINGS = [
-        ("c", "app.pop_screen", "Close")
+        ("x", "app.pop_screen", "Close")
     ]
 
     DEFAULT_CSS = """
@@ -60,9 +60,8 @@ class CustomModalScreen(ModalScreen):
         }
         """
 
-    def __init__(self, deployment_id: str):
+    def __init__(self):
         super().__init__()
-        self._deployment_id = deployment_id # TODO I should be able to remove this, only the child implementations use it
 
     def compose(self) -> ComposeResult:
 
@@ -77,6 +76,12 @@ class CustomModalScreen(ModalScreen):
                 for widget in self._get_content():
                     yield widget
             yield Footer(id="custom_modal_footer")
+
+    def _on_mount(self, event: events.Mount) -> None:
+
+        inputs = self.query(".input")
+        if len(inputs) > 0:
+            inputs[0].focus()
 
     def _get_title(self) -> Label:
         pass
@@ -105,7 +110,7 @@ class ConfirmationModal(CustomModalScreen):
     """
 
     def __init__(self, confirmation_text: str, callback: Callable[[], None]):
-        super().__init__("")
+        super().__init__()
         self._confirmation_text = confirmation_text
         self._callback = callback
 

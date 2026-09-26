@@ -36,7 +36,7 @@ class SecretService:
         Displays metadata of all existing secrets.
         """
         response = self._api_request_handler.send_command(DominoCommand.RETRIEVE_ALL_METADATA)
-        return self._api_request_handler.handle_response_new(response, lambda items: [SecretGroup(item) for item in cast(list[dict[str, Any]], items)])
+        return self._api_request_handler.handle_response(response, lambda items: [SecretGroup(item) for item in cast(list[dict[str, Any]], items)])
 
     def get_metadata_by_key(self, key: str) -> SecretDetails:
         """
@@ -45,7 +45,7 @@ class SecretService:
         :param key: key of the secret to show the metadata of
         """
         response = self._api_request_handler.send_command(DominoCommand.RETRIEVE_SECRET_METADATA, key)
-        return self._api_request_handler.handle_response_new(response, SecretDetails)
+        return self._api_request_handler.handle_response(response, SecretDetails)
 
     def retrieve_secret_by_key(self, key: str) -> dict[str, str]:
         """
@@ -54,7 +54,7 @@ class SecretService:
         :param key: key of the secret to show the value of
         """
         response = self._api_request_handler.send_command(DominoCommand.RETRIEVE_SECRET, key)
-        return self._api_request_handler.handle_response_new(response)
+        return self._api_request_handler.handle_response(response)
 
     def retrieve_secrets_by_context(self, context: str) -> dict[str, str]:
         """
@@ -63,7 +63,7 @@ class SecretService:
         :param context: context of the secrets to show the value of
         """
         response = self._api_request_handler.send_command(DominoCommand.RETRIEVE_SECRETS_BY_CONTEXT, context)
-        return self._api_request_handler.handle_response_new(response)
+        return self._api_request_handler.handle_response(response)
 
     def lock_secret(self, key: str) -> None:
         """
@@ -72,7 +72,7 @@ class SecretService:
         :param key: key of the secret to lock
         """
         response = self._api_request_handler.send_command(DominoCommand.LOCK_SECRET, key)
-        self._api_request_handler.handle_response_new(response)
+        self._api_request_handler.handle_response(response)
 
     def unlock_secret(self, key: str) -> None:
         """
@@ -81,7 +81,7 @@ class SecretService:
         :param key: key of the secret to unlock
         """
         response = self._api_request_handler.send_command(DominoCommand.UNLOCK_SECRET, key)
-        self._api_request_handler.handle_response_new(response)
+        self._api_request_handler.handle_response(response)
 
     def delete_secret(self, key: str) -> None:
         """
@@ -90,7 +90,7 @@ class SecretService:
         :param key: key of the secret to delete
         """
         response = self._api_request_handler.send_command(DominoCommand.DELETE_SECRET, key)
-        self._api_request_handler.handle_response_new(response)
+        self._api_request_handler.handle_response(response)
 
     @staticmethod
     def handle_all_metadata_response(data: List[dict]) -> None:

@@ -101,7 +101,7 @@ class DominoService:
         Lists deployments.
         """
         response = self._api_request_handler.send_command(DominoCommand.LIST_DEPLOYMENTS)
-        deployments_page: Page[DeploymentSummary] = self._api_request_handler.handle_response_new(response, lambda data: Page[DeploymentSummary](data, DeploymentSummary))
+        deployments_page: Page[DeploymentSummary] = self._api_request_handler.handle_response(response, lambda data: Page[DeploymentSummary](data, DeploymentSummary))
 
         return deployments_page.body
 

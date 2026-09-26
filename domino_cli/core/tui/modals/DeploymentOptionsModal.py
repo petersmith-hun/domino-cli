@@ -13,7 +13,8 @@ from domino_cli.core.tui.modals.OAuthDescriptorImportModal import OAuthDescripto
 class DeploymentOptionsModal(CustomModalScreen):
 
     def __init__(self, domino_service: DominoService, deployment_id: str):
-        super().__init__(deployment_id)
+        super().__init__()
+        self._deployment_id = deployment_id
         self._domino_service = domino_service
 
     def _get_title(self) -> Label:

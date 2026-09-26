@@ -15,7 +15,6 @@ class AuthenticateActionAdapter(LongRunningActionAdapter[None]):
         try:
             session_context = self._authentication_service.open_session()
             TUIRuntimeHelper.set_authenticated(session_context, self._app)
-            # TODO vissza kéne tenni valahogy egy közös notify()-t hogy ne kelljen állítgatni a timeoutot, vagy megnézni hogy lehet globálisan feljebb venni
             self._app.notify(f"Welcome, [i]{self._authentication_service.get_username()}[/i]", title="Session is open", severity="information", markup=True)
 
         except AuthenticationException as exc:

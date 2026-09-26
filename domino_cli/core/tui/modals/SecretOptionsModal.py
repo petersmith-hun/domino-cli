@@ -15,7 +15,7 @@ from domino_cli.core.tui.modals.RetrievedSecretsModal import RetrievedSecretsMod
 class SecretOptionsModal(CustomModalScreen):
 
     def __init__(self, secret_service: SecretService, secret: SecretDetails):
-        super().__init__("")
+        super().__init__()
         self._secret_service = secret_service
         self._secret_details = secret
 
@@ -61,7 +61,7 @@ class SecretOptionList(OptionList):
         if self.highlighted_option is None:
             return
 
-        option_id = self.highlighted_option.id
+        option_id = str(self.highlighted_option.id)
 
         if option_id == "retrieve_secret":
             self.loading = True

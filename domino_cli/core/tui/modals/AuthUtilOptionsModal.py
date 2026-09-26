@@ -13,7 +13,7 @@ from domino_cli.core.tui.modals.AuthUtilOperationModals import PasswordEncryptio
 class AuthUtilOptionsModal(CustomModalScreen):
 
     def __init__(self, authentication_service: AuthenticationService):
-        super().__init__("")
+        super().__init__()
         self._authentication_service = authentication_service
 
     def _get_title(self) -> Label:

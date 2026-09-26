@@ -1,9 +1,8 @@
-from typing import Callable, List, Any
+from typing import Callable, Any
 
 from requests import Response
 
-from domino_cli.core.cli.Logging import error, info
-from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
+from domino_cli.core.cli.Logging import error
 from domino_cli.core.client.DominoClient import DominoClient
 from domino_cli.core.domain.CustomExceptions import ValidationException, DominoServiceException
 from domino_cli.core.domain.DominoCommand import DominoCommand
@@ -12,18 +11,18 @@ from domino_cli.core.domain.DominoRequest import DominoRequest
 
 class APIRequestHandler:
     """
-    TODO.
+    Convenience wrapper class for handling API requests.
     """
     def __init__(self, domino_client: DominoClient):
         self._domino_client = domino_client
 
-    def send_command(self, command: DominoCommand, path_variable: str | None = None, body: dict | None = None) -> Response | None:
+    def send_command(self, command: DominoCommand, path_variable: str | None = None, body: dict | None = None) -> Response:
         """
-        TODO.
-        :param command:
-        :param path_variable:
-        :param body:
-        :return:
+        Creates and sends a request to Domino.
+        :param command: DominoCommand identifying the command to be executed
+        :param path_variable: variables to be substituted in the path template
+        :param body: request body content
+        :return: raw Response
         """
         request = DominoRequest(
             method=command.value.method,
@@ -32,39 +31,16 @@ class APIRequestHandler:
             authenticated=True
         )
 
-        try:
-            return self._domino_client.send_command(request)
+        return self._domino_client.send_command(request)
 
-        except Exception as exc: # TODO should refactor this one as well, return should never be "none"
-            error("Failed to execute HTTP request {0} - reason: {1}".format(request, str(exc)))
-            RuntimeHelper.exit_with_error_in_cicd_mode()
-            return None
-
-    def handle_response(self, response: Response | None, handler: Callable[[dict | List[dict] | object], None] | None = None) -> None:
+    @staticmethod
+    def handle_response(response: Response, mapper: Callable[[Any], Any] | None = None) -> Any:
         """
-        TODO.
-        :param response:
-        :param handler:
-        :return:
+        Handles the response from Domino.
+        :param response: raw response from Domino
+        :param mapper: optional mapper to be applied to the response; returns data as is if None
+        :return: data transformed by the mapper or raw response if mapper is None
         """
-        if response is None:
-            return
-
-        if response.status_code >= 300:
-            error(f"Failed to execute operation, Domino responded with status {response.status_code}: {self._try_extract_message(response)}")
-
-            if response.status_code == 400:
-                self._try_render_violations(response)
-
-        elif len(response.content) == 0:
-            info("Operation finished successfully")
-
-        elif handler is not None:
-            handler(response.json())
-
-    def handle_response_new[T](self, response: Response, mapper: Callable[[Any], T] | None = None) -> T | None:
-
-        # TODO calling this crashes the application if session is not yet open
 
         if response.status_code == 400:
             raise ValidationException(response)

@@ -34,15 +34,18 @@ class DeploymentDefinitionWizardModal(CommonConfigWizardModal):
     def _add_inputs(self) -> List[Widget]:
 
         return [
-            self._text_input("deployment_name", "Deployment name", "Name (primary ID) of the deployment"),
+            self._text_input("deployment_name", "Deployment name", "Name (primary ID) of the deployment", required=True),
             *self._group("Source configuration", "Determines where the application's executable is located and how it should be treated", [
                 self._select_input("source_type", "Type", "Type of the executable. Currently FILESYSTEM and DOCKER are supported, which means either the executable is located in the server's filesystem as a standalone executable binary file or exists as a Docker container.",
                                    [("Run as Docker Container", "DOCKER"), ("Run as binary executable", "FILESYSTEM")]),
-                self._text_input("src_home", "Home", "Binary source URL or Docker Registry URI."),
-                self._text_input("src_bin_name", "Resource", "The name of the deployed executable."),
+                self._text_input("src_home", "Home", "Binary source URL or Docker Registry URI.",
+                                 required=True),
+                self._text_input("src_bin_name", "Resource", "The name of the deployed executable.",
+                                 required=True),
             ]),
             *self._group("Target configuration", "Target configuration determines the actual server instance where your application is running. You may also define some directives for deploying multiple instances of the application on different hosts.", [
-                self._textarea_input("target_hosts", "Hosts", "List of arbitrary host IDs, where you would like to install your application."),
+                self._textarea_input("target_hosts", "Hosts", "List of arbitrary host IDs, where you would like to install your application.",
+                                     required=True),
                 self._switch_input("multi_instance_enable", "Multi-instance", "Enables multi-instance deployment."),
                 self._text_input("instance_count", "Instance count", "Sets the number of deployed instances.", disabled=True, control_group="multi-instance"),
                 self._select_input("spread_mode", "Instance spread mode", "Controls how the instances should be spread across multiple hosts.",

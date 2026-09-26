@@ -1,6 +1,7 @@
 import os
 from typing import Any
 
+import pyperclip
 from textual import on
 from textual.containers import HorizontalGroup, VerticalScroll
 from textual.widget import Widget
@@ -21,8 +22,12 @@ class PasswordEncryptionModal(CustomModalScreen):
     }
     """
 
+    BINDINGS = [
+        ("c", "copy_result", "Copy encrypted password to clipboard")
+    ]
+
     def __init__(self, authentication_service: AuthenticationService):
-        super().__init__("")
+        super().__init__()
         self._authentication_service = authentication_service
 
     def _get_title(self) -> Label:
@@ -47,6 +52,14 @@ class PasswordEncryptionModal(CustomModalScreen):
         encrypted_password = self._authentication_service.encrypt_password(password)
         self.query_one("#encrypted_password", TextArea).load_text(encrypted_password)
 
+    def action_copy_result(self) -> None:
+        encrypted_password = self.query_one("#encrypted_password", TextArea).text
+
+        if encrypted_password:
+            pyperclip.copy(encrypted_password)
+            self.app.notify("Encrypted password has been copied to clipboard", title="Copy successful", severity="information")
+        else:
+            self.app.notify("No encrypted password to copy", title="Copy failed", severity="warning")
 
 class GenerateAccessTokenModal(CustomModalScreen):
 
@@ -57,8 +70,12 @@ class GenerateAccessTokenModal(CustomModalScreen):
     }
     """
 
+    BINDINGS = [
+        ("c", "copy_result", "Copy access token to clipboard")
+    ]
+
     def __init__(self, authentication_service: AuthenticationService):
-        super().__init__("")
+        super().__init__()
         self._authentication_service = authentication_service
 
     def _get_title(self) -> Label:
@@ -92,6 +109,15 @@ class GenerateAccessTokenModal(CustomModalScreen):
             self.app.call_from_thread(self.set_loading, False)
             self.app.call_from_thread(lambda: self.app.notify(str(exc), title="Authentication failed", severity="error"))
 
+    def action_copy_result(self) -> None:
+        access_token = self.query_one("#access_token", TextArea).text
+
+        if access_token:
+            pyperclip.copy(access_token)
+            self.app.notify("Access token has been copied to clipboard", title="Copy successful", severity="information")
+        else:
+            self.app.notify("No access token to copy", title="Copy failed", severity="warning")
+
 
 class SetAuthModeModal(CustomModalScreen):
 
@@ -112,7 +138,7 @@ class SetAuthModeModal(CustomModalScreen):
     """
 
     def __init__(self, authentication_service: AuthenticationService):
-        super().__init__("")
+        super().__init__()
         self._authentication_service = authentication_service
 
     def _get_title(self) -> Label:

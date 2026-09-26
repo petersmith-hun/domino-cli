@@ -26,13 +26,18 @@ class CoordinatorConfigWizardModal(CommonConfigWizardModal):
     def _add_inputs(self) -> List[Widget]:
         return [
             *self._group("Server configuration", "Configuration parameters for Domino's internal web server.", [
-                self._text_input("server_context_path", "Server context path", "Root path of the API. Defaults to /.", default_value="/"),
-                self._text_input("server_host", "Server host address", "Host address on which Domino should listen. Specify 0.0.0.0 to listen on all addresses. Defaults to localhost.", default_value="localhost"),
-                self._text_input("server_port", "Server port", "Port on which Domino should listen. Defaults to 9987.", default_value="9987")
+                self._text_input("server_context_path", "Server context path", "Root path of the API. Defaults to /.",
+                                 default_value="/", required=True),
+                self._text_input("server_host", "Server host address", "Host address on which Domino should listen. Specify 0.0.0.0 to listen on all addresses. Defaults to localhost.",
+                                 default_value="localhost", required=True),
+                self._text_input("server_port", "Server port", "Port on which Domino should listen. Defaults to 9987.",
+                                 default_value="9987", required=True)
             ]),
             *self._group("Database configuration", "Configuration parameters for Domino's SQLite storage for deployment definitions.", [
-                self._text_input("datasource_sqlite_datafile_path", "SQLite datafile path", "Defines the path of the SQLite data file. Defaults to ./data/database.sqlite.", default_value="./data/database.sqlite"),
-                self._switch_input("datasource_enable_auto_import", "Enable deployment auto-import", "Enables automatically importing the YAML based deployment definitions. Requires a deployments file (see Coordinator installer)", default_value=True)
+                self._text_input("datasource_sqlite_datafile_path", "SQLite datafile path", "Defines the path of the SQLite data file. Defaults to ./data/database.sqlite.",
+                                 default_value="./data/database.sqlite", required=True),
+                self._switch_input("datasource_enable_auto_import", "Enable deployment auto-import", "Enables automatically importing the YAML based deployment definitions. Requires a deployments file (see Coordinator installer)",
+                                   default_value=True)
             ]),
             *self._group("Encryption configuration", "Encryption configuration for DSM (Domino Secret Manager).", [
                 self._switch_input("encryption_enable", "Enable encryption in DSM", "Enabled/disable encryption-at-rest of stored secrets."),

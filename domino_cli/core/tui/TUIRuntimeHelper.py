@@ -35,7 +35,7 @@ class TUIRuntimeHelper:
 
     @classmethod
     def register_toast(cls, tui_app: App[Any]):
-        cls._observer.register(lambda severity, message: tui_app.notify(message, title="Command result", severity=severity, timeout=10, markup=False))
+        cls._observer.register(lambda severity, message: tui_app.notify(message, title="Command result", severity=severity, markup=False))
 
     @classmethod
     def register_is_authenticated_hook(cls, is_authenticated_label: Label):

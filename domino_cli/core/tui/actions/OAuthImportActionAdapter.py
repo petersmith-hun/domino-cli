@@ -22,7 +22,7 @@ class OAuthImportActionAdapter(LongRunningActionAdapter[OAuthImportMessage]):
         try:
             self._domino_service.import_oauth_descriptor(event.deployment_id, event.dry_run, event.file_path)
             self._app.notify(f"Successfully imported OAuth definition from [i]{event.file_path}[/i]",
-                             title="OAuth definition import completed", severity="information", markup=True, timeout=10)
+                             title="OAuth definition import completed", severity="information", markup=True)
 
         except DominoServiceException as exc:
             self._app.notify(str(exc), title="Failed to import OAuth definition", severity="error")

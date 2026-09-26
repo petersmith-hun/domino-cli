@@ -39,7 +39,7 @@ class LifecycleOperationActionAdapter(LongRunningActionAdapter[LifecycleMessage]
                 self._command_map[event.operation], event.deployment_id, event.version, event.roll, event.instance)
             details = self._create_success_details(event, result, instance_suffix)
 
-            self._app.notify(details, title="Lifecycle operation completed", severity="information", markup=True, timeout=10)
+            self._app.notify(details, title="Lifecycle operation completed", severity="information", markup=True)
 
         except DominoServiceException as exc:
 

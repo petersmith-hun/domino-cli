@@ -1,8 +1,4 @@
-import datetime
-from base64 import b64decode
-
 from requests import Response
-from rich import json
 
 from domino_cli.core.client.DominoClient import DominoClient
 from domino_cli.core.domain.AuthMode import AuthMode
@@ -10,6 +6,7 @@ from domino_cli.core.domain.AuthRequest import AuthRequest
 from domino_cli.core.domain.DominoRequest import DominoRequest
 from domino_cli.core.domain.HTTPMethod import HTTPMethod
 from domino_cli.core.domain.SessionContext import SessionContext
+from domino_cli.core.service.auth import parse_token_expiration
 from domino_cli.core.service.auth.AbstractAuthHandler import AbstractAuthHandler
 from domino_cli.core.service.auth.AuthUtils import AuthUtils
 
@@ -49,7 +46,6 @@ class DirectAuthHandler(AbstractAuthHandler):
             raise Exception("Failed to authenticate - Domino responded with {0}".format(response.status_code))
 
         token_response = response.json()
-        jwt_payload = json.loads(b64decode(str(token_response["jwt"]).split(".")[1] + "=="))
-        expires_at = datetime.datetime.fromtimestamp(jwt_payload["exp"])
+        expires_at = parse_token_expiration(token_response["jwt"])
 
         return SessionContext(auth_request.username, token_response["jwt"], expires_at)

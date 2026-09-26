@@ -31,12 +31,15 @@ class BinaryExecutableAgentConfigWizardModal(CommonAgentConfigWizardModal):
                 self._select_input("spawn_control_service_handler", "Service handler", "Service subsystem to be used for service-based execution. Currently only systemd service subsystem is supported.", [
                     ("Systemd (Debian and Ubuntu based systems)", "systemd"),
                 ]),
-                self._text_input("spawn_control_start_delay", "Restart delay", "Process start delay on restart (in ms time string format, e.g. 20s, 1 minutes, etc)."),
+                self._text_input("spawn_control_start_delay", "Restart delay", "Process start delay on restart (in ms time string format, e.g. 20s, 1 minutes, etc).",
+                                 required=True),
                 self._textarea_input("spawn_control_exec_users", "Allowed executor users", "List of allowed process executor users. Listed users must exist on the host system."),
             ]),
             *self._group("Storage configuration", "Controls where to store the deployments' source packages, as well as the executed application binaries.", [
-                self._text_input("storage_deployments_store", "Deployment store path", "Storage path for downloaded deployment executables."),
-                self._text_input("storage_app_home", "Application home path", "Application work directory root path."),
+                self._text_input("storage_deployments_store", "Deployment store path", "Storage path for downloaded deployment executables.",
+                                 required=True),
+                self._text_input("storage_app_home", "Application home path", "Application work directory root path.",
+                                 required=True),
             ]),
             *self._group("Runtime configuration", "Registers the external runtimes to run RUNTIME deployments.", [
                 self._switch_input("runtime_configure_first", "Configure a runtime now?", "You can configure a runtime for RUNTIME deployments. Further configurations can be added later in the configuration file."),
