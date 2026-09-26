@@ -4,7 +4,7 @@ from typing import List, Any
 
 from domino_cli.core.cli.Logging import info, warning
 from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
-from domino_cli.core.service.wizard.installer import VersionResolver
+from domino_cli.core.service.wizard.installer import VersionResolver, InstallerType
 from domino_cli.core.service.wizard.mapping.InstallerWizardDataMapping import Mapping
 from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
 from domino_cli.installer_config import DominoComponent
@@ -14,14 +14,14 @@ class PlatformComponentInstaller(ABC):
     """
     Abstract base implementation for Domino Platform component installers.
     """
-    def __init__(self, version_resolver: VersionResolver, auto_install: bool = False):
+    def __init__(self, version_resolver: VersionResolver):
         self._version_resolver = version_resolver
-        self._auto_install = auto_install
 
-    def install(self, wizard_data: dict) -> None:
+    def install(self, wizard_data: dict, auto_install: bool = False) -> None:
         """
         Installs the given component by preparing a set of Shell calls and passes them to the backing system.
         :param wizard_data: raw wizard data to extract installation parameters from
+        :param auto_install: flag to indicate automatically installing the component without user confirmation
         """
         component = self._extract_value(wizard_data, Mapping.COMPONENT)
         info("Preparing to install {0} as {1} ...".format(component.value, self._reported_installation_method()))
@@ -29,7 +29,7 @@ class PlatformComponentInstaller(ABC):
         version = self._version_resolver.resolve_latest(component)
         command_lines = self._prepare_command_lines(component, wizard_data, version)
 
-        if not self._auto_install:
+        if not auto_install:
             info("{0} {1} will be installed. Do you wish to proceed? (Type 'yes' to proceed)"
                   .format(component.value, version))
             if RuntimeHelper.input_wrapper(lambda: input()) != "yes":
@@ -38,7 +38,15 @@ class PlatformComponentInstaller(ABC):
         else:
             info("{0} {1} will be installed automatically".format(component.value, version))
 
-        [subprocess.check_call(command_line) for command_line in command_lines] # TODO handle in CLI mode!
+        [subprocess.check_call(command_line) for command_line in command_lines]
+
+    @abstractmethod
+    def installer_type(self) -> InstallerType:
+        """
+        Returns the type of installer.
+        :return: type of installer
+        """
+        pass
 
     @abstractmethod
     def _prepare_command_lines(self, component: DominoComponent, wizard_data: dict, version: str) -> List[List[str]]:

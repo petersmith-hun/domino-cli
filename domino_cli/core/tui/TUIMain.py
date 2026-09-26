@@ -5,18 +5,11 @@ from textual.app import App, ComposeResult
 from textual.containers import Vertical, HorizontalGroup, VerticalScroll
 from textual.widgets import Header, Footer, Label, LoadingIndicator, TabbedContent, TabPane
 
-from domino_cli.core.service.AuthenticationService import AuthenticationService
-from domino_cli.core.service.DominoService import DominoService
-from domino_cli.core.service.SecretService import SecretService
 from domino_cli.core.tui.TUIRuntimeHelper import TUIRuntimeHelper
-from domino_cli.core.tui.actions.AuthenticateActionAdapter import AuthenticateActionAdapter
 from domino_cli.core.tui.actions.CreateSecretActionAdapter import CreateSecretActionAdapter
-from domino_cli.core.tui.actions.DeploymentListActionAdapter import DeploymentListActionAdapter
-from domino_cli.core.tui.actions.SecretListActionAdapter import SecretListActionAdapter
 from domino_cli.core.tui.actions.SecretManagementActionAdapter import SecretManagementActionAdapter
-from domino_cli.core.tui.modals.AuthUtilOptionsModal import AuthUtilOptionsModal
-from domino_cli.core.tui.modals.CreateSecretModal import CreateSecretModal
-from domino_cli.core.tui.modals.DeploymentDescriptorImportModal import DeploymentDescriptorImportModal
+from domino_cli.core.tui.factory.TUIMainComponentsFactory import TUIMainComponentsFactory
+from domino_cli.core.tui.factory.TUIWizardComponentsFactory import TUIWizardComponentsFactory
 from domino_cli.core.tui.screens.DeploymentListScreen import DeploymentLabel, DeploymentsListScreen
 from domino_cli.core.tui.screens.SecretListScreen import SecretListScreen
 from domino_cli.core.tui.screens.WizardSelectorScreen import WizardSelectorScreen
@@ -68,19 +61,15 @@ class TUIMain(App):
     }
     """
 
-    def __init__(self,
-                 domino_service: DominoService,
-                 secret_service: SecretService,
-                 authentication_service: AuthenticationService,
-                 version: str):
+    def __init__(self, version: str, tui_main_components_factory: TUIMainComponentsFactory,
+                 tui_wizard_components_factory: TUIWizardComponentsFactory):
         super().__init__()
-        self._domino_service = domino_service
-        self._secret_service = secret_service
         self._version = version
-        self._authentication_service = authentication_service
-        self._authenticate_action_adapter = AuthenticateActionAdapter(self, authentication_service)
-        self._deployment_list_action_adapter = DeploymentListActionAdapter(self, self._domino_service)
-        self._secret_list_action_adapter = SecretListActionAdapter(self, self._secret_service)
+        self._tui_main_components_factory = tui_main_components_factory
+        self._tui_wizard_components_factory = tui_wizard_components_factory
+        self._authenticate_action_adapter = self._tui_main_components_factory.create_authenticate_action_adapter(self)
+        self._deployment_list_action_adapter = self._tui_main_components_factory.create_deployment_list_action_adapter(self)
+        self._secret_list_action_adapter = self._tui_main_components_factory.create_create_secret_action_adapter(self)
 
         self.theme = "textual-dark"
         self.title = f"Domino CLI Next {self._version}"
@@ -94,13 +83,13 @@ class TUIMain(App):
             with TabbedContent():
                 with TabPane("Deployments", id="tab_deployments"):
                     with VerticalScroll(id="deployments_scroll"):
-                        yield DeploymentsListScreen(self._domino_service)
+                        yield self._tui_main_components_factory.create_deployment_list_screen()
                 with TabPane("Secrets", id="tab_secrets"):
                     with VerticalScroll(id="secrets_scroll"):
-                        yield SecretListScreen(self._secret_service)
+                        yield self._tui_main_components_factory.create_secret_list_screen()
                 with TabPane("Wizards", id="tab_wizards"):
                     with VerticalScroll(id="wizards_scroll"):
-                        yield WizardSelectorScreen()
+                        yield self._tui_wizard_components_factory.create_wizard_selector_screen()
 
         yield Footer()
 
@@ -114,7 +103,7 @@ class TUIMain(App):
         self._authenticate_action_adapter.execute()
 
     def action_auth_utils(self):
-        self.push_screen(AuthUtilOptionsModal(self._authentication_service))
+        self.push_screen(self._tui_main_components_factory.create_auth_util_options_modal())
 
     def action_list_deployments(self):
         self.query_one(TabbedContent).active = "tab_deployments"
@@ -122,7 +111,7 @@ class TUIMain(App):
 
     def action_import_deployment(self):
         self.query_one(TabbedContent).active = "tab_deployments"
-        self.push_screen(DeploymentDescriptorImportModal(self._domino_service))
+        self.push_screen(self._tui_main_components_factory.create_deployment_descriptor_import_modal())
         self.query_one(DeploymentsListScreen).focus()
 
     def action_list_secrets(self):
@@ -132,7 +121,7 @@ class TUIMain(App):
 
     def action_create_secret(self):
         self.query_one(TabbedContent).active = "tab_secrets"
-        self.push_screen(CreateSecretModal(self._secret_service))
+        self.push_screen(self._tui_main_components_factory.create_create_secret_modal())
 
     def action_wizards(self):
         self.query_one(TabbedContent).active = "tab_wizards"

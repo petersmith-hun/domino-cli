@@ -12,9 +12,6 @@ from domino_cli.core.tui.modals import CustomModalScreen, FilteredDirectoryTree
 
 
 class OAuthDescriptorImportModal(CustomModalScreen):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     #custom_modal_frame {

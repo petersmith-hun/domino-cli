@@ -10,9 +10,6 @@ from domino_cli.core.tui.modals.SecretOptionsModal import SecretOptionsModal
 
 
 class SecretLabel(Label):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     SecretLabel {
@@ -28,9 +25,6 @@ class SecretLabel(Label):
 
 
 class SecretListItem(ListItem):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     SecretListItem {
@@ -62,9 +56,6 @@ class SecretListItem(ListItem):
 
 
 class ContextListItem(ListItem):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     ContextListItem {
@@ -94,9 +85,6 @@ class ContextListItem(ListItem):
 
 
 class SecretListHeader(SecretListItem):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     SecretListHeader {
@@ -118,9 +106,6 @@ class SecretListHeader(SecretListItem):
 
 
 class SecretListScreen(ListView):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     SecretListScreen {

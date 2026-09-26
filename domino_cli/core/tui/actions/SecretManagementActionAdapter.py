@@ -15,18 +15,12 @@ class SecretManagementOperation(Enum):
 
 
 class SecretManagementMessage:
-    """
-    TODO.
-    """
     def __init__(self, secret_key: str, operation: SecretManagementOperation):
         self.secret_key = secret_key
         self.operation = operation
 
 
 class SecretManagementActionAdapter(LongRunningActionAdapter[SecretManagementMessage]):
-    """
-    TODO.
-    """
     class SecretListRefreshMessage(Message):
         def __init__(self):
             super().__init__()

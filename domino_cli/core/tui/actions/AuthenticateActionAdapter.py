@@ -7,9 +7,6 @@ from domino_cli.core.tui.actions import LongRunningActionAdapter
 
 
 class AuthenticateActionAdapter(LongRunningActionAdapter[None]):
-    """
-    TODO.
-    """
     def __init__(self, app: App, authentication_service: AuthenticationService):
         super().__init__(app)
         self._authentication_service = authentication_service

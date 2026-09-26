@@ -8,9 +8,6 @@ from domino_cli.core.tui.screens.DeploymentListScreen import DeploymentListHeade
 
 
 class DeploymentListActionAdapter(LongRunningActionAdapter[None]):
-    """
-    TODO.
-    """
     def __init__(self, app: App, domino_service: DominoService):
         super().__init__(app)
         self._domino_service = domino_service

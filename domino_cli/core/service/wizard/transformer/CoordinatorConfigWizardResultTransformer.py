@@ -1,4 +1,5 @@
 from domino_cli.core.service.wizard.mapping.CoordinatorConfigWizardDataMapping import Mapping, MappingGroups
+from domino_cli.core.service.wizard.transformer import WizardTransformerType
 from domino_cli.core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
 
 _ROOT = "domino"
@@ -24,6 +25,9 @@ class CoordinatorConfigWizardResultTransformer(AbstractWizardResultTransformer):
         self._add_defaults(source, target_dict)
 
         return target_dict
+
+    def transformer_type(self) -> WizardTransformerType:
+        return WizardTransformerType.COORDINATOR_CONFIG
 
     def _define_base_dict(self, source: dict, target_dict: dict) -> None:
         [self._assign(mapping, _ROOT, source, target_dict) for mapping in Mapping.get_mappings_by_group(MappingGroups.BASE)]

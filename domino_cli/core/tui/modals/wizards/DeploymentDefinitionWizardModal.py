@@ -25,8 +25,8 @@ class DeploymentDefinitionWizardModal(CommonConfigWizardModal):
         ("Spin up the application via an OS service unit (init.d, systemd, etc.).", "SERVICE")
     ]
 
-    def __init__(self):
-        super().__init__(ConfigType.DEPLOYMENT, DeploymentConfigWizardResultTransformer()) # TODO should be injected
+    def __init__(self, transformer: DeploymentConfigWizardResultTransformer):
+        super().__init__(ConfigType.DEPLOYMENT, transformer)
 
     def _get_title(self) -> Label:
         return Label("Deployment definition wizard")

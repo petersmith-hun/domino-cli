@@ -56,6 +56,8 @@ from domino_cli.core.service.wizard.transformer.DeploymentConfigWizardResultTran
 from domino_cli.core.service.wizard.transformer.DockerAgentConfigWizardResultTransformer import \
     DockerAgentConfigWizardResultTransformer
 from domino_cli.core.tui.TUIMain import TUIMain
+from domino_cli.core.tui.factory.TUIMainComponentsFactory import TUIMainComponentsFactory
+from domino_cli.core.tui.factory.TUIWizardComponentsFactory import TUIWizardComponentsFactory
 
 
 class ApplicationContext:
@@ -66,7 +68,7 @@ class ApplicationContext:
     def init_cli(version: str) -> CLI:
 
         info("Initializing Domino CLI...")
-        _command_processor, _, _, _ = ApplicationContext._init_command_processor()
+        _command_processor, _, _ = ApplicationContext._init_command_processor()
 
         _cli = CLI(_command_processor)
 
@@ -78,12 +80,12 @@ class ApplicationContext:
     @staticmethod
     def init_tui(version: str) -> TUIMain:
 
-        _, _domino_service, _secret_service, _auth_service = ApplicationContext._init_command_processor()
+        _, _tui_main_components_factory, _tui_wizard_components_factory = ApplicationContext._init_command_processor()
 
-        return TUIMain(_domino_service, _secret_service, _auth_service, version)
+        return TUIMain(version, _tui_main_components_factory, _tui_wizard_components_factory)
 
     @staticmethod
-    def _init_command_processor() -> tuple[CommandProcessor, DominoService, SecretService, AuthenticationService]:
+    def _init_command_processor() -> tuple[CommandProcessor, TUIMainComponentsFactory, TUIWizardComponentsFactory]:
 
         # configuration properties
         _domino_base_url = ApplicationContext._assert_config_value("DOMINO_BASE_URL")
@@ -164,6 +166,18 @@ class ApplicationContext:
             DeleteSecretCommandProcessor(_secret_service),
         ])
 
+        # TUI
+        _tui_main_components_factory = TUIMainComponentsFactory(_auth_service, _domino_service, _secret_service)
+        _tui_wizard_components_factory = TUIWizardComponentsFactory([
+            _deployment_config_wizard_result_transformer,
+            _coordinator_config_wizard_result_transformer,
+            _docker_agent_config_wizard_result_transformer,
+            _bin_exec_agent_config_wizard_result_transformer
+        ], [
+            _docker_platform_component_installer,
+            _bin_exec_platform_component_installer
+        ])
+
         # command processor
         return (CommandProcessor(_command_help, [
             _command_help,
@@ -178,7 +192,7 @@ class ApplicationContext:
             _command_wizard,
             _command_info,
             _command_secret
-        ]), _domino_service, _secret_service, _auth_service)
+        ]), _tui_main_components_factory, _tui_wizard_components_factory)
 
     @staticmethod
     def _assert_config_value(config_parameter: str) -> str:

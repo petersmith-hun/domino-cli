@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable
 
 from textual import on
 from textual.app import App
@@ -6,11 +6,6 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Label, Select, Input, Switch, LoadingIndicator
 
-from domino_cli.core.service.wizard.installer.BinaryExecutablePlatformComponentInstaller import \
-    BinaryExecutablePlatformComponentInstaller
-from domino_cli.core.service.wizard.installer.DockerPlatformComponentInstaller import DockerPlatformComponentInstaller
-from domino_cli.core.service.wizard.installer.DockerVersionResolver import DockerVersionResolver
-from domino_cli.core.service.wizard.installer.GitHubReleaseVersionResolver import GitHubReleaseVersionResolver
 from domino_cli.core.service.wizard.installer.PlatformComponentInstaller import PlatformComponentInstaller
 from domino_cli.core.tui.modals import ConfirmationModal
 from domino_cli.core.tui.modals.wizards import BaseWizardModal
@@ -25,6 +20,10 @@ class InstallerWizardModal(BaseWizardModal):
         "docker-agent": "docker_agent_production",
         "binary-executable-agent": "binary_executable_agent_production"
     }
+
+    def __init__(self, installer_resolver: Callable[[str], PlatformComponentInstaller]):
+        super().__init__()
+        self._installer_resolver = installer_resolver
 
     def _get_title(self) -> Label:
         return Label("Domino Platform component installation wizard")
@@ -85,11 +84,7 @@ class InstallerWizardModal(BaseWizardModal):
 
     def _do_install(self, responses: dict[str, str | list[str]]) -> None:
 
-        installer: PlatformComponentInstaller
-        if self.current_component in ["coordinator", "docker-agent"]:
-            installer = DockerPlatformComponentInstaller(DockerVersionResolver(), auto_install=True) # TODO inject these
-        else:
-            installer = BinaryExecutablePlatformComponentInstaller(GitHubReleaseVersionResolver(), auto_install=True)
+        installer = self._installer_resolver(str(self.current_component))
 
         self._show_loading_indicator(self.app, True)
         self.app.run_worker(lambda: self._run_installer(self.app, installer, responses), thread=True)
@@ -97,7 +92,7 @@ class InstallerWizardModal(BaseWizardModal):
     def _run_installer(self, app: App, installer: PlatformComponentInstaller, responses: dict[str, str | list[str]]) -> None:
 
         try:
-            installer.install(responses)
+            installer.install(responses, auto_install=True)
             app.call_from_thread(lambda: self.app.notify(f"Successfully installed {self.current_component} component", title="Installation result", severity="information"))
 
         except Exception as exc:

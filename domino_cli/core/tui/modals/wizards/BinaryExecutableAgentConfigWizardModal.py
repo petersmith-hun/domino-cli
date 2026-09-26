@@ -18,8 +18,8 @@ class BinaryExecutableAgentConfigWizardModal(CommonAgentConfigWizardModal):
 
     configure_first_runtime = reactive(False, init=False)
 
-    def __init__(self):
-        super().__init__(ConfigType.BINARY_EXECUTABLE, BinaryExecutableAgentConfigWizardResultTransformer()) # TODO should be injected
+    def __init__(self, transformer: BinaryExecutableAgentConfigWizardResultTransformer):
+        super().__init__(ConfigType.BINARY_EXECUTABLE, transformer)
 
     def _get_title(self) -> Label:
         return Label("Domino Platform Binary Executable Agent (DPBEA) configuration wizard")

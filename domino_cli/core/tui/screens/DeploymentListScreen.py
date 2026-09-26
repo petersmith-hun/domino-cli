@@ -9,9 +9,6 @@ from domino_cli.core.tui.modals.DeploymentOptionsModal import DeploymentOptionsM
 
 
 class DeploymentLabel(Label):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     DeploymentLabel {
@@ -27,9 +24,6 @@ class DeploymentLabel(Label):
 
 
 class DeploymentListItem(ListItem):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     DeploymentListItem {
@@ -61,9 +55,6 @@ class DeploymentListItem(ListItem):
 
 
 class DeploymentListHeader(DeploymentListItem):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     DeploymentListHeader {
@@ -85,9 +76,6 @@ class DeploymentListHeader(DeploymentListItem):
 
 
 class DeploymentsListScreen(ListView):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     DeploymentsListScreen {

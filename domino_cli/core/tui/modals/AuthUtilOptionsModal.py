@@ -11,9 +11,7 @@ from domino_cli.core.tui.modals.AuthUtilOperationModals import PasswordEncryptio
 
 
 class AuthUtilOptionsModal(CustomModalScreen):
-    """
-    TODO.
-    """
+
     def __init__(self, authentication_service: AuthenticationService):
         super().__init__("")
         self._authentication_service = authentication_service
@@ -28,9 +26,7 @@ class AuthUtilOptionsModal(CustomModalScreen):
 
 
 class AuthUtilsOptionList(OptionList):
-    """
-    TODO.
-    """
+
     def __init__(self, authentication_service: AuthenticationService):
         super().__init__(
             Option("Encrypt password", id="encrypt_password"),

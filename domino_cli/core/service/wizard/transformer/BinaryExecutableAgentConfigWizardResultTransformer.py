@@ -1,5 +1,6 @@
 from domino_cli.core.service.wizard.mapping.BinaryExecutableAgentConfigWizardDataMapping import Mapping, MappingGroups
 from domino_cli.core.service.wizard.mapping.CommonAgentConfigWizardDataMapping import CommonMapping, CommonMappingGroups
+from domino_cli.core.service.wizard.transformer import WizardTransformerType
 from domino_cli.core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
 
 _ROOT = "domino"
@@ -9,6 +10,7 @@ class BinaryExecutableAgentConfigWizardResultTransformer(AbstractWizardResultTra
     """
     AbstractWizardResultTransformer implementation for Domino Platform Binary Executable Agent config wizard.
     """
+
     def transform(self, source: dict) -> dict:
         """
         Transforms the raw response data dictionary of the Binary Executable Agent config wizard to a Domino Platform
@@ -22,6 +24,9 @@ class BinaryExecutableAgentConfigWizardResultTransformer(AbstractWizardResultTra
         self._add_conditional_runtime_configuration(source, target_dict)
 
         return target_dict
+
+    def transformer_type(self) -> WizardTransformerType:
+        return WizardTransformerType.BINARY_EXECUTABLE_AGENT_CONFIG
 
     def _define_base_dict(self, source: dict, target_dict: dict) -> None:
         [self._assign(mapping, _ROOT, source, target_dict) for mapping in CommonMapping.get_mappings_by_group(CommonMappingGroups.BASE)]

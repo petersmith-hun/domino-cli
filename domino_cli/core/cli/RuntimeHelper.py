@@ -1,4 +1,5 @@
 import sys
+from typing import Callable
 
 
 class RuntimeHelper:
@@ -7,6 +8,7 @@ class RuntimeHelper:
     """
 
     _cicd_mode = len(sys.argv) > 1 and sys.argv[1] == "--cicd"
+    _cli_mode = len(sys.argv) > 1 and sys.argv[1] == "--cli"
 
     @classmethod
     def is_cicd_mode(cls) -> bool:
@@ -21,7 +23,16 @@ class RuntimeHelper:
         return cls._cicd_mode
 
     @classmethod
-    def get_cicd_command_line(cls) -> str:
+    def is_cli_mode(cls) -> bool:
+        """
+        Checks if the CLI was executed in CLI mode. CLI mode is the standard, legacy mode of the tool.
+
+        :return: true if CLI mode is enabled, false otherwise.
+        """
+        return cls._cli_mode
+
+    @classmethod
+    def get_cicd_command_line(cls) -> str | None:
         """
         Returns the CI/CD command line, without the --cicd flag itself, only if the CLI is running in CI/CD mode.
         Otherwise, it returns None.
@@ -33,7 +44,7 @@ class RuntimeHelper:
             else None
 
     @classmethod
-    def input_wrapper(cls, input_call: lambda: str) -> str:
+    def input_wrapper(cls, input_call: Callable[[], str]) -> str:
         """
         Checks if the CLI is running in CI/CD mode before executing an input call. If so, immediately quits, otherwise
         executes the input call.

@@ -8,9 +8,6 @@ from domino_cli.core.tui.actions import LongRunningActionAdapter
 
 
 class LifecycleMessage:
-    """
-    TODO.
-    """
     def __init__(self, operation: str, deployment_id: str, roll: bool, instance: str, version: str | None):
         self.operation = operation
         self.deployment_id = deployment_id
@@ -20,9 +17,6 @@ class LifecycleMessage:
 
 
 class LifecycleOperationActionAdapter(LongRunningActionAdapter[LifecycleMessage]):
-    """
-    TODO.
-    """
     _command_map = {
         "deploy_latest": DominoCommand.DEPLOY_LATEST,
         "deploy_version": DominoCommand.DEPLOY_VERSION,

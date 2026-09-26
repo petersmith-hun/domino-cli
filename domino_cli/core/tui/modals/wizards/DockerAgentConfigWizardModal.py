@@ -21,8 +21,8 @@ class DockerAgentConfigWizardModal(CommonAgentConfigWizardModal):
     current_connection_type = reactive("socket", init=False)
     configure_first_registry = reactive(False, init=False)
 
-    def __init__(self):
-        super().__init__(ConfigType.DOCKER_AGENT, DockerAgentConfigWizardResultTransformer()) # TODO should be injected
+    def __init__(self, transformer: DockerAgentConfigWizardResultTransformer):
+        super().__init__(ConfigType.DOCKER_AGENT, transformer)
 
     def _get_title(self) -> Label:
         return Label("Domino Platform Docker Agent (DPDA) configuration wizard")

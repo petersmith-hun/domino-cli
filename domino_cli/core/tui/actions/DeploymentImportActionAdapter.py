@@ -6,17 +6,11 @@ from domino_cli.core.tui.actions import LongRunningActionAdapter
 
 
 class DeploymentImportMessage:
-    """
-    TODO.
-    """
     def __init__(self, file_path: str):
         self.file_path = file_path
 
 
 class DeploymentImportActionAdapter(LongRunningActionAdapter[DeploymentImportMessage]):
-    """
-    TODO.
-    """
     def __init__(self, app: App, domino_service: DominoService):
         super().__init__(app)
         self._domino_service = domino_service

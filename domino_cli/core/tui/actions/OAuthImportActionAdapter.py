@@ -6,9 +6,6 @@ from domino_cli.core.tui.actions import LongRunningActionAdapter
 
 
 class OAuthImportMessage:
-    """
-    TODO.
-    """
     def __init__(self, deployment_id: str, file_path: str, dry_run: bool):
         self.deployment_id = deployment_id
         self.file_path = file_path
@@ -16,9 +13,6 @@ class OAuthImportMessage:
 
 
 class OAuthImportActionAdapter(LongRunningActionAdapter[OAuthImportMessage]):
-    """
-    TODO.
-    """
     def __init__(self, app: App, domino_service: DominoService):
         super().__init__(app)
         self._domino_service = domino_service

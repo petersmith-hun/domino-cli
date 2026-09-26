@@ -11,9 +11,7 @@ from domino_cli.core.tui.modals.OAuthDescriptorImportModal import OAuthDescripto
 
 
 class DeploymentOptionsModal(CustomModalScreen):
-    """
-    TODO.
-    """
+
     def __init__(self, domino_service: DominoService, deployment_id: str):
         super().__init__(deployment_id)
         self._domino_service = domino_service
@@ -28,9 +26,7 @@ class DeploymentOptionsModal(CustomModalScreen):
 
 
 class DeploymentOptionList(OptionList):
-    """
-    TODO.
-    """
+
     def __init__(self, domino_service: DominoService, deployment_id: str):
         super().__init__(
             Option("Deploy latest", id="deploy_latest"),

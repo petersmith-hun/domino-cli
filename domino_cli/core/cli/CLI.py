@@ -18,7 +18,7 @@ class CLI:
         Executes a single command (passed from the command line) in CI/CD mode, otherwise runs CLI command execution
         loop until an exit command terminates it.
         """
-        if RuntimeHelper.is_cicd_mode(): # TODO need to keep the CLI runner for CI/CD mode
+        if RuntimeHelper.is_cicd_mode():
             command = CommandDescriptor(RuntimeHelper.get_cicd_command_line())
             self._command_processor.execute_command(command)
             return

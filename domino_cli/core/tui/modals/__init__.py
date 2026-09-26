@@ -89,9 +89,6 @@ class CustomModalScreen(ModalScreen):
 
 
 class FilteredDirectoryTree(DirectoryTree):
-    """
-    TODO.
-    """
     def __init__(self):
         super().__init__("./", id="file_picker", classes="mt2 h12 full_width")
 
@@ -100,9 +97,6 @@ class FilteredDirectoryTree(DirectoryTree):
 
 
 class ConfirmationModal(CustomModalScreen):
-    """
-    TODO.
-    """
     DEFAULT_CSS = """
         #custom_modal_frame {
             max-width: 80;

@@ -61,8 +61,6 @@ def get_color(color: TerminalColor) -> str:
 
 def _log(log_level: LogLevel, message: str, force: bool = False) -> None:
 
-    # TODO redirecting logs is supposed to be a temporary solution!
-
     TUIRuntimeHelper.log_to_toast(log_level, message)
 
     if not RuntimeHelper.is_cicd_mode() or force:

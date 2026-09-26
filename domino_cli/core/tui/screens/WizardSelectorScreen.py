@@ -1,20 +1,12 @@
-from typing import cast
+from typing import cast, Callable
 
 from textual.containers import VerticalGroup
 from textual.widgets import Label, ListView, ListItem
 
-from domino_cli.core.tui.modals.wizards.BinaryExecutableAgentConfigWizardModal import \
-    BinaryExecutableAgentConfigWizardModal
-from domino_cli.core.tui.modals.wizards.CoordinatorConfigWizardModal import CoordinatorConfigWizardModal
-from domino_cli.core.tui.modals.wizards.DeploymentDefinitionWizardModal import DeploymentDefinitionWizardModal
-from domino_cli.core.tui.modals.wizards.DockerAgentConfigWizardModal import DockerAgentConfigWizardModal
-from domino_cli.core.tui.modals.wizards.InstallerWizardModal import InstallerWizardModal
+from domino_cli.core.tui.modals.wizards import BaseWizardModal
 
 
 class WizardListItem(ListItem):
-    """
-    TODO.
-    """
 
     DEFAULT_CSS = """
     WizardListItem {
@@ -44,9 +36,6 @@ class WizardListItem(ListItem):
 
 
 class WizardSelectorScreen(ListView):
-    """
-    TODO.
-    """
     _documentation_base_url = "https://github.com/petersmith-hun/domino-platform/tree/master/modules/"
 
     DEFAULT_CSS = """
@@ -57,7 +46,7 @@ class WizardSelectorScreen(ListView):
         outline-bottom: ascii $accent;
     }
     """
-    def __init__(self):
+    def __init__(self, modal_factory: Callable[[str], BaseWizardModal | None]):
         super().__init__(
             WizardListItem("wizard_deployment_definition",
                            "Deployment definition wizard",
@@ -75,20 +64,15 @@ class WizardSelectorScreen(ListView):
                            "Domino Platform installer wizard",
                            "Configures and installs the Domino Platform components."),
             id="wizards")
+        self._modal_factory = modal_factory
 
     def action_select_cursor(self) -> None:
 
         wizard_id = cast(WizardListItem, self.highlighted_child).wizard_id
+        wizard_modal = self._modal_factory(wizard_id)
 
-        if wizard_id == "wizard_deployment_definition":
-            self.app.push_screen(DeploymentDefinitionWizardModal())
-        elif wizard_id == "wizard_coordinator":
-            self.app.push_screen(CoordinatorConfigWizardModal())
-        elif wizard_id == "wizard_docker_agent_config":
-            self.app.push_screen(DockerAgentConfigWizardModal())
-        elif wizard_id == "wizard_bin_exec_agent":
-            self.app.push_screen(BinaryExecutableAgentConfigWizardModal())
-        elif wizard_id == "wizard_installer":
-            self.app.push_screen(InstallerWizardModal())
+        if wizard_modal:
+            self.app.push_screen(wizard_modal)
+
         else:
             self.app.notify("Unknown wizard selected", title="Wizard Selector", severity="error")

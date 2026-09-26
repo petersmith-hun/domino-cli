@@ -17,8 +17,8 @@ class CoordinatorConfigWizardModal(CommonConfigWizardModal):
     current_auth_mode = reactive("direct", init=False)
     configure_first_agent = reactive(False, init=False)
 
-    def __init__(self):
-        super().__init__(ConfigType.COORDINATOR, CoordinatorConfigWizardResultTransformer()) # TODO should be injected
+    def __init__(self, transformer: CoordinatorConfigWizardResultTransformer):
+        super().__init__(ConfigType.COORDINATOR, transformer)
 
     def _get_title(self) -> Label:
         return Label("Domino Platform Coordinator (DPC) configuration wizard")
