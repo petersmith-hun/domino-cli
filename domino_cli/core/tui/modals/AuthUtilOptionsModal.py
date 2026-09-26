@@ -1,5 +1,6 @@
 from typing import List
 
+from textual import events
 from textual.widget import Widget
 from textual.widgets import Label, OptionList
 from textual.widgets.option_list import Option
@@ -34,6 +35,9 @@ class AuthUtilsOptionList(OptionList):
             Option("Set authentication mode", id="set_auth_mode")
         )
         self._authentication_service = authentication_service
+
+    def _on_mount(self, event: events.Mount) -> None:
+        self.focus()
 
     def action_select(self) -> None:
 

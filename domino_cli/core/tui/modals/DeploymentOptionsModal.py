@@ -1,5 +1,6 @@
 from typing import List
 
+from textual import events
 from textual.widget import Widget
 from textual.widgets import Label, OptionList
 from textual.widgets.option_list import Option
@@ -41,6 +42,8 @@ class DeploymentOptionList(OptionList):
         self._deployment_id = deployment_id
         self._domino_service = domino_service
 
+    def _on_mount(self, event: events.Mount) -> None:
+        self.focus()
 
     def action_select(self) -> None:
 

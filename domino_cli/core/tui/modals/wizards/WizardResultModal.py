@@ -4,7 +4,7 @@ from typing import List
 
 import pyperclip
 from textual import on
-from textual.containers import VerticalScroll, HorizontalGroup
+from textual.containers import HorizontalGroup
 from textual.widget import Widget
 from textual.widgets import Label, TextArea, Button, Input
 
@@ -40,7 +40,7 @@ class WizardResultModal(BaseWizardModal):
         return Label(self._config_type.value[0])
 
     def _get_content(self) -> List[Widget]:
-        return [VerticalScroll(
+        return [
             TextArea(text=self._yaml_content, read_only=True, language="yaml"),
             self._text_input("target_file_path", "Target file path", "Please enter the target file path to save the configuration into a YAML file",
                              default_value=self._config_type.value[1]),
@@ -48,7 +48,7 @@ class WizardResultModal(BaseWizardModal):
                 Button("Save", id="save_configuration", variant="primary"),
                 classes="full_width align_right"
             )
-        )]
+        ]
 
     @on(Button.Pressed, "#save_configuration")
     def _handle_save(self) -> None:

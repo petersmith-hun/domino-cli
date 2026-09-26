@@ -1,7 +1,7 @@
 from typing import List
 
 from textual import on
-from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
+from textual.containers import HorizontalGroup, VerticalGroup
 from textual.validation import Length
 from textual.widget import Widget
 from textual.widgets import Label, Input, Select, Rule, Switch, TextArea, Button
@@ -57,10 +57,10 @@ class BaseWizardModal(CustomModalScreen):
         super().__init__()
 
     def _get_content(self) -> List[Widget]:
-        return [VerticalScroll(
+        return [
             *self._add_inputs(),
             self._create_render_button()
-        )]
+        ]
 
     def _add_inputs(self) -> List[Widget]:
         return []

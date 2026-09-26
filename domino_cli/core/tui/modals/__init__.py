@@ -3,7 +3,7 @@ from typing import List, Iterable, Callable
 
 from textual import on, events
 from textual.app import ComposeResult
-from textual.containers import Vertical, VerticalGroup, HorizontalGroup
+from textual.containers import Vertical, VerticalGroup, HorizontalGroup, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widget import Widget
 from textual.widgets import Rule, Footer, Label, DirectoryTree, Button
@@ -47,8 +47,8 @@ class CustomModalScreen(ModalScreen):
             height: 4;
         }
         
-        .h12 {
-            height: 12;
+        .mh12 {
+            max-height: 12;
         }
         
         .full_width {
@@ -73,8 +73,9 @@ class CustomModalScreen(ModalScreen):
                 if sub_title:
                     yield sub_title
                 yield Rule()
-                for widget in self._get_content():
-                    yield widget
+                with VerticalScroll(id="custom_modal_content_scroll"):
+                    for widget in self._get_content():
+                        yield widget
             yield Footer(id="custom_modal_footer")
 
     def _on_mount(self, event: events.Mount) -> None:
@@ -95,7 +96,7 @@ class CustomModalScreen(ModalScreen):
 
 class FilteredDirectoryTree(DirectoryTree):
     def __init__(self):
-        super().__init__("./", id="file_picker", classes="mt2 h12 full_width")
+        super().__init__("./", id="file_picker", classes="mh12 full_width")
 
     def filter_paths(self, paths: Iterable[Path]):
         return [path for path in paths if path.is_dir() or path.name.endswith(".yml") or path.name.endswith(".yaml")]

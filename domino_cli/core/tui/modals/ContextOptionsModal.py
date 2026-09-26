@@ -1,5 +1,6 @@
 from typing import List
 
+from textual import events
 from textual.widget import Widget
 from textual.widgets import Label, OptionList
 from textual.widgets.option_list import Option
@@ -17,7 +18,10 @@ class ContextOptionsModal(CustomModalScreen):
         self._secret_context = secret_context
 
     def _get_title(self) -> Label:
-        return Label(f"{self._secret_context} secret context options")
+        return Label(self._secret_context)
+
+    def _get_sub_title(self) -> Label:
+        return Label("ⓘ Secret context options")
 
     def _get_content(self) -> List[Widget]:
         return [ContextOptionList(self._secret_service, self._secret_context)]
@@ -31,6 +35,9 @@ class ContextOptionList(OptionList):
         )
         self._secret_service = secret_service
         self._secret_context = secret_context
+
+    def _on_mount(self, event: events.Mount) -> None:
+        self.focus()
 
     def action_select(self) -> None:
         self.loading = True

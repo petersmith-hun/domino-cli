@@ -1,5 +1,6 @@
 from typing import List
 
+from textual import events
 from textual.widget import Widget
 from textual.widgets import Label, OptionList
 from textual.widgets.option_list import Option
@@ -20,7 +21,10 @@ class SecretOptionsModal(CustomModalScreen):
         self._secret_details = secret
 
     def _get_title(self) -> Label:
-        return Label(f"{self._secret_details.key} secret options")
+        return Label(self._secret_details.key)
+
+    def _get_sub_title(self) -> Label:
+        return Label("ⓘ Secret options")
 
     def _get_content(self) -> List[Widget]:
         return [SecretOptionList(self._secret_service, self._secret_details)]
@@ -55,6 +59,9 @@ class SecretOptionList(OptionList):
         self._secret_service = secret_service
         self._secret_details = secret
         self._secret_management_action_adapter = SecretManagementActionAdapter(self.app, self._secret_service)
+
+    def _on_mount(self, event: events.Mount) -> None:
+        self.focus()
 
     def action_select(self) -> None:
 

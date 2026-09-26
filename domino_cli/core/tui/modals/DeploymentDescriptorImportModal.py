@@ -16,8 +16,8 @@ class DeploymentDescriptorImportModal(CustomModalScreen):
 
     DEFAULT_CSS = """
     #custom_modal_frame {
-        width: 60%;
-        height: 60%;
+        max-width: 90%;
+        max-height: 90%;
     }
     """
 
@@ -30,7 +30,7 @@ class DeploymentDescriptorImportModal(CustomModalScreen):
     def _get_title(self) -> Label:
         return Label(f"Import deployment descriptor")
 
-    def _get_content(self) -> List[Widget]: # TODO modal is not responsive yet (I guess the same applies to the OAuth import modal)
+    def _get_content(self) -> List[Widget]:
         return [
             FilteredDirectoryTree(),
             Label("❌ No file has been selected yet", id="file_selection_indicator", classes="mt2"),

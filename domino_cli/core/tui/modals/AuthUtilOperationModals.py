@@ -3,7 +3,7 @@ from typing import Any
 
 import pyperclip
 from textual import on
-from textual.containers import HorizontalGroup, VerticalScroll
+from textual.containers import HorizontalGroup
 from textual.widget import Widget
 from textual.widgets import Label, Input, TextArea, Button
 
@@ -86,7 +86,7 @@ class GenerateAccessTokenModal(CustomModalScreen):
 
     def _get_content(self) -> list[Widget]:
         return [
-            TextArea(id="access_token", placeholder="You'll get the generated token here.", classes="full_width mt2 h12", read_only=True),
+            TextArea(id="access_token", placeholder="You'll get the generated token here.", classes="full_width mh12", read_only=True),
             HorizontalGroup(
                 Button("Generate token", id="generate_token", variant="primary"),
                 classes="align_right mt2"
@@ -179,14 +179,12 @@ class SetAuthModeModal(CustomModalScreen):
             ]
 
         return [
-            VerticalScroll(
-                *auth_mode_input_group,
-                *direct_mode_parameters,
-                *oauth_mode_parameters,
-                HorizontalGroup(
-                    Button("Update configuration", id="update_auth_config", variant="primary"),
-                    classes="align_right mt2"
-                )
+            *auth_mode_input_group,
+            *direct_mode_parameters,
+            *oauth_mode_parameters,
+            HorizontalGroup(
+                Button("Update configuration", id="update_auth_config", variant="primary"),
+                classes="align_right mt2"
             )
         ]
 

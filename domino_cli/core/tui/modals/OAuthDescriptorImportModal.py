@@ -15,8 +15,8 @@ class OAuthDescriptorImportModal(CustomModalScreen):
 
     DEFAULT_CSS = """
     #custom_modal_frame {
-        width: 60%;
-        height: 60%;
+        max-width: 90%;
+        max-height: 90%;
     }
     """
 

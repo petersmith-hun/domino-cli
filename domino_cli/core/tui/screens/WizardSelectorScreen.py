@@ -27,12 +27,12 @@ class WizardListItem(ListItem):
     }
     """
 
-    def __init__(self, id: str, name: str, description: str):
+    def __init__(self, wizard_id: str, name: str, description: str):
         super().__init__(VerticalGroup(
             Label(name, classes="wizard_name"),
             Label(f"ⓘ {description}", classes="wizard_description")
         ))
-        self.wizard_id = id
+        self.wizard_id = wizard_id
 
 
 class WizardSelectorScreen(ListView):
