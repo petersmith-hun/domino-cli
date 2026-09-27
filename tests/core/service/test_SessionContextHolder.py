@@ -1,3 +1,4 @@
+import datetime
 import unittest
 from unittest import mock
 
@@ -23,7 +24,7 @@ class SessionContextHolderTest(unittest.TestCase):
     def test_should_get_bearer_auth_return_authorization_header_after_updating_context(self):
 
         # given
-        session_context: SessionContext = SessionContext("user", "jwt_token")
+        session_context: SessionContext = SessionContext("user", "jwt_token", expires_at=datetime.datetime.now())
         self.session_context_holder.update(session_context)
 
         # when

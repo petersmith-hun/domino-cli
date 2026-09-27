@@ -20,11 +20,26 @@ class InfoCommandTest(CommandBaseTest):
         # given
         command_descriptor: CommandDescriptor = CommandDescriptor("info app1")
 
+        self.domino_service_mock.execute_lifecycle_command.return_value = { "abbreviation": "dpc" }
+
         # when
         self.info_command.execute_command(command_descriptor)
 
         # then
-        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.INFO, "app1", None, False, None)
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.INFO, "app1", roll=False, instance=None)
+
+    def test_should_execute_command_with_success_for_instance(self):
+
+        # given
+        command_descriptor: CommandDescriptor = CommandDescriptor("info app1 --instance primary")
+
+        self.domino_service_mock.execute_lifecycle_command.return_value = { "abbreviation": "dpc" }
+
+        # when
+        self.info_command.execute_command(command_descriptor)
+
+        # then
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.INFO, "app1", roll=False, instance="primary")
 
     @mock.patch("builtins.print", side_effect=print)
     def test_should_execute_command_fail_on_validation(self, print_mock):

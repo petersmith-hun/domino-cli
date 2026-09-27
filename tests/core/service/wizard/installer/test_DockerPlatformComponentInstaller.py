@@ -45,7 +45,7 @@ class DockerPlatformComponentInstallerTest(unittest.TestCase):
             DockerPlatformComponentInstaller(self.version_resolver_mock)
 
     @mock.patch("builtins.input", return_value="yes")
-    @mock.patch("subprocess.call")
+    @mock.patch("subprocess.check_call")
     def test_should_install_coordinator(self, subprocess_call_mock, input_mock):
 
         # given
@@ -76,7 +76,7 @@ class DockerPlatformComponentInstallerTest(unittest.TestCase):
         ])
 
     @mock.patch("builtins.input", return_value="yes")
-    @mock.patch("subprocess.call")
+    @mock.patch("subprocess.check_call")
     def test_should_install_coordinator_without_deployments_file(self, subprocess_call_mock, input_mock):
 
         # given
@@ -107,7 +107,7 @@ class DockerPlatformComponentInstallerTest(unittest.TestCase):
         ])
 
     @mock.patch("builtins.input", return_value="yes")
-    @mock.patch("subprocess.call")
+    @mock.patch("subprocess.check_call")
     def test_should_install_docker_agent(self, subprocess_call_mock, input_mock):
 
         # given
@@ -136,7 +136,7 @@ class DockerPlatformComponentInstallerTest(unittest.TestCase):
         ])
 
     @mock.patch("builtins.input", return_value="no")
-    @mock.patch("subprocess.call")
+    @mock.patch("subprocess.check_call")
     def test_should_not_install_docker_agent_when_rejected(self, subprocess_call_mock, input_mock):
 
         # given

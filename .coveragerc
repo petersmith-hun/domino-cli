@@ -2,5 +2,6 @@
 source =
     domino_cli.core
 omit =
+    domino_cli/core/tui/*
     test/*
     */__init__.py

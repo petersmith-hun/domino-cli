@@ -22,7 +22,9 @@ class ViolationsModel:
 
     def __init__(self, response: Response):
         response_data = response.json()
-        self.violations = [self.Violation(violation) for violation in response_data]
+        self.violations = [self.Violation(violation) for violation in response_data.get("violations", [])] \
+            if response_data \
+            else []
 
 
 class ValidationException(Exception):

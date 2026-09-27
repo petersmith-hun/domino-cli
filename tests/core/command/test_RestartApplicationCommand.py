@@ -3,6 +3,7 @@ from unittest import mock
 
 from domino_cli.core.command.RestartApplicationCommand import RestartApplicationCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
+from domino_cli.core.domain.Deployments import LifecycleResponse
 from domino_cli.core.domain.DominoCommand import DominoCommand
 from domino_cli.core.service.DominoService import DominoService
 from tests.core.command.CommandBaseTest import CommandBaseTest
@@ -19,34 +20,52 @@ class RestartApplicationCommandTest(CommandBaseTest):
 
         # given
         command_descriptor: CommandDescriptor = CommandDescriptor("restart app1")
+        lifecycle_response = LifecycleResponse({
+            "status": "HEALTH_CHECK_OK",
+            "message": "Restarted application"
+        })
+
+        self.domino_service_mock.execute_lifecycle_command.return_value = lifecycle_response
 
         # when
         self.restart_application_command.execute_command(command_descriptor)
 
         # then
-        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.RESTART, "app1", None, False, None)
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.RESTART, "app1", roll=False, instance=None)
 
     def test_should_execute_command_for_rolling_restart_with_success(self):
 
         # given
         command_descriptor: CommandDescriptor = CommandDescriptor("restart app1 --roll")
+        lifecycle_response = LifecycleResponse({
+            "status": "START_FAILED",
+            "message": "Failed to restart application"
+        })
+
+        self.domino_service_mock.execute_lifecycle_command.return_value = lifecycle_response
 
         # when
         self.restart_application_command.execute_command(command_descriptor)
 
         # then
-        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.RESTART, "app1", None, True, None)
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.RESTART, "app1", roll=True, instance=None)
 
     def test_should_execute_command_for_instance_restart_with_success(self):
 
         # given
         command_descriptor: CommandDescriptor = CommandDescriptor("restart app1 --instance primary")
+        lifecycle_response = LifecycleResponse({
+            "status": "HEALTH_CHECK_OK",
+            "message": "Restarted application"
+        })
+
+        self.domino_service_mock.execute_lifecycle_command.return_value = lifecycle_response
 
         # when
         self.restart_application_command.execute_command(command_descriptor)
 
         # then
-        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.RESTART, "app1", None, False, "primary")
+        self.domino_service_mock.execute_lifecycle_command.assert_called_once_with(DominoCommand.RESTART, "app1", roll=False, instance="primary")
 
     @mock.patch("builtins.print", side_effect=print)
     def test_should_execute_command_fail_on_validation(self, print_mock):

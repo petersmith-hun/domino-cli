@@ -1,24 +1,27 @@
+import json
 import unittest
 from unittest import mock
-from unittest.mock import call
 
 from requests import Response
 
 from domino_cli.core.client.DominoClient import DominoClient
+from domino_cli.core.domain.CustomExceptions import ValidationException, DominoServiceException
 from domino_cli.core.domain.DominoRequest import DominoRequest
 from domino_cli.core.domain.HTTPMethod import HTTPMethod
+from domino_cli.core.domain.Secrets import SecretGroup, SecretDetails
 from domino_cli.core.service.SecretService import SecretService
+from domino_cli.core.service.utility.APIRequestHandler import APIRequestHandler
 
 
 class SecretServiceTest(unittest.TestCase):
 
     def setUp(self):
         self._domino_client_mock = mock.create_autospec(DominoClient)
+        self._api_request_handler = APIRequestHandler(self._domino_client_mock)
         self._response_mock = mock.create_autospec(Response)
-        self._secret_service = SecretService(self._domino_client_mock)
+        self._secret_service = SecretService(self._api_request_handler)
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_create_secret(self, print_mock):
+    def test_should_create_secret(self):
 
         # given
         request_body = {
@@ -42,10 +45,8 @@ class SecretServiceTest(unittest.TestCase):
 
         # then
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_called_with("[info ] Operation finished successfully")
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_create_secret_return_with_validation_error(self, print_mock):
+    def test_should_create_secret_return_with_validation_error(self):
 
         # given
         request_body = {
@@ -72,18 +73,13 @@ class SecretServiceTest(unittest.TestCase):
         self._response_mock.status_code = 400
 
         # when
-        self._secret_service.create_secret(request_body["key"], request_body["context"], request_body["value"])
+        throwing = lambda: self._secret_service.create_secret(request_body["key"], request_body["context"], request_body["value"])
 
         # then
+        self.assertRaises(ValidationException, throwing)
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_has_calls([
-            call("[error] Failed to execute operation, Domino responded with status 400: Validation error"),
-            call("[error] Invalid field [key]: Invalid key"),
-            call("[error] Invalid field [context]: Invalid context"),
-        ])
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_create_secret_return_with_validation_error_and_handle_invalid_response(self, print_mock):
+    def test_should_create_secret_return_with_validation_error_and_handle_invalid_response(self):
 
         # given
         request_body = {
@@ -105,14 +101,13 @@ class SecretServiceTest(unittest.TestCase):
         self._response_mock.status_code = 400
 
         # when
-        self._secret_service.create_secret(request_body["key"], request_body["context"], request_body["value"])
+        throwing = lambda: self._secret_service.create_secret(request_body["key"], request_body["context"], request_body["value"])
 
         # then
+        self.assertRaises(ValidationException, throwing)
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_called_with("[error] Failed to execute operation, Domino responded with status 400: HTTP 400")
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_get_all_metadata(self, print_mock):
+    def test_should_get_all_metadata(self):
 
         # given
         expected_request = DominoRequest(
@@ -121,6 +116,22 @@ class SecretServiceTest(unittest.TestCase):
             body=None,
             authenticated=True
         )
+
+        expected_result = [
+            SecretGroup({
+                "context": "volumes",
+                "secrets": [
+                    {"key": "volume.vfs", "retrievable": True},
+                    {"key": "volume.logs", "retrievable": False},
+                ]
+            }),
+            SecretGroup({
+                "context": "config",
+                "secrets": [
+                    {"key": "config.test", "retrievable": True},
+                ]
+            })
+        ]
 
         self._domino_client_mock.send_command.return_value = self._response_mock
         self._response_mock.status_code = 201
@@ -142,22 +153,13 @@ class SecretServiceTest(unittest.TestCase):
         ]
 
         # when
-        self._secret_service.get_all_metadata()
+        result = self._secret_service.get_all_metadata()
 
         # then
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_has_calls([
-            call("[info ] Secrets in context [volumes]"),
-            call("[info ]                     volume.vfs: Retrievable"),
-            call("[info ]                    volume.logs: Not retrievable"),
-            call(),
-            call("[info ] Secrets in context [config]"),
-            call("[info ]                    config.test: Retrievable"),
-            call()
-        ])
+        self.assertEqual(json.dumps(result, default=lambda obj: obj.__dict__), json.dumps(expected_result, default=lambda obj: obj.__dict__))
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_get_metadata_by_key(self, print_mock):
+    def test_should_get_metadata_by_key(self):
 
         # given
         expected_request = DominoRequest(
@@ -166,6 +168,12 @@ class SecretServiceTest(unittest.TestCase):
             body=None,
             authenticated=True
         )
+
+        expected_result = SecretDetails({
+            "key": "volume.vfs",
+            "context": "config",
+            "retrievable": True
+        })
 
         self._domino_client_mock.send_command.return_value = self._response_mock
         self._response_mock.status_code = 200
@@ -177,18 +185,13 @@ class SecretServiceTest(unittest.TestCase):
         }
 
         # when
-        self._secret_service.get_metadata_by_key("volume.vfs")
+        result = self._secret_service.get_metadata_by_key("volume.vfs")
 
         # then
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_has_calls([
-            call("[info ]                            key: volume.vfs"),
-            call("[info ]                        context: config"),
-            call("[info ]                    retrievable: True")
-        ])
+        self.assertEqual(json.dumps(result, default=lambda obj: obj.__dict__), json.dumps(expected_result, default=lambda obj: obj.__dict__))
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_get_metadata_by_key_handle_missing_secret(self, print_mock):
+    def test_should_get_metadata_by_key_handle_missing_secret(self):
 
         # given
         expected_request = DominoRequest(
@@ -206,14 +209,13 @@ class SecretServiceTest(unittest.TestCase):
         }
 
         # when
-        self._secret_service.get_metadata_by_key("missing.key")
+        throwing = lambda: self._secret_service.get_metadata_by_key("missing.key")
 
         # then
+        self.assertRaises(DominoServiceException, throwing)
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_called_with("[error] Failed to execute operation, Domino responded with status 404: Missing secret")
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_retrieve_secret_by_key(self, print_mock):
+    def test_should_retrieve_secret_by_key(self):
 
         # given
         expected_request = DominoRequest(
@@ -223,22 +225,23 @@ class SecretServiceTest(unittest.TestCase):
             authenticated=True
         )
 
-        self._domino_client_mock.send_command.return_value = self._response_mock
-        self._response_mock.status_code = 200
-        self._response_mock.content = "json-representation-of-the-response-below"
-        self._response_mock.json.return_value = {
+        expected_result = {
             "volume.logs": "/tmp/app/logs"
         }
 
+        self._domino_client_mock.send_command.return_value = self._response_mock
+        self._response_mock.status_code = 200
+        self._response_mock.content = "json-representation-of-the-response-below"
+        self._response_mock.json.return_value = expected_result
+
         # when
-        self._secret_service.retrieve_secret_by_key("volume.logs")
+        result = self._secret_service.retrieve_secret_by_key("volume.logs")
 
         # then
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_called_with("[info ]                    volume.logs: /tmp/app/logs")
+        self.assertEqual(result, expected_result)
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_retrieve_secrets_by_context(self, print_mock):
+    def test_should_retrieve_secrets_by_context(self):
 
         # given
         expected_request = DominoRequest(
@@ -248,26 +251,24 @@ class SecretServiceTest(unittest.TestCase):
             authenticated=True
         )
 
-        self._domino_client_mock.send_command.return_value = self._response_mock
-        self._response_mock.status_code = 200
-        self._response_mock.content = "json-representation-of-the-response-below"
-        self._response_mock.json.return_value = {
+        expected_result = {
             "volume.logs": "/tmp/app/logs",
             "volume.vfs": "/tmp/vfs"
         }
 
+        self._domino_client_mock.send_command.return_value = self._response_mock
+        self._response_mock.status_code = 200
+        self._response_mock.content = "json-representation-of-the-response-below"
+        self._response_mock.json.return_value = expected_result
+
         # when
-        self._secret_service.retrieve_secrets_by_context("volumes")
+        result = self._secret_service.retrieve_secrets_by_context("volumes")
 
         # then
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_has_calls([
-            call("[info ]                    volume.logs: /tmp/app/logs"),
-            call("[info ]                     volume.vfs: /tmp/vfs")
-        ])
+        self.assertEqual(result, expected_result)
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_lock_secret(self, print_mock):
+    def test_should_lock_secret(self):
 
         # given
         expected_request = DominoRequest(
@@ -285,10 +286,8 @@ class SecretServiceTest(unittest.TestCase):
 
         # then
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_called_with("[info ] Operation finished successfully")
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_unlock_secret(self, print_mock):
+    def test_should_unlock_secret(self):
 
         # given
         expected_request = DominoRequest(
@@ -306,10 +305,8 @@ class SecretServiceTest(unittest.TestCase):
 
         # then
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_called_with("[info ] Operation finished successfully")
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_delete_secret(self, print_mock):
+    def test_should_delete_secret(self):
 
         # given
         expected_request = DominoRequest(
@@ -327,5 +324,4 @@ class SecretServiceTest(unittest.TestCase):
 
         # then
         self._domino_client_mock.send_command.assert_called_with(expected_request)
-        print_mock.assert_called_with("[info ] Operation finished successfully")
 
