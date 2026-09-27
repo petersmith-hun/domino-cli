@@ -4,9 +4,10 @@ from typing import List, Iterable, Callable
 from textual import on, events
 from textual.app import ComposeResult
 from textual.containers import Vertical, VerticalGroup, HorizontalGroup, VerticalScroll
+from textual.events import Mount
 from textual.screen import ModalScreen
 from textual.widget import Widget
-from textual.widgets import Rule, Footer, Label, DirectoryTree, Button
+from textual.widgets import Rule, Footer, Label, DirectoryTree, Button, ListItem, ListView
 
 
 class CustomModalScreen(ModalScreen):
@@ -139,3 +140,122 @@ class ConfirmationModal(CustomModalScreen):
     @on(Button.Pressed, "#cancel_button")
     def _handle_cancel(self):
         self.dismiss()
+
+
+class CustomModalListItem(ListItem):
+
+    DEFAULT_CSS = """
+        CustomModalListItem {
+            padding: 1 3;
+            outline-left: ascii $accent;
+            outline-right: ascii $accent;
+        }
+    
+        .item_name {
+            text-style: bold;
+        }
+        
+        .item_description {
+            color: $text-muted;
+            text-style: italic;
+        }
+    """
+
+    def __init__(self, item_id: str, name: str, description: str):
+        super().__init__(VerticalGroup(
+            Label(name, classes="item_name"),
+            Label(f"ⓘ {description}", classes="item_description")
+        ))
+        self.item_id = item_id
+
+
+class CustomModalOptionList(ListView):
+
+    DEFAULT_CSS = """
+        CustomModalOptionList {
+            outline-left: ascii $accent;
+            outline-right: ascii $accent;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+    """
+    def __init__(self, callback: Callable[[str], None], *items):
+        super().__init__(*items)
+        self._callback = callback
+
+    def _on_mount(self, _: Mount) -> None:
+        self.focus()
+
+    def action_select_cursor(self) -> None:
+
+        if self.highlighted_child is None or not isinstance(self.highlighted_child, CustomModalListItem):
+            return
+
+        self._callback(self.highlighted_child.item_id)
+
+
+class OptionsModalScreen(ModalScreen):
+
+    BINDINGS = [
+        ("x", "app.pop_screen", "Close")
+    ]
+
+    DEFAULT_CSS = """
+        OptionsModalScreen {
+            align: center middle;
+        }
+        
+        ListView {
+            outline-left: ascii $accent;
+            outline-right: ascii $accent;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        VerticalScroll {
+            outline-left: ascii $accent;
+            outline-right: ascii $accent;
+            scrollbar-size-vertical: 0;
+        }
+        
+        #custom_modal_frame {
+            background: $boost;
+            outline: ascii $accent;
+            max-width: 80%;
+            max-height: 80%;
+            align: center middle;
+            padding-top: 1;
+        }
+        
+        #custom_modal_controls {
+            padding: 0 3;
+            outline-left: ascii $accent;
+            outline-right: ascii $accent;
+        }
+    """
+
+    def compose(self) -> ComposeResult:
+
+        sub_title = self._get_sub_title()
+
+        with Vertical(id="custom_modal_frame"):
+            with VerticalGroup(id="custom_modal_controls"):
+                yield self._get_title()
+                if sub_title:
+                    yield sub_title
+                yield Rule()
+            with VerticalScroll(id="custom_modal_content_scroll"):
+                yield CustomModalOptionList(self._on_option_selected, *self._get_items())
+            yield Footer(id="custom_modal_footer")
+
+    def _on_option_selected(self, item_id: str) -> None:
+        pass
+
+    def _get_title(self) -> Label:
+        pass
+
+    def _get_sub_title(self) -> Label:
+        pass
+
+    def _get_items(self) -> List[CustomModalListItem]:
+        pass

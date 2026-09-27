@@ -1,36 +1,16 @@
 from typing import List
 
-from textual import events
-from textual.widget import Widget
-from textual.widgets import Label, OptionList
-from textual.widgets.option_list import Option
+from textual.widgets import Label
 
 from domino_cli.core.domain.Secrets import SecretDetails
 from domino_cli.core.service.SecretService import SecretService
 from domino_cli.core.tui.actions.SecretManagementActionAdapter import SecretManagementOperation, \
     SecretManagementActionAdapter, SecretManagementMessage
-from domino_cli.core.tui.modals import CustomModalScreen, ConfirmationModal
+from domino_cli.core.tui.modals import ConfirmationModal, OptionsModalScreen, CustomModalListItem
 from domino_cli.core.tui.modals.RetrievedSecretsModal import RetrievedSecretsModal
 
 
-class SecretOptionsModal(CustomModalScreen):
-
-    def __init__(self, secret_service: SecretService, secret: SecretDetails):
-        super().__init__()
-        self._secret_service = secret_service
-        self._secret_details = secret
-
-    def _get_title(self) -> Label:
-        return Label(self._secret_details.key)
-
-    def _get_sub_title(self) -> Label:
-        return Label("ⓘ Secret options")
-
-    def _get_content(self) -> List[Widget]:
-        return [SecretOptionList(self._secret_service, self._secret_details)]
-
-
-class SecretOptionList(OptionList):
+class SecretOptionsModal(OptionsModalScreen):
 
     _confirmation_map = {
         "lock_secret": "This operation locks the secret, making it only accessible by Domino Coordinator",
@@ -45,39 +25,44 @@ class SecretOptionList(OptionList):
     }
 
     def __init__(self, secret_service: SecretService, secret: SecretDetails):
-
-        options: List[Option] = []
-        if secret.retrievable:
-            options.append(Option("Retrieve secret", id="retrieve_secret"))
-            options.append(Option("Lock secret", id="lock_secret"))
-        else:
-            options.append(Option("Unlock secret", id="unlock_secret"))
-
-        options.append(Option("Delete secret", id="delete_secret"))
-
-        super().__init__(*options)
+        super().__init__()
         self._secret_service = secret_service
         self._secret_details = secret
         self._secret_management_action_adapter = SecretManagementActionAdapter(self.app, self._secret_service)
 
-    def _on_mount(self, event: events.Mount) -> None:
-        self.focus()
+    def _get_title(self) -> Label:
+        return Label(self._secret_details.key)
 
-    def action_select(self) -> None:
+    def _get_sub_title(self) -> Label:
+        return Label("ⓘ Secret options")
 
-        if self.highlighted_option is None:
-            return
+    def _get_items(self) -> List[CustomModalListItem]:
 
-        option_id = str(self.highlighted_option.id)
+        options: List[CustomModalListItem] = []
+        if self._secret_details.retrievable:
+            options.append(CustomModalListItem("retrieve_secret", "Retrieve secret",
+                                               "Retrieves this secret in decrypted form"))
+            options.append(CustomModalListItem("lock_secret", "Lock secret",
+                                               "Locks this secret, making it only accessible by Domino Coordinator"))
+        else:
+            options.append(CustomModalListItem("unlock_secret", "Unlock secret",
+                                               "Unlocks this secret, making it retrievable via API"))
 
-        if option_id == "retrieve_secret":
+        options.append(CustomModalListItem("delete_secret", "Delete secret",
+                                           "Deletes this secret. This operation is permanent, and might lead to deployment failures"))
+
+        return options
+
+    def _on_option_selected(self, item_id: str) -> None:
+
+        if item_id == "retrieve_secret":
             self.loading = True
             self.run_worker(self._handle_secret_retrieval, thread=True)
 
         else:
-            message = SecretManagementMessage(self._secret_details.key, self._operation_map[option_id])
+            message = SecretManagementMessage(self._secret_details.key, self._operation_map[item_id])
             callback = lambda: self._secret_management_action_adapter.execute(message)
-            self.app.push_screen(ConfirmationModal(self._confirmation_map[option_id], callback))
+            self.app.push_screen(ConfirmationModal(self._confirmation_map[item_id], callback))
 
     def _handle_secret_retrieval(self) -> None:
         secrets = self._secret_service.retrieve_secret_by_key(self._secret_details.key)

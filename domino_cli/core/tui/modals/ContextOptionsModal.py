@@ -1,16 +1,13 @@
 from typing import List
 
-from textual import events
-from textual.widget import Widget
-from textual.widgets import Label, OptionList
-from textual.widgets.option_list import Option
+from textual.widgets import Label
 
 from domino_cli.core.service.SecretService import SecretService
-from domino_cli.core.tui.modals import CustomModalScreen
+from domino_cli.core.tui.modals import OptionsModalScreen, CustomModalListItem
 from domino_cli.core.tui.modals.RetrievedSecretsModal import RetrievedSecretsModal
 
 
-class ContextOptionsModal(CustomModalScreen):
+class ContextOptionsModal(OptionsModalScreen):
 
     def __init__(self, secret_service: SecretService, secret_context: str):
         super().__init__()
@@ -23,23 +20,13 @@ class ContextOptionsModal(CustomModalScreen):
     def _get_sub_title(self) -> Label:
         return Label("ⓘ Secret context options")
 
-    def _get_content(self) -> List[Widget]:
-        return [ContextOptionList(self._secret_service, self._secret_context)]
+    def _get_items(self) -> List[CustomModalListItem]:
+        return [
+            CustomModalListItem("retrieve_context", "Retrieve all secrets in context",
+                                "Retrieves all secrets in this context in decrypted form")
+        ]
 
-
-class ContextOptionList(OptionList):
-
-    def __init__(self, secret_service: SecretService, secret_context: str):
-        super().__init__(
-            Option("Retrieve all secrets in context", id="retrieve_context")
-        )
-        self._secret_service = secret_service
-        self._secret_context = secret_context
-
-    def _on_mount(self, event: events.Mount) -> None:
-        self.focus()
-
-    def action_select(self) -> None:
+    def _on_option_selected(self, item_id: str) -> None:
         self.loading = True
         self.run_worker(self._handle_secret_retrieval, thread=True)
 
