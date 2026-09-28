@@ -19,6 +19,8 @@ class AuthCommandTest(CommandBaseTest):
         # given
         command_descriptor: CommandDescriptor = CommandDescriptor("auth --encrypt-password")
 
+        self.authentication_service_mock.encrypt_password.return_value = "encrypted_password"
+
         # when
         self.auth_command.execute_command(command_descriptor)
 
@@ -30,6 +32,8 @@ class AuthCommandTest(CommandBaseTest):
 
         # given
         command_descriptor: CommandDescriptor = CommandDescriptor("auth --generate-token")
+
+        self.authentication_service_mock.generate_token.return_value = "generated_token"
 
         # when
         self.auth_command.execute_command(command_descriptor)
@@ -85,9 +89,7 @@ class AuthCommandTest(CommandBaseTest):
         self.auth_command.execute_command(command_descriptor)
 
         # then
-        self.assertEqual(len(self.authentication_service_mock.mock_calls), 1)
-        self.assertEqual(self.authentication_service_mock.set_mode.call_count, 1)
-        self.authentication_service_mock.set_mode.assert_called_with(None)
+        self.authentication_service_mock.set_mode.assert_not_called()
 
     def test_should_execute_command_show_help_for_invalid_flag(self):
 

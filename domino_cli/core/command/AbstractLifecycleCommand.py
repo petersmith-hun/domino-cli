@@ -1,4 +1,5 @@
-from domino_cli.core.cli.Logging import warning
+from domino_cli.core.cli.Logging import warning, error
+from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.command.AbstractCommand import AbstractCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
 from domino_cli.core.domain.DominoCommand import DominoCommand
@@ -24,12 +25,20 @@ class AbstractLifecycleCommand(AbstractCommand):
         """
         if len(command_descriptor.arguments) == 0:
             warning("Application name required")
-        else:
+            return
 
-            roll = "--roll" in command_descriptor.arguments
-            instance = command_descriptor.arguments[2] \
-                if "--instance" in command_descriptor.arguments and len(command_descriptor.arguments) == 3 \
-                else None
+        application = command_descriptor.arguments[0]
 
-            self._domino_service.execute_lifecycle_command(self._domino_command, command_descriptor.arguments[0],
-                                                           version=None, roll=roll, instance=instance)
+        roll = "--roll" in command_descriptor.arguments
+        instance = command_descriptor.arguments[2] \
+            if "--instance" in command_descriptor.arguments and len(command_descriptor.arguments) == 3 \
+            else None
+
+        try:
+            result = self._domino_service.execute_lifecycle_command(self._domino_command, application, roll=roll, instance=instance)
+            self._print_result(self._domino_command, application, result)
+
+        except Exception as exc:
+            error("Failed to execute command {0} on application {1} - Domino call result is: {2}"
+                  .format(self._domino_command.name, application, str(exc)))
+            RuntimeHelper.exit_with_error_in_cicd_mode()

@@ -1,3 +1,5 @@
+import datetime
+
 from requests import Response
 
 from domino_cli.core.client.OAuthAuthorizationClient import OAuthAuthorizationClient
@@ -26,7 +28,10 @@ class OAuthAuthHandler(AbstractAuthHandler):
         if not response.status_code == 200:
             raise Exception("Failed to authenticate - OAuth Authorization Server responded with {0}".format(response.status_code))
 
-        return SessionContext(self._oauth_config.client_id, response.json()["access_token"])
+        token_response = response.json()
+        expires_at = datetime.datetime.now() + datetime.timedelta(seconds=token_response["expires_in"])
+
+        return SessionContext(self._oauth_config.client_id, token_response["access_token"], expires_at)
 
     def for_auth_mode(self) -> AuthMode:
         return AuthMode.OAUTH

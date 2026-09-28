@@ -41,7 +41,12 @@ class MetadataAllCommandProcessor(SecretCommandProcessor):
     def process(self, arguments: List[str]) -> bool:
 
         RuntimeHelper.unsupported_in_cicd_mode()
-        self._secret_service.get_all_metadata()
+        try:
+            result = self._secret_service.get_all_metadata()
+            self._secret_service.handle_all_metadata_response(result)
+
+        except Exception as exc:
+            error(f"Error retrieving secret metadata: {str(exc)}")
 
         return True
 
@@ -67,7 +72,14 @@ class MetadataKeyCommandProcessor(SecretCommandProcessor):
             return False
 
         key = arguments.pop(0)
-        self._secret_service.get_metadata_by_key(key)
+
+
+        try:
+            result = self._secret_service.get_metadata_by_key(key)
+            self._secret_service.handle_flat_response(result)
+
+        except Exception as exc:
+            error(f"Error retrieving secret metadata for key {key}: {str(exc)}")
 
         return True
 

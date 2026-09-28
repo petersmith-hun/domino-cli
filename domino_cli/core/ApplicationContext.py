@@ -34,6 +34,7 @@ from domino_cli.core.service.SecretService import SecretService
 from domino_cli.core.service.SessionContextHolder import SessionContextHolder
 from domino_cli.core.service.auth.DirectAuthHandler import DirectAuthHandler
 from domino_cli.core.service.auth.OAuthAuthHandler import OAuthAuthHandler
+from domino_cli.core.service.utility.APIRequestHandler import APIRequestHandler
 from domino_cli.core.service.wizard.BinaryExecutableAgentConfigWizard import BinaryExecutableAgentConfigWizard
 from domino_cli.core.service.wizard.CoordinatorConfigWizard import CoordinatorConfigWizard
 from domino_cli.core.service.wizard.DeploymentConfigWizard import DeploymentConfigWizard
@@ -54,6 +55,9 @@ from domino_cli.core.service.wizard.transformer.DeploymentConfigWizardResultTran
     DeploymentConfigWizardResultTransformer
 from domino_cli.core.service.wizard.transformer.DockerAgentConfigWizardResultTransformer import \
     DockerAgentConfigWizardResultTransformer
+from domino_cli.core.tui.TUIMain import TUIMain
+from domino_cli.core.tui.factory.TUIMainComponentsFactory import TUIMainComponentsFactory
+from domino_cli.core.tui.factory.TUIWizardComponentsFactory import TUIWizardComponentsFactory
 
 
 class ApplicationContext:
@@ -64,6 +68,24 @@ class ApplicationContext:
     def init_cli(version: str) -> CLI:
 
         info("Initializing Domino CLI...")
+        _command_processor, _, _ = ApplicationContext._init_command_processor()
+
+        _cli = CLI(_command_processor)
+
+        info(f"Domino CLI v{version} initialized")
+        info("-" * 30)
+
+        return _cli
+
+    @staticmethod
+    def init_tui(version: str) -> TUIMain:
+
+        _, _tui_main_components_factory, _tui_wizard_components_factory = ApplicationContext._init_command_processor()
+
+        return TUIMain(version, _tui_main_components_factory, _tui_wizard_components_factory)
+
+    @staticmethod
+    def _init_command_processor() -> tuple[CommandProcessor, TUIMainComponentsFactory, TUIWizardComponentsFactory]:
 
         # configuration properties
         _domino_base_url = ApplicationContext._assert_config_value("DOMINO_BASE_URL")
@@ -101,8 +123,9 @@ class ApplicationContext:
         _session_context_holder = SessionContextHolder()
         _domino_client = DominoClient(_domino_base_url, _session_context_holder)
         _oauth_authorization_client = OAuthAuthorizationClient(_oauth_config)
-        _domino_service = DominoService(_domino_client)
-        _secret_service = SecretService(_domino_client)
+        _api_request_handler = APIRequestHandler(_domino_client)
+        _domino_service = DominoService(_domino_client, _api_request_handler)
+        _secret_service = SecretService(_api_request_handler)
         _direct_auth_handler = DirectAuthHandler(_domino_client)
         _oauth_auth_handler = OAuthAuthHandler(_oauth_config, _oauth_authorization_client)
         _auth_service = AuthenticationService(_default_auth_mode, _session_context_holder, [
@@ -143,8 +166,20 @@ class ApplicationContext:
             DeleteSecretCommandProcessor(_secret_service),
         ])
 
+        # TUI
+        _tui_main_components_factory = TUIMainComponentsFactory(_auth_service, _domino_service, _secret_service)
+        _tui_wizard_components_factory = TUIWizardComponentsFactory([
+            _deployment_config_wizard_result_transformer,
+            _coordinator_config_wizard_result_transformer,
+            _docker_agent_config_wizard_result_transformer,
+            _bin_exec_agent_config_wizard_result_transformer
+        ], [
+            _docker_platform_component_installer,
+            _bin_exec_platform_component_installer
+        ])
+
         # command processor
-        _command_processor = CommandProcessor(_command_help, [
+        return (CommandProcessor(_command_help, [
             _command_help,
             _command_exit,
             _command_auth,
@@ -157,14 +192,7 @@ class ApplicationContext:
             _command_wizard,
             _command_info,
             _command_secret
-        ])
-
-        _cli = CLI(_command_processor)
-
-        info(f"Domino CLI v{version} initialized")
-        info("-" * 30)
-
-        return _cli
+        ]), _tui_main_components_factory, _tui_wizard_components_factory)
 
     @staticmethod
     def _assert_config_value(config_parameter: str) -> str:

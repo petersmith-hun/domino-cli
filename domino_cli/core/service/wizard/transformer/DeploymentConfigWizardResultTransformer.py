@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from domino_cli.core.service.wizard.mapping.DeploymentConfigWizardDataMapping import Mapping, MappingGroups
+from domino_cli.core.service.wizard.transformer import WizardTransformerType
 from domino_cli.core.service.wizard.transformer.AbstractWizardResultTransformer import AbstractWizardResultTransformer
 
 _SOURCE_TYPE_FILESYSTEM = "FILESYSTEM"
@@ -41,6 +42,9 @@ class DeploymentConfigWizardResultTransformer(AbstractWizardResultTransformer):
         self._add_info_parameters(root_node, source, target_dict)
 
         return target_dict
+
+    def transformer_type(self) -> WizardTransformerType:
+        return WizardTransformerType.DEPLOYMENT_CONFIG
 
     def _define_base_dict(self, root_node: str, source: dict) -> dict:
 

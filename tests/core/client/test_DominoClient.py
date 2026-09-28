@@ -1,3 +1,4 @@
+import datetime
 import unittest
 from unittest import mock
 
@@ -19,7 +20,7 @@ _JSON_CONTENT_TYPE_HEADER = {"Content-Type": "application/json"}
 _TEXT_CONTENT_TYPE_HEADER = {"Content-Type": "text/plain"}
 _BODY = {"message": "value"}
 _TEXT_DATA = "domino:\n\tdeployments:\n\t\tleaflet\n"
-_SESSION_CONTEXT: SessionContext = SessionContext("username", "token")
+_SESSION_CONTEXT: SessionContext = SessionContext("username", "token", datetime.datetime.now())
 
 
 class DominoClientTest(unittest.TestCase):

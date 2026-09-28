@@ -4,10 +4,13 @@ from unittest import mock
 from requests import Response
 
 from domino_cli.core.client.DominoClient import DominoClient
+from domino_cli.core.domain.CustomExceptions import DominoServiceException
+from domino_cli.core.domain.Deployments import LifecycleResponse
 from domino_cli.core.domain.DominoCommand import DominoCommand
 from domino_cli.core.domain.DominoRequest import DominoRequest
 from domino_cli.core.domain.HTTPMethod import HTTPMethod
 from domino_cli.core.service.DominoService import DominoService
+from domino_cli.core.service.utility.APIRequestHandler import APIRequestHandler
 
 _TEXT_DATA = "domino:\n\tdeployments:\n\t\tleaflet\n"
 
@@ -16,79 +19,65 @@ class DominoServiceTest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.domino_client_mock: DominoClient = mock.create_autospec(DominoClient)
-        self.domino_service: DominoService = DominoService(self.domino_client_mock)
+        self.api_request_handler_mock = mock.create_autospec(APIRequestHandler)
+        self.domino_service: DominoService = DominoService(self.domino_client_mock, self.api_request_handler_mock)
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_execute_lifecycle_command_with_success(self, print_mock):
+    def test_should_execute_lifecycle_command_with_success(self):
 
         # given
         query = {"roll": "false"}
+        expected = LifecycleResponse({
+            "message": "some details",
+            "status": "ALL_OK"
+        })
 
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True)
 
         # when
-        self.domino_service.execute_lifecycle_command(DominoCommand.DEPLOY_VERSION, "app1", version="1.0.0")
+        result = self.domino_service.execute_lifecycle_command(DominoCommand.DEPLOY_VERSION, "app1", version="1.0.0")
 
         # then
         self._assert_client_call("/lifecycle/app1/deploy/1.0.0", expected_query_params=query)
-        self.assertEqual(print_mock.call_count, 6)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Sending DEPLOY_VERSION command for application app1 via Domino"),
-            mock.call("[info ] Command DEPLOY_VERSION successfully executed on application app1"),
-            mock.call("[info ]  --- Response details ---"),
-            mock.call("[info ]              message: some details"),
-            mock.call("[info ]               status: ALL_OK"),
-            mock.call()
-        ])
+        self.assertEqual(result.__dict__, expected.__dict__)
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_execute_lifecycle_command_of_rolling_deploy_with_success(self, print_mock):
+    def test_should_execute_lifecycle_command_of_rolling_deploy_with_success(self):
 
         # given
         query = {"roll": "true"}
+        expected = LifecycleResponse({
+            "message": "some details",
+            "status": "ALL_OK"
+        })
 
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True)
 
         # when
-        self.domino_service.execute_lifecycle_command(DominoCommand.DEPLOY_VERSION, "app1", version="1.0.0", roll=True)
+        result = self.domino_service.execute_lifecycle_command(DominoCommand.DEPLOY_VERSION, "app1", version="1.0.0", roll=True)
 
         # then
         self._assert_client_call("/lifecycle/app1/deploy/1.0.0", expected_query_params=query)
-        self.assertEqual(print_mock.call_count, 6)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Sending DEPLOY_VERSION command for application app1 via Domino"),
-            mock.call("[info ] Command DEPLOY_VERSION successfully executed on application app1"),
-            mock.call("[info ]  --- Response details ---"),
-            mock.call("[info ]              message: some details"),
-            mock.call("[info ]               status: ALL_OK"),
-            mock.call()
-        ])
+        self.assertEqual(result.__dict__, expected.__dict__)
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_execute_lifecycle_command_of_instance_deploy_with_success(self, print_mock):
+    def test_should_execute_lifecycle_command_of_instance_deploy_with_success(self):
 
         # given
         query = {"roll": "false", "instance": "primary"}
 
+        expected = LifecycleResponse({
+            "message": "some details",
+            "status": "ALL_OK"
+        })
+
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True)
 
         # when
-        self.domino_service.execute_lifecycle_command(DominoCommand.DEPLOY_VERSION, "app1", version="1.0.0", instance="primary")
+        result = self.domino_service.execute_lifecycle_command(DominoCommand.DEPLOY_VERSION, "app1", version="1.0.0", instance="primary")
 
         # then
         self._assert_client_call("/lifecycle/app1/deploy/1.0.0", expected_query_params=query)
-        self.assertEqual(print_mock.call_count, 6)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Sending DEPLOY_VERSION command for application app1 via Domino"),
-            mock.call("[info ] Command DEPLOY_VERSION successfully executed on application app1"),
-            mock.call("[info ]  --- Response details ---"),
-            mock.call("[info ]              message: some details"),
-            mock.call("[info ]               status: ALL_OK"),
-            mock.call()
-        ])
+        self.assertEqual(result.__dict__, expected.__dict__)
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_execute_lifecycle_command_with_failure(self, print_mock):
+    def test_should_execute_lifecycle_command_with_failure(self):
 
         # given
         query = {"roll": "false"}
@@ -96,17 +85,13 @@ class DominoServiceTest(unittest.TestCase):
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(False)
 
         # when
-        self.domino_service.execute_lifecycle_command(DominoCommand.START, "app2")
+        throwing = lambda: self.domino_service.execute_lifecycle_command(DominoCommand.START, "app2")
 
         # then
+        self.assertRaises(DominoServiceException, throwing)
         self._assert_client_call("/lifecycle/app2/start", expected_query_params=query)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Sending START command for application app2 via Domino"),
-            mock.call("[error] Failed to execute command START on application app2 - Domino responded with 500")
-        ])
 
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_execute_lifecycle_command_handle_exception(self, print_mock):
+    def test_should_execute_lifecycle_command_handle_exception(self):
 
         # given
         query = {"roll": "false"}
@@ -114,18 +99,14 @@ class DominoServiceTest(unittest.TestCase):
         self.domino_client_mock.send_command.side_effect = Exception("Mock client call failure")
 
         # when
-        self.domino_service.execute_lifecycle_command(DominoCommand.STOP, "app3")
+        throwing = lambda: self.domino_service.execute_lifecycle_command(DominoCommand.STOP, "app3")
 
         # then
+        self.assertRaises(Exception, throwing)
         self._assert_client_call("/lifecycle/app3/stop", expected_method=HTTPMethod.DELETE, expected_query_params=query)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Sending STOP command for application app3 via Domino"),
-            mock.call("[error] Failed to execute HTTP request [DELETE /lifecycle/app3/stop] - reason: Mock client call failure")
-        ])
 
     @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=_TEXT_DATA)
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_execute_import_definition_command_using_default_path_with_success(self, print_mock, open_mock):
+    def test_should_execute_import_definition_command_using_default_path_with_success(self, open_mock):
 
         # given
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True, True)
@@ -135,17 +116,9 @@ class DominoServiceTest(unittest.TestCase):
 
         # then
         self._assert_client_call("/deployments/import", HTTPMethod.POST, _TEXT_DATA)
-        self.assertEqual(print_mock.call_count, 4)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Requesting Domino to import deployment definition from=.domino/deployment.yml"),
-            mock.call("[info ] Successfully imported definition .domino/deployment.yml"),
-            mock.call("[info ] No further response received from Domino"),
-            mock.call()
-        ])
 
     @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=_TEXT_DATA)
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_execute_import_definition_command_using_defined_path_with_success(self, print_mock, open_mock):
+    def test_should_execute_import_definition_command_using_defined_path_with_success(self, open_mock):
 
         # given
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True, True)
@@ -155,52 +128,32 @@ class DominoServiceTest(unittest.TestCase):
 
         # then
         self._assert_client_call("/deployments/import", HTTPMethod.POST, _TEXT_DATA)
-        self.assertEqual(print_mock.call_count, 4)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Requesting Domino to import deployment definition from=/opt/deployment.yml"),
-            mock.call("[info ] Successfully imported definition /opt/deployment.yml"),
-            mock.call("[info ] No further response received from Domino"),
-            mock.call()
-        ])
 
     @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=_TEXT_DATA)
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_execute_import_definition_command_with_server_error(self, print_mock, open_mock):
+    def test_should_execute_import_definition_command_with_server_error(self, open_mock):
 
         # given
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(False)
 
         # when
-        self.domino_service.import_definition()
+        throwing = lambda: self.domino_service.import_definition()
 
         # then
+        self.assertRaises(DominoServiceException, throwing)
         self._assert_client_call("/deployments/import", HTTPMethod.POST, _TEXT_DATA)
-        self.assertEqual(print_mock.call_count, 4)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Requesting Domino to import deployment definition from=.domino/deployment.yml"),
-            mock.call("[error] Failed to import deployment definition .domino/deployment.yml - Domino responded with 500"),
-            mock.call("[info ] No further response received from Domino"),
-            mock.call()
-        ])
 
     @mock.patch("builtins.open", side_effect=IOError("Failed to open file"))
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_execute_import_definition_command_with_client_error(self, print_mock, open_mock):
+    def test_should_execute_import_definition_command_with_client_error(self, open_mock):
 
         # when
-        self.domino_service.import_definition()
+        throwing = lambda: self.domino_service.import_definition()
 
         # then
         self.assertEqual(self.domino_client_mock.send_command.call_count, 0)
-        self.assertEqual(print_mock.call_count, 2)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Requesting Domino to import deployment definition from=.domino/deployment.yml"),
-            mock.call("[error] Failed to import definition from .domino/deployment.yml - reason: Failed to open file")
-        ])
+        self.assertRaises(IOError, throwing)
 
     @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=_TEXT_DATA)
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_import_oauth_descriptor_command_using_default_path_with_success(self, print_mock, open_mock):
+    def test_should_import_oauth_descriptor_command_using_default_path_with_success(self, open_mock):
 
         # given
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True, True)
@@ -210,17 +163,9 @@ class DominoServiceTest(unittest.TestCase):
 
         # then
         self._assert_client_call("/deployments/app/oauth-application/import", HTTPMethod.POST, _TEXT_DATA)
-        self.assertEqual(print_mock.call_count, 4)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Requesting Domino to import OAuth application descriptor from=.domino/oauth.yml"),
-            mock.call("[info ] Successfully imported OAuth application descriptor .domino/oauth.yml"),
-            mock.call("[info ] No further response received from Domino"),
-            mock.call()
-        ])
 
     @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=_TEXT_DATA)
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_import_oauth_descriptor_command_using_given_path_with_success(self, print_mock, open_mock):
+    def test_should_import_oauth_descriptor_command_using_given_path_with_success(self, open_mock):
 
         # given
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(True, True)
@@ -230,48 +175,29 @@ class DominoServiceTest(unittest.TestCase):
 
         # then
         self._assert_client_call("/deployments/app/oauth-application/import", HTTPMethod.POST, _TEXT_DATA, {"dry-run": "true"})
-        self.assertEqual(print_mock.call_count, 4)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Requesting Domino to import OAuth application descriptor from=/opt/custom-oauth.yml"),
-            mock.call("[info ] Successfully imported OAuth application descriptor /opt/custom-oauth.yml"),
-            mock.call("[info ] No further response received from Domino"),
-            mock.call()
-        ])
 
     @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=_TEXT_DATA)
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_import_oauth_descriptor_command_with_server_error(self, print_mock, open_mock):
+    def test_should_import_oauth_descriptor_command_with_server_error(self, open_mock):
 
         # given
         self.domino_client_mock.send_command.return_value = DominoServiceTest._prepare_response(False)
 
         # when
-        self.domino_service.import_oauth_descriptor("app", False)
+        throwing = lambda: self.domino_service.import_oauth_descriptor("app", False)
 
         # then
+        self.assertRaises(DominoServiceException, throwing)
         self._assert_client_call("/deployments/app/oauth-application/import", HTTPMethod.POST, _TEXT_DATA)
-        self.assertEqual(print_mock.call_count, 4)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Requesting Domino to import OAuth application descriptor from=.domino/oauth.yml"),
-            mock.call("[error] Failed to import OAuth application descriptor .domino/oauth.yml - Domino responded with 500"),
-            mock.call("[info ] No further response received from Domino"),
-            mock.call()
-        ])
 
     @mock.patch("builtins.open", side_effect=IOError("Failed to open file"))
-    @mock.patch("builtins.print", side_effect=print)
-    def test_should_import_oauth_descriptor_command_with_client_error(self, print_mock, open_mock):
+    def test_should_import_oauth_descriptor_command_with_client_error(self, open_mock):
 
         # when
-        self.domino_service.import_oauth_descriptor("app", False)
+        throwing = lambda: self.domino_service.import_oauth_descriptor("app", False)
 
         # then
         self.assertEqual(self.domino_client_mock.send_command.call_count, 0)
-        self.assertEqual(print_mock.call_count, 2)
-        print_mock.assert_has_calls([
-            mock.call("[info ] Requesting Domino to import OAuth application descriptor from=.domino/oauth.yml"),
-            mock.call("[error] Failed to import descriptor from .domino/oauth.yml - reason: Failed to open file")
-        ])
+        self.assertRaises(IOError, throwing)
 
     def _assert_client_call(self, expected_path, expected_method=HTTPMethod.PUT, expected_body=None, expected_query_params=None):
 

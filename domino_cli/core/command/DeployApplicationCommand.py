@@ -29,17 +29,24 @@ class DeployApplicationCommand(AbstractCommand):
         if len(command_descriptor.arguments) < 2:
             error("Application name and 'latest' keyword or explicit version is required")
             RuntimeHelper.exit_with_error_in_cicd_mode()
+            return
 
-        else:
-            application: str = command_descriptor.arguments[0]
-            version: str = command_descriptor.arguments[1]
-            command: DominoCommand = DominoCommand.DEPLOY_LATEST \
-                if version == _LATEST_KEYWORD \
-                else DominoCommand.DEPLOY_VERSION
+        application: str = command_descriptor.arguments[0]
+        version: str = command_descriptor.arguments[1]
+        command: DominoCommand = DominoCommand.DEPLOY_LATEST \
+            if version == _LATEST_KEYWORD \
+            else DominoCommand.DEPLOY_VERSION
 
-            roll = "--roll" in command_descriptor.arguments
-            instance = command_descriptor.arguments[3] \
-                if "--instance" in command_descriptor.arguments and len(command_descriptor.arguments) == 4 \
-                else None
+        roll = "--roll" in command_descriptor.arguments
+        instance = command_descriptor.arguments[3] \
+            if "--instance" in command_descriptor.arguments and len(command_descriptor.arguments) == 4 \
+            else None
 
-            self._domino_service.execute_lifecycle_command(command, application, version, roll, instance)
+        try:
+            result = self._domino_service.execute_lifecycle_command(command, application, version, roll, instance)
+            self._print_result(command, application, result)
+
+        except Exception as exc:
+            error("Failed to execute command {0} on application {1} - Domino call result is: {2}"
+                  .format(command.name, application, str(exc)))
+            RuntimeHelper.exit_with_error_in_cicd_mode()

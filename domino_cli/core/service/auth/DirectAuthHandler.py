@@ -6,6 +6,7 @@ from domino_cli.core.domain.AuthRequest import AuthRequest
 from domino_cli.core.domain.DominoRequest import DominoRequest
 from domino_cli.core.domain.HTTPMethod import HTTPMethod
 from domino_cli.core.domain.SessionContext import SessionContext
+from domino_cli.core.service.auth import parse_token_expiration
 from domino_cli.core.service.auth.AbstractAuthHandler import AbstractAuthHandler
 from domino_cli.core.service.auth.AuthUtils import AuthUtils
 
@@ -44,4 +45,7 @@ class DirectAuthHandler(AbstractAuthHandler):
         if not response.status_code == 201:
             raise Exception("Failed to authenticate - Domino responded with {0}".format(response.status_code))
 
-        return SessionContext(auth_request.username, response.json()["jwt"])
+        token_response = response.json()
+        expires_at = parse_token_expiration(token_response["jwt"])
+
+        return SessionContext(auth_request.username, token_response["jwt"], expires_at)

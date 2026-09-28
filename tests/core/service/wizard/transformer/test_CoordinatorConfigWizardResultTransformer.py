@@ -56,6 +56,9 @@ _DIRECT_AUTH_NO_FIRST_AGENT_WITHOUT_ENCRYPTION_TRANSFORMED: dict = {
             "api-key": "",
             "known-agents": []
         },
+        "oauth-registration": {
+            "providers": []
+        },
         "info": {
             "app-name": "Coordinator Test",
             "abbreviation": "DPC-TEST"
@@ -122,6 +125,9 @@ _OAUTH_AUTH_FIRST_AGENT_DEFAULTS_WITH_ENCRYPTION_TRANSFORMED: dict = {
                     "agent-key": "agent-key-docker1"
                 }
             ]
+        },
+        "oauth-registration": {
+            "providers": []
         },
         "info": {
             "app-name": "Coordinator Test 2",

@@ -1,8 +1,9 @@
 from __future__ import annotations
 from abc import ABCMeta, abstractmethod
-from typing import List, Callable
+from typing import List, Callable, Any
 
 from domino_cli.core.service.wizard.mapping.WizardDataMappingBaseEnum import WizardDataMappingBaseEnum
+from domino_cli.core.service.wizard.transformer import WizardTransformerType
 
 
 class AbstractWizardResultTransformer(object, metaclass=ABCMeta):
@@ -22,6 +23,15 @@ class AbstractWizardResultTransformer(object, metaclass=ABCMeta):
         """
         pass
 
+    @abstractmethod
+    def transformer_type(self) -> WizardTransformerType:
+        """
+        Returns the transformer type of this transformer.
+
+        :return: transformer type
+        """
+        pass
+
     def _assign(self, mapping: WizardDataMappingBaseEnum, root_node: str, source: dict, target_dict: dict) -> None:
         """
         Transforms a single value by doing the following steps:
@@ -37,7 +47,7 @@ class AbstractWizardResultTransformer(object, metaclass=ABCMeta):
         key, node = self._node_search(mapping, root_node, target_dict)
         node[key] = self._safe_read(source, mapping.get_wizard_field(), mapping.get_mapper())
 
-    def _read_current_value(self, mapping: WizardDataMappingBaseEnum, root_node: str, target_dict: dict) -> any:
+    def _read_current_value(self, mapping: WizardDataMappingBaseEnum, root_node: str, target_dict: dict) -> Any:
         """
         Reads a single value from target dict object.
 
@@ -96,7 +106,8 @@ class AbstractWizardResultTransformer(object, metaclass=ABCMeta):
         else:
             return current_key, current_dict
 
-    def _safe_read(self, source: dict, key: str, mapper: Callable[[str], any]) -> any:
+    @staticmethod
+    def _safe_read(source: dict, key: str, mapper: Callable[[str], Any]) -> Any:
         """
         Able to safely read the given key of the given (raw wizard response) dict object.
         Returns None in case the key does not exist.

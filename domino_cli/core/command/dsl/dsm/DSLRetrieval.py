@@ -51,7 +51,13 @@ class RetrieveByKeySecretCommandProcessor(SecretCommandProcessor):
             return False
 
         key = arguments.pop(0)
-        self._secret_service.retrieve_secret_by_key(key)
+
+        try:
+            result = self._secret_service.retrieve_secret_by_key(key)
+            self._secret_service.handle_flat_response(result)
+
+        except Exception as exc:
+            error(f"Error retrieving secret for key {key}: {str(exc)}")
 
         return True
 
@@ -75,7 +81,13 @@ class RetrieveByContextSecretCommandProcessor(SecretCommandProcessor):
             return False
 
         context = arguments.pop(0)
-        self._secret_service.retrieve_secrets_by_context(context)
+
+        try:
+            result = self._secret_service.retrieve_secrets_by_context(context)
+            self._secret_service.handle_flat_response(result)
+
+        except Exception as exc:
+            error(f"Error retrieving secrets for context {context}: {str(exc)}")
 
         return True
 

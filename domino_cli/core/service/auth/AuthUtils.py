@@ -22,6 +22,10 @@ class AuthUtils:
         """
         username = os.getenv(_DOMINO_CLI_USERNAME)
         if username is None:
+
+            if not RuntimeHelper.is_cli_mode():
+                raise Exception("Username is not specified, see Auth utils > Set authentication mode.")
+
             username = RuntimeHelper.input_wrapper(lambda: input(" ** specify username: "))
 
         return username
@@ -36,6 +40,10 @@ class AuthUtils:
         """
         password = os.getenv(_DOMINO_CLI_PASSWORD)
         if password is None:
+
+            if not RuntimeHelper.is_cli_mode():
+                raise Exception("Password is not specified, see Auth utils > Set authentication mode.")
+
             password = RuntimeHelper.input_wrapper(lambda: getpass(" ** specify password: "))
 
         return password

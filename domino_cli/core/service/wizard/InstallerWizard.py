@@ -64,7 +64,10 @@ class InstallerWizard(AbstractWizard):
 
     def _handle_result(self, result: dict) -> None:
 
-        if result[Mapping.COMPONENT.get_wizard_field()] in ["coordinator", "docker-agent"]:
-            self._docker_platform_component_installer.install(result)
-        else:
-            self._bin_exec_platform_component_installer.install(result)
+        try:
+            if result[Mapping.COMPONENT.get_wizard_field()] in ["coordinator", "docker-agent"]:
+                self._docker_platform_component_installer.install(result)
+            else:
+                self._bin_exec_platform_component_installer.install(result)
+        except Exception as exc:
+            raise Exception(f"Failed to install platform component: {str(exc)}")

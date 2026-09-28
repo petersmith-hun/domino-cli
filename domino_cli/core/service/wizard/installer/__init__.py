@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 
 from domino_cli.installer_config import DominoComponent
 
@@ -16,3 +17,8 @@ class VersionResolver(ABC):
         :return: resolved latest version
         """
         pass
+
+
+class InstallerType(Enum):
+    DOCKER_BASED_INSTALLER = "docker_based"
+    BINARY_EXECUTABLE_BASED_INSTALLER = "binary_executable_based"

@@ -1,4 +1,4 @@
-from domino_cli.core.cli.Logging import error
+from domino_cli.core.cli.Logging import error, info
 from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
 from domino_cli.core.command.AbstractCommand import AbstractCommand
 from domino_cli.core.domain.CommandDescriptor import CommandDescriptor
@@ -26,4 +26,10 @@ class ImportCommand(AbstractCommand):
             if len(command_descriptor.arguments) == 1 \
             else None
 
-        self._domino_service.import_definition(definition_path)
+        try:
+            self._domino_service.import_definition(definition_path)
+            info(f"Successfully imported definition {definition_path}")
+
+        except Exception as exc:
+            error(f"Failed to import deployment definition {definition_path}: {str(exc)}")
+            RuntimeHelper.exit_with_error_in_cicd_mode()

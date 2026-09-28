@@ -69,9 +69,30 @@ After this step, you can start Domino CLI:
 domino-cli
 ```
 
+### Default (TUI) mode
+
+Domino CLI now starts in TUI-mode (Terminal User Interface), which gives a brand new look and user experience to the tool.
+The former commands are still available, but now they can be used by navigating the "graphical" user interface, using
+the following buttons:
+* `a`: Authenticate using the preconfigured credentials
+* `alt+a`: Authentication utilities (password encryption, access token generation, and temporary configuration of credentials)
+* `d`: List deployments; use arrows to select a definition, then hit Enter to see its options
+* `alt+d`: Import deployment definition from filesystem (lists files in current directory)
+* `s`: List secrets; use arrows to select a context or a secret, then hit Enter to see its options
+* `alt+s`: Create new secret
+* `w`: Wizards
+* `q`: Quit Domino CLI
+* `ctrl+p`: Opens the "palette", providing additional options, like changing the terminal's theme, or showing the
+available keys (the ones above)
+
+Modal windows can be closed by hitting `x`. In some cases hitting `c` copies the contents of the modal window to the 
+clipboard (the modal indicates the option if available).
+
+Please note that if a certain panel or input seems unusable, hit Tab to cycle through UI elements (.i.e., it changes focus) 
+
 ### CI/CD mode
 
-Domino CLI now supports execution in so-called CI/CD mode, which is a simplified execution mode, primarily to be used on
+Domino CLI also supports execution in so-called CI/CD mode, which is a simplified execution mode, primarily to be used on
 CI/CD environments, usually within a deployment script. There are a few things to note here:
 * To execute Domino CLI in CI/CD mode, pass the `--cicd` switch as the first command line parameter, then the command
   you wish to execute, e.g. like this:
@@ -92,7 +113,18 @@ set the result (the generated access token) as the `DOMINO_CLI_PREAUTHORIZED_TOK
   including the configuration wizards, and manual authentication (you need to define the necessary parameters as
   environment variables, as described above in the [Configuration section](#configuration))
 
+### Legacy CLI mode
+
+In case you don't like the new TUI mode, you may return to the legacy CLI mode by starting Domino CLI with the `--cli` switch.
+```bash
+domino-cli --cli
+```
+
 ## Usage
+
+_Please note that this segment is applicable for the legacy CLI mode, but it can still help learning the usage of the
+available commands._
+
 After successfully starting up Domino CLI you should see its prompt (`Domino CLI >`) along with some start-up messages.
 Now it's time to start playing around with the commands - the supported ones are the following:
 

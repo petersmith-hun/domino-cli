@@ -122,7 +122,7 @@ class OAuthAuthHandlerTest(TestCase):
         response: Response = mock.create_autospec(Response)
         if successful:
             response.status_code = 200
-            response.json.return_value = {"access_token": _JWT_TOKEN}
+            response.json.return_value = {"access_token": _JWT_TOKEN, "expires_in": 3600}
         else:
             response.status_code = 403
 

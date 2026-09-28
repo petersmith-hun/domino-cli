@@ -1,7 +1,7 @@
 from typing import List
 
 from domino_cli.installer_config import installer_config
-from domino_cli.core.service.wizard.installer import VersionResolver
+from domino_cli.core.service.wizard.installer import VersionResolver, InstallerType
 from domino_cli.core.service.wizard.installer.PlatformComponentInstaller import PlatformComponentInstaller
 from domino_cli.core.service.wizard.mapping.InstallerWizardDataMapping import Mapping
 from domino_cli.installer_config import DominoComponent
@@ -34,6 +34,9 @@ class BinaryExecutablePlatformComponentInstaller(PlatformComponentInstaller):
 
     def __init__(self, version_resolver: VersionResolver):
         super().__init__(version_resolver)
+
+    def installer_type(self) -> InstallerType:
+        return InstallerType.BINARY_EXECUTABLE_BASED_INSTALLER
 
     def _prepare_command_lines(self, component: DominoComponent, wizard_data: dict, version: str) -> List[List[str]]:
 

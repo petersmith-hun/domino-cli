@@ -1,20 +1,18 @@
-from typing import Callable, List
+from typing import List, cast, Any
 
-from requests import Response
-
-from domino_cli.core.cli.Logging import error, info
+from domino_cli.core.cli.Logging import info
 from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
-from domino_cli.core.client.DominoClient import DominoClient
 from domino_cli.core.domain.DominoCommand import DominoCommand
-from domino_cli.core.domain.DominoRequest import DominoRequest
+from domino_cli.core.domain.Secrets import SecretGroup, SecretDetails
+from domino_cli.core.service.utility.APIRequestHandler import APIRequestHandler
 
 
 class SecretService:
     """
     Service implementation for secret management operations.
     """
-    def __init__(self, domino_client: DominoClient):
-        self._domino_client = domino_client
+    def __init__(self, api_request_handler: APIRequestHandler):
+        self._api_request_handler = api_request_handler
 
     def create_secret(self, key: str, context: str, value: str) -> None:
         """
@@ -30,42 +28,42 @@ class SecretService:
             "value": value
         }
 
-        response = self._send_command(DominoCommand.CREATE_SECRET, body=request_body)
-        self._handle_response(response)
+        response = self._api_request_handler.send_command(DominoCommand.CREATE_SECRET, body=request_body)
+        self._api_request_handler.handle_response(response)
 
-    def get_all_metadata(self) -> None:
+    def get_all_metadata(self) -> list[SecretGroup]:
         """
         Displays metadata of all existing secrets.
         """
-        response = self._send_command(DominoCommand.RETRIEVE_ALL_METADATA)
-        self._handle_response(response, self._handle_all_metadata_response)
+        response = self._api_request_handler.send_command(DominoCommand.RETRIEVE_ALL_METADATA)
+        return self._api_request_handler.handle_response(response, lambda items: [SecretGroup(item) for item in cast(list[dict[str, Any]], items)])
 
-    def get_metadata_by_key(self, key: str) -> None:
+    def get_metadata_by_key(self, key: str) -> SecretDetails:
         """
         Displays metadata of the given secret.
 
         :param key: key of the secret to show the metadata of
         """
-        response = self._send_command(DominoCommand.RETRIEVE_SECRET_METADATA, key)
-        self._handle_response(response, self._handle_flat_response)
+        response = self._api_request_handler.send_command(DominoCommand.RETRIEVE_SECRET_METADATA, key)
+        return self._api_request_handler.handle_response(response, SecretDetails)
 
-    def retrieve_secret_by_key(self, key: str) -> None:
+    def retrieve_secret_by_key(self, key: str) -> dict[str, str]:
         """
         Displays the value of the given secret.
 
         :param key: key of the secret to show the value of
         """
-        response = self._send_command(DominoCommand.RETRIEVE_SECRET, key)
-        self._handle_response(response, self._handle_flat_response)
+        response = self._api_request_handler.send_command(DominoCommand.RETRIEVE_SECRET, key)
+        return self._api_request_handler.handle_response(response)
 
-    def retrieve_secrets_by_context(self, context: str) -> None:
+    def retrieve_secrets_by_context(self, context: str) -> dict[str, str]:
         """
         Displays the value of the secrets under the given context.
 
         :param context: context of the secrets to show the value of
         """
-        response = self._send_command(DominoCommand.RETRIEVE_SECRETS_BY_CONTEXT, context)
-        self._handle_response(response, self._handle_flat_response)
+        response = self._api_request_handler.send_command(DominoCommand.RETRIEVE_SECRETS_BY_CONTEXT, context)
+        return self._api_request_handler.handle_response(response)
 
     def lock_secret(self, key: str) -> None:
         """
@@ -73,8 +71,8 @@ class SecretService:
 
         :param key: key of the secret to lock
         """
-        response = self._send_command(DominoCommand.LOCK_SECRET, key)
-        self._handle_response(response)
+        response = self._api_request_handler.send_command(DominoCommand.LOCK_SECRET, key)
+        self._api_request_handler.handle_response(response)
 
     def unlock_secret(self, key: str) -> None:
         """
@@ -82,8 +80,8 @@ class SecretService:
 
         :param key: key of the secret to unlock
         """
-        response = self._send_command(DominoCommand.UNLOCK_SECRET, key)
-        self._handle_response(response)
+        response = self._api_request_handler.send_command(DominoCommand.UNLOCK_SECRET, key)
+        self._api_request_handler.handle_response(response)
 
     def delete_secret(self, key: str) -> None:
         """
@@ -91,45 +89,11 @@ class SecretService:
 
         :param key: key of the secret to delete
         """
-        response = self._send_command(DominoCommand.DELETE_SECRET, key)
-        self._handle_response(response)
-
-    def _send_command(self, command: DominoCommand, path_variable: str | None = None, body: dict | None = None) -> Response | None:
-
-        request = DominoRequest(
-            method=command.value.method,
-            path=command.value.path_template.format(path_variable),
-            body=body,
-            authenticated=True
-        )
-
-        try:
-            return self._domino_client.send_command(request)
-
-        except Exception as exc:
-            error("Failed to execute HTTP request {0} - reason: {1}".format(request, str(exc)))
-            RuntimeHelper.exit_with_error_in_cicd_mode()
-            return None
-
-    def _handle_response(self, response: Response | None, handler: Callable[[dict | List | object], None] = None) -> None:
-
-        if response is None:
-            return
-
-        if response.status_code >= 300:
-            error(f"Failed to execute operation, Domino responded with status {response.status_code}: {self._try_extract_message(response)}")
-
-            if response.status_code == 400:
-                self._try_render_violations(response)
-
-        elif len(response.content) == 0:
-            info("Operation finished successfully")
-
-        elif handler is not None:
-            handler(response.json())
+        response = self._api_request_handler.send_command(DominoCommand.DELETE_SECRET, key)
+        self._api_request_handler.handle_response(response)
 
     @staticmethod
-    def _handle_all_metadata_response(data: List[dict]) -> None:
+    def handle_all_metadata_response(data: List[dict]) -> None:
 
         for context in data:
             info(f"Secrets in context [{context["context"]}]")
@@ -138,25 +102,9 @@ class SecretService:
             print()
 
     @staticmethod
-    def _handle_flat_response(data: dict) -> None:
+    def handle_flat_response(data: dict) -> None:
 
         if RuntimeHelper.is_cicd_mode():
             [print(f"{field}={data[field]}") for field in data]
         else:
             [info("{:>30}: {}".format(field, data[field])) for field in data]
-
-    @staticmethod
-    def _try_extract_message(response: Response) -> str:
-
-        try:
-            return response.json()["message"]
-        except:
-            return response.text
-
-    @staticmethod
-    def _try_render_violations(response: Response) -> None:
-
-        try:
-            [error(f"Invalid field [{violation["field"]}]: {violation["message"]}") for violation in response.json()["violations"]]
-        except:
-            pass

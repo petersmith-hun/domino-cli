@@ -39,7 +39,7 @@ class BinaryExecutablePlatformComponentInstallerTest(unittest.TestCase):
 
     @mock.patch("builtins.input", return_value="yes")
     @mock.patch("builtins.open", new_callable=mock_open)
-    @mock.patch("subprocess.call")
+    @mock.patch("subprocess.check_call")
     def test_should_install_bin_exec_agent(self, subprocess_call_mock, open_mock, input_mock):
 
         # given
@@ -66,7 +66,7 @@ class BinaryExecutablePlatformComponentInstallerTest(unittest.TestCase):
 
     @mock.patch("builtins.input", return_value="no")
     @mock.patch("builtins.open", new_callable=mock_open)
-    @mock.patch("subprocess.call")
+    @mock.patch("subprocess.check_call")
     def test_should_not_install_bin_exec_agent_when_rejected(self, subprocess_call_mock, open_mock, input_mock):
 
         # given

@@ -26,7 +26,10 @@ class CreateSecretCommandProcessor(SecretCommandProcessor):
         context = arguments.pop(0)
         value = RuntimeHelper.input_wrapper(lambda: getpass('Enter secret value > '))
 
-        self._secret_service.create_secret(key, context, value)
+        try:
+            self._secret_service.create_secret(key, context, value)
+        except Exception as exc:
+            error(f"Failed to create secret: {exc}")
 
         return True
 

@@ -10,6 +10,7 @@ class MappingGroups(Enum):
     OAUTH = "oauth"
     FIRST_AGENT = "first-agent"
     ENCRYPTION = "encryption"
+    DEFAULTS = "defaults"
 
 
 class Mapping(WizardDataMappingBaseEnum):
@@ -47,5 +48,7 @@ class Mapping(WizardDataMappingBaseEnum):
 
     INFO_APP_NAME = (MappingGroups.BASE, "info_app_name", "$root.info.app-name")
     INFO_ABBREVIATION = (MappingGroups.BASE, "info_abbreviation", "$root.info.abbreviation")
+
+    FIRST_OAUTH_PROVIDER = (MappingGroups.DEFAULTS, "first_oauth_provider", "$root.oauth-registration.providers", lambda _: [])
 
     RESULT_RENDERING = ("", "result_rendering", None)

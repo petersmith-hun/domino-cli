@@ -22,7 +22,11 @@ class DeleteSecretCommandProcessor(SecretCommandProcessor):
             return False
 
         key = arguments.pop(0)
-        self._secret_service.delete_secret(key)
+
+        try:
+            self._secret_service.delete_secret(key)
+        except Exception as exc:
+            error(f"Failed to delete secret: {exc}")
 
         return True
 

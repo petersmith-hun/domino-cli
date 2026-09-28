@@ -2,7 +2,10 @@ import os
 import sys
 from enum import Enum
 
+from domino_cli.core.cli import LogLevel
 from domino_cli.core.cli.RuntimeHelper import RuntimeHelper
+
+from domino_cli.core.tui.TUIRuntimeHelper import TUIRuntimeHelper
 
 
 class TerminalColor(Enum):
@@ -12,11 +15,6 @@ class TerminalColor(Enum):
     BLUE = "\033[94m"
     NORMAL = "\033[0m"
 
-
-class LogLevel(Enum):
-    INFO = "info"
-    WARNING = "warn"
-    ERROR = "error"
 
 _terminal_color_mapping: dict[LogLevel, TerminalColor] = {
     LogLevel.INFO: TerminalColor.GREEN,
@@ -62,6 +60,8 @@ def get_color(color: TerminalColor) -> str:
         else color.value
 
 def _log(log_level: LogLevel, message: str, force: bool = False) -> None:
+
+    TUIRuntimeHelper.log_to_toast(log_level, message)
 
     if not RuntimeHelper.is_cicd_mode() or force:
         print(f"[{get_color(_terminal_color_mapping[log_level])}{log_level.value:5}{get_color(TerminalColor.NORMAL)}] {message}")

@@ -1,7 +1,11 @@
+import base64
+import json
+from time import time
 from unittest import TestCase, mock
 
 from requests import Response
 
+from domino_cli import RuntimeHelper
 from domino_cli.core.client.DominoClient import DominoClient
 from domino_cli.core.domain.AuthMode import AuthMode
 from domino_cli.core.domain.DominoRequest import DominoRequest
@@ -9,7 +13,8 @@ from domino_cli.core.domain.HTTPMethod import HTTPMethod
 from domino_cli.core.domain.SessionContext import SessionContext
 from domino_cli.core.service.auth.DirectAuthHandler import DirectAuthHandler
 
-_JWT_TOKEN = "jwt_token"
+_JWT_PAYLOAD = {"exp": int(time())}
+_JWT_TOKEN = f"header.{base64.encodebytes(json.dumps(_JWT_PAYLOAD).encode()).strip().decode()}.signature"
 _TEST_USERNAME_CONSOLE = "test_user_console"
 _TEST_PASSWORD_CONSOLE = "test_pw_console"
 _TEST_USERNAME_ENV = "test_user_env"
@@ -29,6 +34,7 @@ class DirectAuthHandlerTest(TestCase):
     def test_should_create_session_context_successfully_execute_with_credentials_from_console(self, getpass_mock, input_mock):
 
         # given
+        RuntimeHelper._cli_mode = True
         self.domino_client_mock.send_command.return_value = self._prepare_client_response(True)
 
         # when
