@@ -2,9 +2,10 @@ from typing import List, Callable
 
 from textual import on
 from textual.app import App
+from textual.containers import HorizontalGroup
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Label, Select, Input, Switch, LoadingIndicator
+from textual.widgets import Label, Select, Input, Switch, LoadingIndicator, Button
 
 from domino_cli.core.service.wizard.installer.PlatformComponentInstaller import PlatformComponentInstaller
 from domino_cli.core.tui.modals import ConfirmationModal
@@ -63,6 +64,12 @@ class InstallerWizardModal(BaseWizardModal):
                                  control_group="dpbea", disabled=True, required=True),
             ])
         ]
+
+    def _create_render_button(self) -> HorizontalGroup:
+        return HorizontalGroup(
+            Button("Start installation", id="render_configuration", variant="primary"),
+            classes="full_width align_right"
+        )
 
     @on(Select.Changed, "#component")
     def _on_source_type_changed(self, event: Select.Changed) -> None:

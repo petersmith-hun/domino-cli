@@ -46,6 +46,9 @@ class LifecycleOperationActionAdapter(LongRunningActionAdapter[LifecycleMessage]
             content = self._create_error_reason(event, exc, instance_suffix)
             self._app.notify(content, title="Lifecycle operation failed", severity="error")
 
+        except:
+            self._app.notify("Unexpected error occurred", title="Lifecycle operation failed", severity="error")
+
     @staticmethod
     def _create_success_details(event: LifecycleMessage, result: LifecycleResponse | dict, instance_suffix) -> str:
 

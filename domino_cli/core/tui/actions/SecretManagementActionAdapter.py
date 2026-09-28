@@ -3,7 +3,6 @@ from enum import Enum
 from textual.app import App
 from textual.message import Message
 
-from domino_cli.core.domain.CustomExceptions import DominoServiceException
 from domino_cli.core.service.SecretService import SecretService
 from domino_cli.core.tui.actions import LongRunningActionAdapter
 
@@ -47,6 +46,6 @@ class SecretManagementActionAdapter(LongRunningActionAdapter[SecretManagementMes
 
             self._app.post_message(self.SecretListRefreshMessage())
 
-        except DominoServiceException as exc:
+        except Exception as exc:
             self._app.notify(f"Failed to [i]{event.operation.value}[/i] secret [i]{event.secret_key}[/i]: {str(exc)}",
                              title="Secret management operation failed", severity="error", markup=True)

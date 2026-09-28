@@ -1,7 +1,7 @@
 from textual.app import App
 from textual.message import Message
 
-from domino_cli.core.domain.CustomExceptions import DominoServiceException
+from domino_cli.core.domain.CustomExceptions import DominoServiceException, ValidationException
 from domino_cli.core.service.SecretService import SecretService
 from domino_cli.core.tui.actions import LongRunningActionAdapter
 
@@ -29,6 +29,10 @@ class CreateSecretActionAdapter(LongRunningActionAdapter[NewSecret]):
             self._app.notify(f"Secret [i]{event.secret_key}[/i] has been created successfully",
                              title="Secret creation successful", markup=True, severity="information")
             self._app.post_message(CreateSecretActionAdapter.SecretCreatedMessage())
+
+        except ValidationException as exc:
+            validation_errors = "\n".join([f"{violation.field}: {violation.message}" for violation in exc.violations])
+            self._app.notify(f"Validation failed:\n{validation_errors}", title="Secret creation failed", severity="error")
 
         except DominoServiceException as exc:
             self._app.call_from_thread(lambda: self._app.notify(f"Error creating secrets {str(exc)}",

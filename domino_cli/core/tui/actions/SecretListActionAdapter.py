@@ -1,7 +1,6 @@
 from textual.app import App
 from textual.widgets import ListView
 
-from domino_cli.core.domain.CustomExceptions import DominoServiceException
 from domino_cli.core.service.SecretService import SecretService
 from domino_cli.core.tui.actions import LongRunningActionAdapter
 from domino_cli.core.tui.screens.SecretListScreen import SecretListHeader, SecretListItem, ContextListItem
@@ -18,7 +17,7 @@ class SecretListActionAdapter(LongRunningActionAdapter[None]):
         try:
             secrets_groups = self._secret_service.get_all_metadata()
 
-        except DominoServiceException as exc:
+        except Exception as exc:
             self._app.call_from_thread(lambda: self._app.notify(f"Error fetching secrets: {str(exc)}", title="Failed fetching secrets", severity="error"))
             return
 

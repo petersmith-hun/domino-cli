@@ -1,6 +1,5 @@
 from textual.app import App
 
-from domino_cli.core.domain.CustomExceptions import DominoServiceException
 from domino_cli.core.service.DominoService import DominoService
 from domino_cli.core.tui.actions import LongRunningActionAdapter
 
@@ -24,5 +23,5 @@ class OAuthImportActionAdapter(LongRunningActionAdapter[OAuthImportMessage]):
             self._app.notify(f"Successfully imported OAuth definition from [i]{event.file_path}[/i]",
                              title="OAuth definition import completed", severity="information", markup=True)
 
-        except DominoServiceException as exc:
+        except Exception as exc:
             self._app.notify(str(exc), title="Failed to import OAuth definition", severity="error")

@@ -65,6 +65,13 @@ class SecretOptionsModal(OptionsModalScreen):
             self.app.push_screen(ConfirmationModal(self._confirmation_map[item_id], callback))
 
     def _handle_secret_retrieval(self) -> None:
-        secrets = self._secret_service.retrieve_secret_by_key(self._secret_details.key)
-        self.app.call_from_thread(lambda: self.app.push_screen(RetrievedSecretsModal(secrets)))
-        self.loading = False
+
+        try:
+            secrets = self._secret_service.retrieve_secret_by_key(self._secret_details.key)
+            self.app.call_from_thread(lambda: self.app.push_screen(RetrievedSecretsModal(secrets)))
+
+        except Exception as exc:
+            self.app.notify(f"Failed to retrieve secret: {str(exc)}", title="Secret retrieval failed", severity="error")
+
+        finally:
+            self.loading = False

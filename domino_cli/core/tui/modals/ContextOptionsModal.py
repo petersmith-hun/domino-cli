@@ -31,6 +31,13 @@ class ContextOptionsModal(OptionsModalScreen):
         self.run_worker(self._handle_secret_retrieval, thread=True)
 
     def _handle_secret_retrieval(self) -> None:
-        secrets = self._secret_service.retrieve_secrets_by_context(self._secret_context)
-        self.app.call_from_thread(lambda: self.app.push_screen(RetrievedSecretsModal(secrets)))
-        self.loading = False
+
+        try:
+            secrets = self._secret_service.retrieve_secrets_by_context(self._secret_context)
+            self.app.call_from_thread(lambda: self.app.push_screen(RetrievedSecretsModal(secrets)))
+
+        except Exception as exc:
+            self.app.notify(f"Failed to retrieve secrets: {str(exc)}", title="Secret retrieval failed", severity="error")
+
+        finally:
+            self.loading = False
